@@ -70,16 +70,26 @@ function nowParts() {
 // Is this date+time still a valid, bookable slot? Enforces Mon–Sat, the
 // 8 AM–1 PM BOOKING window, no past dates, and no past-or-after-1pm slots today.
 // ('YYYY-MM-DD' and 'HH:MM' compare correctly as zero-padded strings.)
-function slotBookable(date, time) {
+function slotBookable(date, time, bookingEnd) {
   const { todayStr, nowHHMM } = nowParts();
+  // A doctor may extend their own booking window past the hospital default.
+  const endLimit = /^\d{2}:\d{2}$/.test(String(bookingEnd || '')) ? bookingEnd : BOOKING_END;
   if (weekdayOf(date) === 'Sun') return { ok: false, reason: 'Hospital is closed on Sundays. Sessions run Monday to Saturday.' };
   if (date < todayStr) return { ok: false, reason: 'That date has already passed.' };
-  if (time < SESSION_START || time >= BOOKING_END) return { ok: false, reason: 'Booking is open 8:00 AM to 1:00 PM only (doctors see patients until 2:00 PM).' };
+  if (time < SESSION_START || time >= endLimit) return { ok: false, reason: `This time is outside the booking window (until ${label12(endLimit)}). Please pick an earlier slot.` };
   if (date === todayStr) {
-    if (nowHHMM >= BOOKING_END) return { ok: false, reason: "Today's booking window (until 1:00 PM) has closed. Please book for another day." };
+    if (nowHHMM >= endLimit) return { ok: false, reason: `Today's booking window (until ${label12(endLimit)}) has closed. Please book for another day.` };
     if (time <= nowHHMM) return { ok: false, reason: 'That time has already passed today.' };
   }
   return { ok: true };
+}
+
+// 'HH:mm' → '1:00 PM' for user-facing messages.
+function label12(t24) {
+  const [h, m] = String(t24).split(':').map(Number);
+  const mer = h >= 12 ? 'PM' : 'AM';
+  const hh = h % 12 || 12;
+  return `${hh}:${String(m).padStart(2, '0')} ${mer}`;
 }
 
 // Load a doctor's bookable slots + available days from the DB.
@@ -90,6 +100,7 @@ async function doctorAvailability(doctorId) {
   return {
     slots: doctor?.slots?.length ? doctor.slots : DEFAULT_SLOTS,
     availableDays: doctor?.availableDays?.length ? doctor.availableDays : DEFAULT_DAYS,
+    bookingEnd: doctor?.bookingEnd || '',
     doctor,
   };
 }
@@ -103,9 +114,10 @@ async function getSlots(req, res, next) {
     const { date, doctorId } = req.query;
     if (!date) return fail(res, 400, 'date is required', 'NO_DATE');
 
-    const { slots: doctorSlots, availableDays } = await doctorAvailability(doctorId);
+    const { slots: doctorSlots, availableDays, bookingEnd } = await doctorAvailability(doctorId);
     const weekday = weekdayOf(date);
     const dayAvailable = availableDays.includes(weekday);
+    const endLimit = /^\d{2}:\d{2}$/.test(bookingEnd) ? bookingEnd : BOOKING_END;
 
     // Slots already taken for this doctor+date.
     const taken = await Appointment.find({
@@ -125,8 +137,9 @@ async function getSlots(req, res, next) {
       if (!dayAvailable) {
         return { time, available: false, reason: `Doctor not available on ${weekday}` };
       }
-      // Hospital session window (Mon–Sat, 8 AM–2 PM, nothing in the past).
-      const session = slotBookable(date, time);
+      // Hospital session window (Mon–Sat, nothing in the past), honouring this
+      // doctor's own booking cut-off when they sit later than the default.
+      const session = slotBookable(date, time, endLimit);
       if (!session.ok) {
         return { time, available: false, reason: session.reason };
       }
@@ -139,9 +152,9 @@ async function getSlots(req, res, next) {
       };
     });
 
-    // After 1 PM there is no same-day booking (session still runs to 2 PM).
+    // Same-day booking closes at this doctor's own cut-off (default 1 PM).
     const { todayStr, nowHHMM } = nowParts();
-    const sessionClosedToday = date === todayStr && nowHHMM >= BOOKING_END;
+    const sessionClosedToday = date === todayStr && nowHHMM >= endLimit;
 
     return res.json({
       success: true,
@@ -149,7 +162,7 @@ async function getSlots(req, res, next) {
       weekday,
       dayAvailable: dayAvailable && weekday !== 'Sun' && !sessionClosedToday,
       sessionClosedToday,
-      sessionHours: { start: SESSION_START, bookingEnd: BOOKING_END, end: SESSION_END },
+      sessionHours: { start: SESSION_START, bookingEnd: endLimit, end: SESSION_END },
       availableDays,
       slots,
     });
@@ -180,9 +193,9 @@ async function bookAppointment(req, res, next) {
     if (!docSlots.includes(time)) {
       return fail(res, 400, 'This time is not in the doctor’s available slots.', 'BAD_SLOT');
     }
-    // Session rule: Mon–Sat, 8 AM–2 PM, and no same-day slot in the past /
-    // after the 2 PM cut-off.
-    const session = slotBookable(date, time);
+    // Session rule: Mon–Sat, no same-day slot in the past, and within this
+    // doctor's booking window (their own cut-off, else the hospital default).
+    const session = slotBookable(date, time, docRow.bookingEnd);
     if (!session.ok) {
       return fail(res, 400, session.reason, 'SESSION_CLOSED');
     }
@@ -400,7 +413,7 @@ async function reschedule(req, res, next) {
       return fail(res, 400, `Doctor not available on ${weekdayOf(date)}. Pick another day.`, 'DAY_OFF');
     }
     if (!docSlots.includes(time)) return fail(res, 400, 'Invalid slot for this doctor.', 'BAD_SLOT');
-    const session = slotBookable(date, time);
+    const session = slotBookable(date, time, docRow?.bookingEnd);
     if (!session.ok) return fail(res, 400, session.reason, 'SESSION_CLOSED');
 
     const doctor = docRow ? { id: docRow.doctorId, name: docRow.name } : { id: a.doctorId, name: a.doctorName };

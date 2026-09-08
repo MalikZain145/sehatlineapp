@@ -244,7 +244,7 @@ async function updateDoctor(req, res, next) {
     const doc = await Doctor.findOne({ doctorId });
     if (!doc) return fail(res, 404, 'Doctor not found.', 'NOT_FOUND');
 
-    const fields = ['name', 'specialization', 'department', 'qualifications', 'room', 'experienceYears', 'active', 'conditions'];
+    const fields = ['name', 'specialization', 'department', 'qualifications', 'room', 'experienceYears', 'active', 'conditions', 'slots', 'availableDays', 'bookingEnd'];
     fields.forEach((k) => { if (req.body[k] !== undefined) doc[k] = req.body[k]; });
     await doc.save();
 

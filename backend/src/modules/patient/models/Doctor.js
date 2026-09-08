@@ -22,6 +22,10 @@ const doctorSchema = new mongoose.Schema(
     // Bookable time slots for this doctor, 24h 'HH:mm'. Admin-managed. The
     // appointment flow offers exactly these (minus already-booked ones).
     slots: { type: [String], default: ['09:00', '09:30', '10:00', '10:30', '11:00', '12:00', '12:30', '13:00'] },
+    // Optional per-doctor booking cut-off ('HH:mm'). When set it overrides the
+    // hospital-wide BOOKING_END (1:00 PM) for THIS doctor only — so a doctor who
+    // sits later can accept bookings up to their own time. Empty = use default.
+    bookingEnd: { type: String, default: '' },
     // Per-day working hours the doctor sets in the app: [{ day, start, end,
     // available }]. availableDays + slots above are DERIVED from this for the
     // patient booking flow; this keeps the doctor's exact per-day config.
