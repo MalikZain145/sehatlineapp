@@ -61,6 +61,8 @@
   .msg{display:flex;gap:12px;margin-bottom:22px;align-items:flex-start;}
   .msg .av{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;}
   .msg.bot .av{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04231f;}
+  .msg.bot .av.botav{background:transparent;padding:0;overflow:hidden;}
+  .msg.bot .av.botav svg{width:36px;height:36px;display:block;filter:drop-shadow(0 2px 6px rgba(11,170,157,.4));}
   .msg.user .av{background:#30363d;color:var(--text);}
   .bubble{padding:2px 2px;line-height:1.65;font-size:15px;white-space:pre-wrap;word-wrap:break-word;overflow-wrap:anywhere;flex:1;}
   .msg.user .bubble{color:#dbe7ee;}
@@ -165,7 +167,7 @@
       <button id="menuBtn" onclick="toggleSidebar()">☰</button>
       <div class="who">
         <b>Muhammad Zain Ul Abideen</b>
-        <span>Clone of Zain Bhai · SehatLine explainer</span>
+        <span>AI version of Zain Bhai · SehatLine explainer</span>
       </div>
       <div class="langsel" id="langsel">
         <button data-l="auto" class="active" onclick="setLang('auto')">Auto</button>
@@ -205,11 +207,11 @@ const KB = [
   tags:["who are you","kون ho","kon ho","tum kon","aap kon","your name","naam","identity","introduce","apna taaruf","تم کون","آپ کون","نام","who r u"],
   a:{
     en:[
-      "I am Muhammad Zain Ul Abideen, the Clone of Zain Bhai. I know the SehatLine project inside-out — its frontend, backend, routes, database and every module. Ask me anything about the code and I'll explain it, calmly and clearly, as many times and as many ways as you need.",
-      "Main Zain ka digital clone hoon — think of me as Zain sitting next to you, ready to explain the SehatLine project. Login, routes, database, modules — jo poochhna hai poochho."
+      "I am Muhammad Zain Ul Abideen, the AI version of Zain Bhai. I know the SehatLine project inside-out — its frontend, backend, routes, database and every module. Ask me anything about the code and I'll explain it, calmly and clearly, as many times and as many ways as you need.",
+      "Main Zain ka AI version hoon — think of me as Zain sitting next to you, ready to explain the SehatLine project. Login, routes, database, modules — jo poochhna hai poochho."
     ],
     ru:[
-      "Main Muhammad Zain Ul Abideen hoon, Clone of Zain Bhai. Mujhe SehatLine project poora yaad hai — frontend, backend, routes, database aur har module. Code ke baare mein jo bhi poochho, main aaram se, saaf saaf, jitni baar chaho samjhaunga.",
+      "Main Muhammad Zain Ul Abideen hoon, AI version of Zain Bhai. Mujhe SehatLine project poora yaad hai — frontend, backend, routes, database aur har module. Code ke baare mein jo bhi poochho, main aaram se, saaf saaf, jitni baar chaho samjhaunga.",
       "Samjho main Zain hi hoon, tumhare saath baitha SehatLine samjhane ke liye. Login ho, route ho, database ho — bina jhijhak poochho."
     ],
     ur:[
@@ -570,8 +572,8 @@ const KB = [
 
 /* ---- Greeting intent (handled separately for a warm opener) ---- */
 const GREET = {
-  en:"Assalam-o-alaikum! I am Muhammad Zain Ul Abideen, Clone of Zain Bhai. Ask me anything about the SehatLine project — login, routes, database, modules — in English, Roman Urdu or Urdu. Where should we start?",
-  ru:"Assalam-o-alaikum! Main Muhammad Zain Ul Abideen hoon, Clone of Zain Bhai. SehatLine project ke baare mein kuch bhi poochho — login, routes, database, modules — English, Roman Urdu ya Urdu mein. Kahan se shuru karein?",
+  en:"Assalam-o-alaikum! I am Muhammad Zain Ul Abideen, AI version of Zain Bhai. Ask me anything about the SehatLine project — login, routes, database, modules — in English, Roman Urdu or Urdu. Where should we start?",
+  ru:"Assalam-o-alaikum! Main Muhammad Zain Ul Abideen hoon, AI version of Zain Bhai. SehatLine project ke baare mein kuch bhi poochho — login, routes, database, modules — English, Roman Urdu ya Urdu mein. Kahan se shuru karein?",
   ur:"السلام علیکم! میں محمد زین العابدین ہوں، زین بھائی کا کلون۔ سہت لائن پروجیکٹ کے بارے میں کچھ بھی پوچھو — لاگ اِن، روٹس، ڈیٹابیس، ماڈیولز — انگریزی، رومن اردو یا اردو میں۔ کہاں سے شروع کریں؟"
 };
 
@@ -589,6 +591,11 @@ const SUGGEST = {
 
 /* ---- Real code snippets shown with an answer (from the actual codebase) ---- */
 const CODE = {
+  overview:{ file:"the whole journey = a chain of statuses across modules",
+    src:"// one patient flows through the modules as a chain of statuses:\nToken.status         : 'in-queue' -> 'in-progress'                 (doctor)\nPrescription.pharmacyStatus : 'pending' -> 'preparing' -> 'ready' -> 'dispensed'\nPrescription.labStatus      : 'pending' -> 'processing' -> 'completed'\n// each module flips the NEXT status; Socket.IO pushes it to every screen live.",
+    note:{ en:"The entire app is really one moving record per patient: the doctor sets it pending at the pharmacy, the pharmacy dispenses, the lab completes. Every screen just reads/updates these status fields — that's the whole system in one picture.",
+           ru:"Poora app asal mein har patient ka ek chalta hua record hai: doctor usay pharmacy par pending karta hai, pharmacy dispense karti hai, lab complete karti hai. Har screen bas in status fields ko parhti/update karti hai — yehi poora system hai.",
+           ur:"پورا ایپ ہر مریض کا ایک چلتا ریکارڈ ہے: ڈاکٹر pending، فارمیسی dispense، لیب complete۔ ہر اسکرین انہی status فیلڈز کو پڑھتی/اپڈیٹ کرتی ہے۔" } },
   login:{ file:"backend/src/modules/auth/controllers/auth.controller.js — login()",
     src:"const user = await User.findOne(query).select('+password');\nconst ok = user ? await user.comparePassword(password)\n                : await bcrypt.compare(password, DUMMY_HASH);\nif (!user || !ok) return fail(res, 401, 'Invalid email/phone or password.');\nconst { token } = await createSession(user, { ip: req.clientIp });\nreturn res.json({ success: true, token, user: user.toSafeJSON() });",
     note:{ en:"User.findOne pulls the account from MongoDB; comparePassword runs bcrypt on the typed vs hashed password; createSession signs a JWT; toSafeJSON strips the password before sending the user back.",
@@ -643,7 +650,47 @@ const CODE = {
     src:"if (!docSlots.includes(time))\n  return fail(res, 400, 'This time is not in the doctor\\u2019s available slots.');\nconst session = slotBookable(date, time, docRow.bookingEnd);  // hours check\nif (!session.ok) return fail(res, 400, session.reason, 'SESSION_CLOSED');\nconst appt = await Appointment.create({ user, doctorId, date, time, status: 'booked' });",
     note:{ en:"Booking validates the slot against the doctor's own slots and their booking window (slotBookable, with a per-doctor bookingEnd override), then creates a 'booked' Appointment. Reschedule reuses the same checks on an existing one.",
            ru:"Booking slot ko doctor ke apne slots aur uski booking window (slotBookable, per-doctor bookingEnd override ke saath) se check karta hai, phir 'booked' Appointment banata hai. Reschedule wahi checks maujooda appointment par lagata hai.",
-           ur:"Booking سلاٹ کو ڈاکٹر کے slots اور ونڈو (slotBookable) سے چیک کرتا ہے، پھر 'booked' Appointment بناتا ہے۔" } }
+           ur:"Booking سلاٹ کو ڈاکٹر کے slots اور ونڈو (slotBookable) سے چیک کرتا ہے، پھر 'booked' Appointment بناتا ہے۔" } },
+  stack:{ file:"backend/package.json — dependencies",
+    src:"\"dependencies\": {\n  \"express\": \"^4\",        // web server / REST API\n  \"mongoose\": \"^8\",       // MongoDB models\n  \"socket.io\": \"^4\",      // live updates\n  \"jsonwebtoken\": \"...\",  // JWT auth\n  \"bcryptjs\": \"...\",      // password hashing\n  \"zod\": \"...\",           // input validation\n  \"helmet\": \"...\", \"cors\": \"...\", \"express-rate-limit\": \"...\",\n  \"multer\": \"...\", \"tesseract.js\": \"...\", \"node-cron\": \"...\"\n}",
+    note:{ en:"Each dependency maps to a job: express serves the API, mongoose talks to MongoDB, socket.io does live updates, jsonwebtoken+bcryptjs handle auth, zod validates input, and helmet/cors/rate-limit harden it.",
+           ru:"Har dependency ka ek kaam hai: express API deta hai, mongoose MongoDB se baat karta hai, socket.io live updates, jsonwebtoken+bcryptjs auth, zod input validation, aur helmet/cors/rate-limit security.",
+           ur:"ہر dependency کا ایک کام: express API، mongoose MongoDB، socket.io لائیو، jsonwebtoken+bcryptjs auth، zod validation، helmet/cors/rate-limit سیکیورٹی۔" } },
+  architecture:{ file:"project folder structure",
+    src:"SehatLineApp/\n├─ frontend/            (Expo React Native app)\n│  └─ src/modules/<role>/screens + services\n└─ backend/\n   └─ src/\n      ├─ app.js          (Express + mounts all routes)\n      ├─ server.js       (starts the server)\n      ├─ config/         (db.js, env.js)\n      ├─ middleware/     (auth, validate, security)\n      └─ modules/<role>/ (controllers / routes / models)",
+    note:{ en:"Two halves — frontend (app) and backend (server). The backend is split by ROLE; each module carries its own controllers (logic), routes (URLs) and models (DB shapes). Find any feature by its role folder.",
+           ru:"Do hisse — frontend (app) aur backend (server). Backend ROLE ke hisaab se bata hua; har module ke apne controllers (logic), routes (URLs) aur models (DB shape). Koi bhi feature uske role folder mein milega.",
+           ur:"دو حصے — فرنٹ اینڈ اور بیک اینڈ۔ بیک اینڈ رول کے حساب سے تقسیم؛ ہر ماڈیول کے اپنے controllers, routes, models۔" } },
+  controller_model:{ file:"model (schema)  +  controller (logic)",
+    src:"// MODEL — the shape of data in MongoDB (Mongoose)\nconst doctorSchema = new mongoose.Schema({\n  doctorId: { type: String, unique: true }, name: String,\n  slots: [String], active: { type: Boolean, default: true },\n});\nmodule.exports = mongoose.model('Doctor', doctorSchema);\n\n// CONTROLLER — uses the model to read/write, then responds\nasync function listDoctors(req, res) {\n  const rows = await Doctor.find().lean();\n  res.json({ success: true, doctors: rows });\n}",
+    note:{ en:"The MODEL defines what a Doctor looks like in the DB. The CONTROLLER is the logic that uses that model (Doctor.find) and sends the response. Middleware runs before the controller as a checkpoint.",
+           ru:"MODEL batata hai ke Doctor DB mein kaisa dikhta hai. CONTROLLER woh logic hai jo model use karta hai (Doctor.find) aur response bhejta hai. Middleware controller se pehle checkpoint ki tarah chalta hai.",
+           ur:"MODEL بتاتا ہے Doctor کیسا ہے؛ CONTROLLER اسے استعمال کر کے جواب بھیجتا ہے؛ middleware پہلے چیک پوسٹ کی طرح چلتا ہے۔" } },
+  frontend_backend:{ file:"frontend/src/services/apiClient.js  +  config/api.config.js",
+    src:"// apiClient — every screen calls this instead of fetch() directly\nres = await fetch(getApiBaseUrl() + path, {\n  method, headers: { 'Content-Type': 'application/json',\n                     Authorization: 'Bearer ' + token },\n  body: JSON.stringify(data),\n});\n// api.config.js decides getApiBaseUrl():\n//   dev  -> your PC's LAN IP (auto-detected)\n//   APK  -> the hosted Vercel URL",
+    note:{ en:"Screens call a service, the service calls apiClient, apiClient does fetch(baseURL + path) and attaches the JWT automatically. api.config picks the base URL: your PC's IP while developing, the hosted URL in the shipped APK.",
+           ru:"Screen service ko call karti hai, service apiClient ko, apiClient fetch(baseURL+path) karta hai aur JWT khud laga deta hai. api.config base URL chunta hai: dev mein PC ka IP, APK mein hosted URL.",
+           ur:"اسکرین سروس کو، سروس apiClient کو کال کرتی ہے؛ apiClient fetch کرتا ہے اور JWT خود لگاتا ہے۔ api.config base URL چنتا ہے۔" } },
+  modules:{ file:"backend/src/app.js — one line mounts each role",
+    src:"app.use('/api/auth', authRoutes);\napp.use('/api/patient', patientRoutes);\napp.use('/api/doctor', doctorRoutes);\napp.use('/api/admin', adminRoutes);\napp.use('/api/pharmacy', pharmacyRoutes);\napp.use('/api/laboratory', laboratoryRoutes);",
+    note:{ en:"This is the whole system in six lines: each role is a self-contained module mounted under its own /api prefix. That's why the 5 portals stay cleanly separated yet share one backend + one database.",
+           ru:"Poora system chhe lines mein: har role ek alag module hai jo apne /api prefix par mount hota hai. Isi liye 5 portals saaf alag rehte hain magar ek hi backend + ek database share karte hain.",
+           ur:"پورا سسٹم چھ لائنوں میں: ہر رول اپنے /api prefix پر ماؤنٹ؛ اسی لیے پانچ پورٹل الگ مگر ایک بیک اینڈ + ایک ڈیٹابیس۔" } },
+  queue_theory:{ file:"appointment.controller.js — priority-aware ordering",
+    src:"// order today's patients: highest priority -> earliest time -> booked first\nconst cmp = (a, b) =>\n  (b.priorityScore || 0) - (a.priorityScore || 0)\n  || String(a.time).localeCompare(String(b.time))\n  || new Date(a.bookedAt) - new Date(b.bookedAt);\nconst ordered = sameDay.sort(cmp);\nconst ahead = ordered.findIndex(a => String(a._id) === String(appointment._id));",
+    note:{ en:"This is the queue 'brain' in code: patients are sorted by priorityScore first (elderly/critical rise), then slot time, then booking order — and 'ahead' is simply your index in that sorted list. The M/M/s + Lag-SIPP math produces the scores/estimates behind it.",
+           ru:"Ye queue ka 'dimaag' code mein hai: patients pehle priorityScore se sort (buzurg/critical upar), phir slot time, phir booking order — aur 'ahead' bas us sorted list mein tumhara index hai. M/M/s + Lag-SIPP math score/estimate deta hai.",
+           ur:"یہ قطار کا دماغ ہے: پہلے priorityScore، پھر time، پھر booking order؛ 'ahead' اسی فہرست میں تمہارا index ہے۔ M/M/s + Lag-SIPP سکور دیتا ہے۔" } },
+  chronic_token:{ file:"chronic.config.js  +  token.controller.js",
+    src:"// chronic.config.js — an illness maps to the right doctor\n{ doctorId: 'chronic_endo', name: 'Dr. Muhammad Khan',\n  conditions: ['Diabetes', 'Thyroid Disorder'] }\n\n// token.controller.js — queue positions are priority-aware\nordered.forEach((t, i) => { t.position = i + 1; });  // live position\n// estimateWaitMin(position, servers, serviceMin) -> shown to the patient",
+    note:{ en:"A chronic patient's illness selects the doctor from chronic.config; the token controller keeps recomputing each patient's live position (priority-aware) and an estimated wait. No clock slots — it's a running queue.",
+           ru:"Chronic patient ki beemari chronic.config se doctor chunti hai; token controller har patient ki live position (priority-aware) aur estimated wait dobara-dobara nikaalta rehta hai. Clock slot nahi — chalti hui queue.",
+           ur:"مریض کی بیماری chronic.config سے ڈاکٹر چنتی ہے؛ token controller ہر مریض کی لائیو پوزیشن اور تخمینی انتظار نکالتا رہتا ہے۔" } },
+  hosting:{ file:"vercel.json  +  api/index.js (serverless entry)",
+    src:"// vercel.json — send every request into the serverless function\n{ \"rewrites\": [{ \"source\": \"/(.*)\", \"destination\": \"/api\" }] }\n\n// api/index.js — the Express app as a serverless handler\nconst app = require('../backend/src/app');\nmodule.exports = async (req, res) => {\n  await connectDBCached();      // reuse one DB connection\n  return app(req, res);\n};",
+    note:{ en:"Vercel runs the Express app as a serverless function: vercel.json routes all traffic to /api, and api/index.js loads the app and reuses one cached DB connection per cold start. MongoDB Atlas holds the data.",
+           ru:"Vercel Express app ko serverless function ki tarah chalata hai: vercel.json saara traffic /api par bhejta hai, aur api/index.js app load kar ke ek cached DB connection reuse karta hai. Data MongoDB Atlas par.",
+           ur:"Vercel ایپ کو serverless چلاتا ہے: vercel.json سارا ٹریفک /api پر، api/index.js ایپ لوڈ کر کے ایک cached DB کنکشن reuse کرتا ہے۔ ڈیٹا Atlas پر۔" } }
 };
 
 /* ---- Follow-up questions shown at the end of an answer ---- */
@@ -698,21 +745,52 @@ function norm(t){
     .replace(/[^a-z0-9؀-ۿ\s]/g," ")
     .replace(/\s+/g," ").trim()+" ";
 }
-function scoreIntent(intent, nText){
+// Levenshtein edit distance (capped — we only care about <=2 for typos).
+function editDistance(a,b){
+  a=a||""; b=b||""; const m=a.length,n=b.length;
+  if(!m) return n; if(!n) return m; if(Math.abs(m-n)>2) return 3;
+  let prev=Array.from({length:n+1},(_,j)=>j), cur=new Array(n+1);
+  for(let i=1;i<=m;i++){ cur[0]=i;
+    for(let j=1;j<=n;j++){ const c=a[i-1]===b[j-1]?0:1;
+      cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+c); }
+    [prev,cur]=[cur,prev];
+  }
+  return prev[n];
+}
+// Does any typed token match this keyword — exactly, as a stem, or within a
+// small typo distance? This is what makes "logn", "databse", "pharmecy" work.
+function fuzzyTokenHit(tokens, word){
+  const thr = word.length<=4?1:2;
+  for(const t of tokens){
+    if(t===word) return true;
+    if(word.length>=4 && (t.includes(word)||word.includes(t))) return true;
+    if(Math.abs(t.length-word.length)<=2 && editDistance(t,word)<=thr) return true;
+  }
+  return false;
+}
+function scoreIntent(intent, nText, tokens){
   let s=0;
   intent.tags.forEach(tag=>{
-    const tg = tag.toLowerCase().trim();
-    if(!tg) return;
-    if(tg.includes(" ")){ if(nText.includes(" "+tg+" ")||nText.includes(tg)) s+=2.2; }
-    else { if(nText.includes(" "+tg+" ")) s+=1.4; else if(nText.includes(tg) && tg.length>3) s+=0.6; }
+    const tg = tag.toLowerCase().trim(); if(!tg) return;
+    if(tg.includes(" ")){
+      if(nText.includes(tg)) { s+=2.2; return; }
+      const parts=tg.split(" ").filter(Boolean);
+      const hit=parts.filter(p=>fuzzyTokenHit(tokens,p)).length;
+      if(hit>=Math.ceil(parts.length*0.7)) s+=1.4;
+    } else {
+      if(nText.includes(" "+tg+" ")) s+=1.4;
+      else if(fuzzyTokenHit(tokens,tg)) s+=1.2;
+      else if(nText.includes(tg) && tg.length>3) s+=0.5;
+    }
   });
   return s;
 }
 function findIntent(text){
   const n = norm(text);
-  if(/^\s*(hi|hello|hey|salam|asalam|assalam|aoa|السلام|سلام|hy)\b/.test(n)) return {id:"__greet"};
+  if(/^\s*(hi|hello|helo|hlo|hey|salam|asalam|assalam|aoa|السلام|سلام|hy)\b/.test(n)) return {id:"__greet"};
+  const tokens = n.trim().split(/\s+/).filter(w=>w.length>=2);
   let best=null, bestScore=0;
-  KB.forEach(it=>{ const sc=scoreIntent(it,n); if(sc>bestScore){bestScore=sc; best=it;} });
+  KB.forEach(it=>{ const sc=scoreIntent(it,n,tokens); if(sc>bestScore){bestScore=sc; best=it;} });
   return bestScore>=1 ? best : null;
 }
 function answerFor(intent, lang, advance){
@@ -767,6 +845,18 @@ function miniAgentSVG(){
     +'<rect x="24" y="44" width="14" height="9" rx="4" fill="url(#mg2)"/>'
     +'</svg><div class="aw-paper"></div>';
 }
+/* tiny STATIC mascot used as the bot's message avatar (instead of a "Z") */
+function avatarMascotSVG(){
+  return '<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-label="Zain AI">'
+    +'<defs><linearGradient id="av" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#18e0cc"/><stop offset="1" stop-color="#0b8f84"/></linearGradient></defs>'
+    +'<line x1="20" y1="4" x2="20" y2="8" stroke="#0bAA9d" stroke-width="1.6"/><circle cx="20" cy="3" r="2.2" fill="#18e0cc"/>'
+    +'<rect x="6" y="8" width="28" height="25" rx="10" fill="url(#av)"/>'
+    +'<rect x="9.5" y="12.5" width="21" height="15" rx="7" fill="#04231f"/>'
+    +'<circle cx="16" cy="20" r="3.2" fill="#8ff5ea"/><circle cx="26" cy="20" r="3.2" fill="#8ff5ea"/>'
+    +'<circle cx="12" cy="24" r="1.8" fill="#ff8fb0" opacity=".55"/><circle cx="30" cy="24" r="1.8" fill="#ff8fb0" opacity=".55"/>'
+    +'<path d="M16 25 Q21 28.5 26 25" stroke="#8ff5ea" stroke-width="1.8" fill="none" stroke-linecap="round"/>'
+    +'</svg>';
+}
 function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 function fmt(s){
   // bold **x**, inline paths, code words already fine; convert newlines
@@ -779,7 +869,8 @@ function addMsg(role,text,lang,intentId,opts){
   const isUr = lang==="ur";
   const wrap=document.createElement("div"); wrap.className="wrap";
   const m=document.createElement("div"); m.className="msg "+role;
-  const av=document.createElement("div"); av.className="av"; av.textContent= role==="bot"?"Z":"🧑";
+  const av=document.createElement("div"); av.className="av";
+  if(role==="bot"){ av.classList.add("botav"); av.innerHTML=avatarMascotSVG(); } else av.textContent="🧑";
   const b=document.createElement("div"); b.className="bubble"; if(isUr){b.classList.add("rtl");b.setAttribute("dir","rtl");} else b.setAttribute("dir","auto");
   b.innerHTML=fmt(text);
   m.appendChild(av); m.appendChild(b); wrap.appendChild(m);
@@ -848,7 +939,7 @@ function runAgent(cb){
     if(i>=steps.length){ wrap.remove(); cb(); return; }
     const s=steps[i]; txt.innerHTML="<b>"+esc(s.t)+"</b>";
     ag.className="aw-agent"+(s.pose?(" "+s.pose):""); i++;
-    setTimeout(tick, 440+Math.random()*170);
+    setTimeout(tick, 780+Math.random()*360);   // slower, more deliberate
   })();
 }
 function typing(){
@@ -904,7 +995,7 @@ function renderChat(){
   const sug=$("#suggest");
   if(!c||c.messages.length===0){
     const hero=document.createElement("div"); hero.className="hero";
-    hero.innerHTML=mascotSVG()+'<h2>I am Muhammad Zain Ul Abideen, Clone of Zain Bhai</h2><p>Dekho, SehatLine project ka jo bhi samajhna ho — login, routes, database, doctor/pharmacy/lab flow — bas poochho. English, Roman Urdu ya Urdu, jaise chaho. Ghabrao mat, main hoon na. 🙂</p>';
+    hero.innerHTML=mascotSVG()+'<h2>I am Muhammad Zain Ul Abideen, AI version of Zain Bhai</h2><p>Dekho, SehatLine project ka jo bhi samajhna ho — login, routes, database, doctor/pharmacy/lab flow — bas poochho. English, Roman Urdu ya Urdu, jaise chaho. Ghabrao mat, main hoon na. 🙂</p>';
     const w=document.createElement("div"); w.className="wrap"; w.appendChild(hero); chatEl.appendChild(w);
     if(sug){ sug.style.display="flex"; } renderSuggest();
   } else {
@@ -926,15 +1017,25 @@ function onSend(){
   addMsg("user",text,lang); persist("user",text,lang);
   inp.value=""; inp.style.height="auto"; hideCenterSuggest(); scrollDown();
 
-  const intent=findIntent(text);
-  const c=cur(); const last=[...c.messages].reverse().find(m=>m.role==="bot" && m.intentId);
-  const advance = intent && last && last.intentId===intent.id;
+  const c=cur();
+  let intent=findIntent(text);
+  const lastId=c.lastIntent||null;
+  const nl=" "+text.toLowerCase()+" ";
+  const words=text.split(/\s+/).filter(Boolean).length;
+  const isFollowup=/\b(aur|mazeed|zyada|zaida|more|detail|tafseel|iska|isko|iski|uska|isme|is\s?me|ye|yeh|explain|samjha|samjhao|elaborate|continue|next|code|example|misaal|dikhao|show)\b/.test(nl);
+  const wantsMore=/\b(aur|mazeed|zyada|zaida|more|detail|tafseel|dubara|dobara|elaborate|continue|next|phir se|again)\b/.test(nl);
+  // Context: a short follow-up with no clear match refers to the last topic.
+  if(!intent && lastId && (isFollowup || words<=3)) intent=KB.find(k=>k.id===lastId)||null;
+
+  const last=[...c.messages].reverse().find(m=>m.role==="bot" && m.intentId);
+  const advance = intent && ((last && last.intentId===intent.id) || wantsMore);
 
   runAgent(()=>{
     if(!intent){
       const out=(FALLBACK[lang]||FALLBACK.en);
       addMsg("bot",out,lang,"__fallback"); persist("bot",out,lang,"__fallback"); scrollDown();
     } else {
+      c.lastIntent=intent.id; save();                 // remember topic for context
       addBotAnswer(answerFor(intent,lang,advance),lang,intent.id);
     }
   });
