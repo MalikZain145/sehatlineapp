@@ -97,6 +97,16 @@
   .hero .big{width:70px;height:70px;border-radius:20px;margin:0 auto 14px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;color:#04231f;}
   .hero h2{margin:0 0 6px;font-size:22px;}
   .hero p{color:var(--muted);margin:0 auto;max-width:520px;font-size:14px;}
+  /* little agent mascot */
+  .mascot{width:132px;height:132px;margin:0 auto 8px;display:block;}
+  .m-float{animation:mfloat 3.4s ease-in-out infinite;transform-origin:60px 70px;}
+  .m-eye{animation:mblink 4s infinite;transform-origin:center;}
+  .m-hand{animation:mwave 2.4s ease-in-out infinite;transform-origin:96px 74px;}
+  @keyframes mfloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);}}
+  @keyframes mblink{0%,92%,100%{transform:scaleY(1);}96%{transform:scaleY(.1);}}
+  @keyframes mwave{0%,60%,100%{transform:rotate(0);}70%{transform:rotate(-22deg);}85%{transform:rotate(14deg);}}
+  .m-glow{filter:drop-shadow(0 8px 22px rgba(11,170,157,.35));}
+  @media(prefers-reduced-motion:reduce){.m-float,.m-eye,.m-hand{animation:none;}}
   [dir="rtl"],.rtl{font-family:'Segoe UI','Noto Nastaliq Urdu',system-ui,sans-serif;}
   @media(max-width:760px){
     #sidebar{position:fixed;z-index:30;height:100%;margin-left:-270px;}
@@ -144,7 +154,7 @@
 
     <div id="inputbar">
       <div class="inrow">
-        <textarea id="inp" rows="1" placeholder="Sawal likho… (English / Roman Urdu / اردو)"></textarea>
+        <textarea id="inp" rows="1" placeholder="Ask me anything about SehatLine"></textarea>
         <button id="send" onclick="onSend()">➤</button>
       </div>
       <div class="foot-note">Offline knowledge engine — SehatLine ke asli code par based. Chats sirf is browser (localStorage) mein save hoti hain.</div>
@@ -372,7 +382,7 @@ const KB = [
 },
 {
   id:"appointment",
-  tags:["appointment","booking","book appointment","reschedule","queue theory","token","chronic","opd","appointment kaise","slot","اپائنٹمنٹ","بکنگ","booking kaise"],
+  tags:["appointment","booking","book appointment","reschedule","appointment kaise","slot","doctor time","اپائنٹمنٹ","بکنگ","booking kaise"],
   a:{
     en:[
       "Appointments (cardiology/OPD): the patient picks a doctor → an available day → a free time slot, then POST /api/patient/appointments (appointment.controller.js → bookAppointment) saves it. Slots come from each doctor's own configured slots and days; the hospital booking window is 8 AM–1 PM (a doctor can be given a later cut-off with bookingEnd).\n• Reschedule: POST /api/patient/appointments/:id/reschedule moves an existing booking to a new date/time/doctor.\n• Live queue: getActiveAppointment counts how many patients are ahead using a priority-aware order (elderly/critical first). Chronic-OPD uses a token system instead of clock slots."
@@ -401,6 +411,96 @@ const KB = [
   }
 },
 {
+  id:"doctor_consult",
+  tags:["doctor","consultation","doctor flow","doctor kaise","consult","doctor queue","prescription","proceed to pharmacy","doctor portal","doctor kaam","doctor screen","ڈاکٹر","کنسلٹیشن","doctor module","patient dekhta"],
+  a:{
+    en:[
+      "DOCTOR flow (the doctor portal):\n1) The doctor logs in and lands on the live PATIENT QUEUE (backend/src/modules/doctor/controllers/queue.controller.js). The order isn't just first-come — it's priority-aware (elderly / critical vitals come up sooner).\n2) The doctor opens the next patient → does the consultation (writes notes, diagnosis) in the consultation controller.\n3) At the end the doctor writes a prescription (medicines + optionally lab tests) and taps 'Proceed to Pharmacy'. That CREATES a Prescription document with pharmacyStatus = 'pending' — which instantly puts the patient into the PHARMACY queue.\n4) Socket.IO fires so the pharmacy screen updates live.\nSo the doctor is the bridge: patient → (consult) → pharmacy. Frontend lives in frontend/src/modules/doctor/screens, talking to /api/doctor/... routes."
+    ],
+    ru:[
+      "Dekho DOCTOR ka flow bilkul simple hai, ghabrao mat:\n1) Doctor login karta hai to seedha usay live PATIENT QUEUE milti hai (backend/src/modules/doctor/controllers/queue.controller.js). Ye queue sirf pehle-aao-pehle-paao nahi — priority-aware hai (buzurg / critical patient pehle upar aa jaate hain).\n2) Doctor next patient kholta hai → consultation karta hai (notes, diagnosis likhta hai).\n3) Aakhir mein doctor prescription likhta hai (medicines + zaroorat ho to lab tests) aur 'Proceed to Pharmacy' dabata hai. Yehi ek Prescription document banata hai jiska pharmacyStatus = 'pending' — aur patient foran PHARMACY queue mein chala jaata hai.\n4) Socket.IO chalta hai to pharmacy ki screen live update ho jaati hai.\nBas yaad rakho: doctor ek pul (bridge) hai — patient → (consult) → pharmacy. Simple hai na? 🙂"
+    ],
+    ur:[
+      "ڈاکٹر کا طریقہ:\n۱) ڈاکٹر لاگ اِن کرتے ہی لائیو پیشنٹ قطار دیکھتا ہے (doctor/controllers/queue.controller.js)، جو priority کے حساب سے ترتیب دی جاتی ہے۔\n۲) اگلا مریض کھول کر کنسلٹیشن کرتا ہے۔\n۳) پھر نسخہ (دوائیں + ضرورت پر ٹیسٹ) لکھ کر 'Proceed to Pharmacy' دباتا ہے — یہ ایک Prescription بناتا ہے (pharmacyStatus = pending) اور مریض فارمیسی قطار میں چلا جاتا ہے۔\n۴) Socket.IO سے فارمیسی اسکرین فوراً اپڈیٹ ہو جاتی ہے۔"
+    ]
+  }
+},
+{
+  id:"pharmacy_dispense",
+  tags:["pharmacy","dispense","medicine","pharmacy flow","pharmacy kaise","dawai","medicines","dispensing","pharmacy queue","waiting preparing ready","pharmacy kaam","فارمیسی","دوائی","dispense kaise","pharmacist"],
+  a:{
+    en:[
+      "PHARMACY flow (dispensing queue):\n• The pharmacy queue IS the prescriptions the doctors sent — every Prescription whose pharmacyStatus is pending / preparing / ready (backend/src/modules/pharmacy/controllers/queue.controller.js). 'pending' shows as Waiting.\n• The pharmacist moves each order along: Waiting → tap to start → 'preparing' → medicines packed → 'ready' (the patient gets a 'ready for pickup' notification) → 'dispensed' (dispensedAt is stamped).\n• KEY step: on dispense, if the doctor had also ordered lab tests (or it's a chronic patient), a labQueued flag pushes the SAME patient straight into the LABORATORY queue.\n• The dashboard 'Today's Queue' = waiting+preparing+ready, and 'Completed Orders' = dispensed today.\nSo pharmacy is the middle station: doctor → pharmacy → (if tests) lab."
+    ],
+    ru:[
+      "Chalo PHARMACY ka flow samajh lo, aasan hai:\n• Pharmacy ki queue asal mein wahi prescriptions hain jo doctor ne bheji — har Prescription jiska pharmacyStatus pending / preparing / ready ho (pharmacy/controllers/queue.controller.js). 'pending' screen par Waiting dikhta hai.\n• Pharmacist har order ko aage badhata hai: Waiting → start dabao → 'preparing' → dawai pack → 'ready' (patient ko 'ready for pickup' notification chali jaati hai) → 'dispensed' (dispensedAt lag jaata hai).\n• ASLI baat: dispense hote hi, agar doctor ne lab tests bhi likhe the (ya patient chronic hai), to ek labQueued flag ussi patient ko seedha LABORATORY queue mein daal deta hai.\n• Dashboard par 'Today's Queue' = waiting+preparing+ready, aur 'Completed Orders' = aaj dispense hue.\nYaad rakho: pharmacy beech ka station hai — doctor → pharmacy → (tests hon to) lab. Ho gaya na clear? 🙂"
+    ],
+    ur:[
+      "فارمیسی کا طریقہ:\n• فارمیسی قطار وہی نسخے ہیں جو ڈاکٹر نے بھیجے (pharmacyStatus: pending/preparing/ready)۔ pending یعنی Waiting۔\n• فارماسسٹ آگے بڑھاتا ہے: Waiting → preparing → ready (مریض کو نوٹیفکیشن) → dispensed۔\n• اہم: dispense ہوتے ہی، اگر ٹیسٹ لکھے تھے یا مریض chronic ہے تو labQueued فلیگ اسے لیبارٹری قطار میں بھیج دیتا ہے۔\n• ڈیش بورڈ: Today's Queue = waiting+preparing+ready، Completed Orders = آج dispense ہوئے۔"
+    ]
+  }
+},
+{
+  id:"lab_report",
+  tags:["lab","laboratory","lab flow","report","lab report","test","sample","lab kaise","report upload","laboratory kaise","lab kaam","لیب","لیبارٹری","رپورٹ","test result","counter"],
+  a:{
+    en:[
+      "LABORATORY flow (the last station):\n• A patient reaches the lab queue only after the pharmacy dispenses AND the doctor had ordered tests (the labQueued flag). So the lab never gets a patient out of order.\n• The lab technician moves it along: sample → process → upload report (backend/src/modules/laboratory/controllers/queue.controller.js).\n• When the report is uploaded, two things happen automatically: (1) a LabReport document is created in the PATIENT's records (so the patient sees it in 'My Reports'), and (2) the in-queue item auto-completes — no manual 'mark done'.\n• The patient also gets a notification like 'You've been called — please proceed to Counter X' (the lab's counter number).\nSo the full journey end-to-end: patient → doctor → pharmacy → laboratory → report in the patient's app."
+    ],
+    ru:[
+      "LABORATORY ka flow — ye aakhri station hai, dhyan se suno:\n• Patient lab ki queue mein tabhi aata hai jab pharmacy dispense kar de AUR doctor ne tests likhe hon (labQueued flag). Iss liye lab ko kabhi ghalat tarteeb mein patient nahi milta.\n• Lab technician aage badhata hai: sample → process → report upload (laboratory/controllers/queue.controller.js).\n• Jab report upload hoti hai to do kaam khud-ba-khud hote hain: (1) patient ke records mein ek LabReport ban jaati hai (patient usay 'My Reports' mein dekh leta hai), aur (2) queue ka item khud complete ho jaata hai — koi manual 'mark done' nahi.\n• Patient ko notification bhi jaati hai: 'Aap ko bulaya gaya hai — Counter X par tashreef laayein' (lab ka counter number).\nTo poora safar yun hai: patient → doctor → pharmacy → laboratory → report patient ki app mein. Dekha, itna hi tha. 🙂"
+    ],
+    ur:[
+      "لیبارٹری کا طریقہ (آخری اسٹیشن):\n• مریض لیب قطار میں تبھی آتا ہے جب فارمیسی dispense کرے اور ڈاکٹر نے ٹیسٹ لکھے ہوں (labQueued)۔\n• لیب ٹیکنیشن: sample → process → report upload۔\n• رپورٹ اپلوڈ ہوتے ہی: (۱) مریض کے ریکارڈ میں LabReport بن جاتی ہے، (۲) قطار کا آئٹم خود مکمل ہو جاتا ہے۔\n• مریض کو 'Counter X پر آئیں' کا نوٹیفکیشن ملتا ہے۔\nپورا سفر: مریض → ڈاکٹر → فارمیسی → لیبارٹری → رپورٹ۔"
+    ]
+  }
+},
+{
+  id:"queue_theory",
+  tags:["queue theory","priority","algorithm","erlang","m/m/s","ai triage","how order","priority score","kaise order","crowd","waiting time","optimize","queue engine","کیو تھیوری","priority kaise","ترتیب","math","model"],
+  a:{
+    en:[
+      "The queue 'brain' (this is the research part — say this in the viva):\n• We don't seat patients purely first-come. Each patient gets a priorityScore, and the queue is ordered by score → then time → then booking order. Elderly and critical-vitals patients rise up safely.\n• The analytical model is queueing theory: M/M/s (Erlang C) for multi-server waiting, plus a priority (Cobham) rule and a Lag-SIPP adjustment for time-varying arrival rates.\n• On top, an AI triage ensemble (Gradient Boosting + a neural MLP, with a rule-based fallback) reads ~14 features to estimate urgency.\n• Result in load tests: large peak-crowd reduction (roughly 91–97% at 100–300 patients). There's a load-test report you can generate with npm run queue-test.\nOne line: it's smart, fair ordering — sickest-and-waiting-longest first, backed by real queueing math, not a random line."
+    ],
+    ru:[
+      "Ab suno, ye queue ka 'dimaag' hai — yehi tumhara research wala hissa hai, viva mein yehi impress karega:\n• Hum patients ko sirf pehle-aao-pehle-paao nahi bithate. Har patient ko ek priorityScore milta hai, aur queue score → phir time → phir booking ke hisaab se lagti hai. Buzurg aur critical patient mehfooz tareeqe se upar aa jaate hain.\n• Analytical model queueing theory hai: M/M/s (Erlang C) multi-server waiting ke liye, saath ek priority (Cobham) rule aur Lag-SIPP adjustment (jab arrival rate waqt ke sath badalti hai).\n• Uper se ek AI triage ensemble (Gradient Boosting + neural MLP, aur rule-based fallback) ~14 features parh kar urgency ka andaaza lagata hai.\n• Load test ka nateeja: peak crowd bohat kam ho jaati hai (taqreeban 91–97% jab 100–300 patients hon). Ek load-test report bhi hai jo npm run queue-test se ban jaati hai.\nEk line mein: ye smart aur insaaf-wali tarteeb hai — jo zyada beemar aur zyada der se wait kar raha, woh pehle — asli queueing math par, koi random line nahi. Ghabrao mat, viva mein yehi confidently bol dena. 💪"
+    ],
+    ur:[
+      "قطار کا 'دماغ' (یہی ریسرچ والا حصہ ہے):\n• مریض صرف پہلے آؤ پہلے پاؤ پر نہیں بیٹھتے۔ ہر مریض کو priorityScore ملتا ہے، قطار score → time → booking کے حساب سے لگتی ہے۔ بزرگ اور نازک مریض محفوظ طریقے سے پہلے آتے ہیں۔\n• ماڈل: M/M/s (Erlang C) + Cobham priority + Lag-SIPP۔\n• اوپر سے AI triage (Gradient Boosting + MLP + rule-based) ~۱۴ فیچرز سے urgency کا اندازہ لگاتا ہے۔\n• نتیجہ: رش تقریباً ۹۱–۹۷٪ کم (۱۰۰–۳۰۰ مریض)۔ رپورٹ npm run queue-test سے بنتی ہے۔"
+    ]
+  }
+},
+{
+  id:"security",
+  tags:["security","secure","secured","protected","how secure","protection","hacking","injection","kitna secure","security kaise","mehfooz","bcrypt jwt security","سیکیورٹی","محفوظ","protect kaise","rate limit","helmet"],
+  a:{
+    en:[
+      "Security — how the backend is protected (good viva points):\n• Passwords: never stored plain — bcrypt hashing (salt 10) in a pre-save hook. Login checks with bcrypt.compare.\n• Auth: JWT tokens; every protected route passes through authGuard (auth.middleware.js) which verifies the Bearer token. Sessions add device tracking + a 5-minute inactivity logout.\n• Input safety: Zod validation on request bodies (validate middleware), validateObjectId to reject malformed ids, and a NoSQL-injection sanitizer on body/query/params.\n• Network: Helmet security headers, CORS locked to allowed origins in production, and express-rate-limit (a strict authLimiter on login/signup, a general apiLimiter).\n• Signup: the CNIC 'verified' proof is a short-lived HMAC-signed token (cnicToken.js), so it can't be faked.\nMessage for the viva: defense-in-depth — hashing, tokens, validation, rate-limiting and sanitisation all layered together."
+    ],
+    ru:[
+      "Security — backend kaise mehfooz hai (ye viva mein achhe points hain, note kar lo):\n• Passwords: kabhi plain store nahi — bcrypt hashing (salt 10) pre-save hook mein. Login bcrypt.compare se check hota hai.\n• Auth: JWT token; har protected route authGuard (auth.middleware.js) se guzarta hai jo Bearer token verify karta hai. Sessions device tracking + 5-minute inactivity logout deti hain.\n• Input safety: Zod validation (validate middleware), validateObjectId (galat id reject), aur NoSQL-injection sanitizer body/query/params par.\n• Network: Helmet security headers, production mein CORS sirf allowed origins tak, aur express-rate-limit (login/signup par strict authLimiter, aam requests par apiLimiter).\n• Signup: CNIC ka 'verified' saboot ek short-lived HMAC-signed token hai (cnicToken.js), jise fake nahi kiya ja sakta.\nViva mein bas ye keh dena: defense-in-depth — hashing, token, validation, rate-limit aur sanitisation, sab layers mein. Confidence rakho, ye strong hai. 💪"
+    ],
+    ur:[
+      "سیکیورٹی — بیک اینڈ کیسے محفوظ ہے:\n• پاس ورڈ: bcrypt ہیشنگ (salt 10)، کبھی سادہ نہیں۔ لاگ اِن bcrypt.compare سے۔\n• Auth: JWT ٹوکن؛ ہر محفوظ روٹ authGuard سے گزرتا ہے۔ Sessions + ۵ منٹ inactivity logout۔\n• ان پٹ: Zod validation، validateObjectId، NoSQL-injection sanitizer۔\n• نیٹ ورک: Helmet، CORS، express-rate-limit۔\n• سائن اپ: CNIC کا ثبوت HMAC-signed ٹوکن (cnicToken.js)۔\nخلاصہ: defense-in-depth — کئی تہوں والی حفاظت۔"
+    ]
+  }
+},
+{
+  id:"chronic_token",
+  tags:["chronic","token","chronic opd","token flow","illness","chronic patient","token kaise","chronic kaise","کرانک","ٹوکن","chronic queue","opd token"],
+  a:{
+    en:[
+      "CHRONIC OPD (token system): patients marked chronic (isChronic) don't book a clock slot — they take a TOKEN. Their illness maps to the right doctor (chronic.config), and the backend's token controller (getActiveToken) tracks their live position. After the doctor sees them the same doctor → pharmacy → lab flow applies. It's gated (e.g. a 30-day rule) so it isn't misused. So SehatLine actually has two front-doors: appointment slots (specialist/OPD) and chronic tokens — both feed the same doctor → pharmacy → lab pipeline."
+    ],
+    ru:[
+      "CHRONIC OPD (token system): jo patients chronic mark hote hain (isChronic) woh clock-slot book nahi karte — TOKEN lete hain. Unki beemari sahi doctor se map hoti hai (chronic.config), aur backend ka token controller (getActiveToken) unki live position rakhta hai. Doctor ke baad wahi doctor → pharmacy → lab flow chalta hai. Ispe ek gate bhi hai (jaise 30-din ka rule) taake ghalat use na ho. Yaani SehatLine ke do darwaze hain: appointment slots (specialist/OPD) aur chronic tokens — dono aakhir mein ek hi doctor → pharmacy → lab pipeline mein aate hain. Simple. 🙂"
+    ],
+    ur:[
+      "کرانک او پی ڈی (ٹوکن سسٹم): جو مریض chronic ہوں (isChronic) وہ سلاٹ نہیں لیتے — ٹوکن لیتے ہیں۔ بیماری صحیح ڈاکٹر سے map ہوتی ہے (chronic.config)، token controller (getActiveToken) لائیو پوزیشن رکھتا ہے۔ اس کے بعد وہی ڈاکٹر → فارمیسی → لیب۔ ایک گیٹ بھی ہے (۳۰ دن کا اصول)۔ یعنی دو دروازے: اپائنٹمنٹ اور ٹوکن، دونوں ایک ہی pipeline میں۔"
+    ]
+  }
+},
+{
   id:"logins_demo",
   tags:["demo account","test account","login credentials","password kya","kaunsa account","demo login","credentials","account details","username password","اکاؤنٹ پاس ورڈ","کریڈینشل","test login"],
   a:{
@@ -420,10 +520,10 @@ const KB = [
   tags:["help","what can i ask","kya poochu","kya pooch sakta","options","madad","what do you know","tum kya jante","مدد","کیا پوچھوں","help me"],
   a:{
     en:[
-      "Ask me anything about the SehatLine project — for example:\n• How does login work? (which route, file, function, DB)\n• How does signup / CNIC verification work?\n• What is a route / controller / model / middleware?\n• How does the frontend talk to the backend?\n• How is the database connected?\n• What is JWT / how are pages protected?\n• How does the live queue (Socket.IO) work?\n• The 5 modules, appointments, hosting, demo logins.\nAnd if any answer isn't clear, just ask again or tap 'Explain differently' — I'll re-explain another way."
+      "Ask me anything about the SehatLine project — for example:\n• How does login / signup (CNIC) work? (route, file, function, DB)\n• The full flow: doctor consultation → pharmacy dispense → lab report\n• How does the queue theory / priority ordering work?\n• What is a route / controller / model / middleware?\n• How does the frontend talk to the backend? How is the DB connected?\n• JWT, security, Socket.IO live updates\n• The 5 modules, appointments, chronic tokens, hosting, demo logins.\nAnd if any answer isn't clear, just ask again or tap 'Explain differently' — I'll re-explain another way, as many times as you need."
     ],
     ru:[
-      "SehatLine project ke baare mein kuch bhi poochho — jaise:\n• Login kaise chalta hai? (kaunsa route, file, function, DB)\n• Signup / CNIC verification kaise?\n• Route / controller / model / middleware kya hai?\n• Frontend backend se kaise baat karta hai?\n• Database kaise connect hai?\n• JWT kya hai / pages kaise protect hote hain?\n• Live queue (Socket.IO) kaise chalti hai?\n• 5 modules, appointments, hosting, demo logins.\nKoi jawab samajh na aaye to dobara poochho ya 'Explain differently' dabao — main doosre tareeqe se samjha dunga."
+      "Suno, SehatLine ke baare mein jo dil chahe poochho — jaise:\n• Login / signup (CNIC) kaise chalta hai? (route, file, function, DB)\n• Poora flow: doctor consultation → pharmacy dispense → lab report\n• Queue theory / priority ordering kaise kaam karti hai?\n• Route / controller / model / middleware kya hai?\n• Frontend backend se kaise baat karta hai? Database kaise connect hai?\n• JWT, security, Socket.IO live updates\n• 5 modules, appointments, chronic tokens, hosting, demo logins.\nKoi baat samajh na aaye to bezijhak dobara poochho ya 'Explain differently' dabao — main doosre tareeqe se samjha dunga, jitni baar chaho. Ghabrao mat. 🙂"
     ],
     ur:[
       "سہت لائن کے بارے میں کچھ بھی پوچھو — مثلاً:\n• لاگ اِن کیسے چلتا ہے؟\n• سائن اپ/شناختی کارڈ کیسے؟\n• روٹ/کنٹرولر/ماڈل/مڈل ویئر کیا ہے؟\n• فرنٹ اینڈ بیک اینڈ سے کیسے بات کرتا ہے؟\n• ڈیٹابیس کیسے جڑا ہے؟ JWT کیا ہے؟\n• لائیو قطار، ماڈیولز، ہوسٹنگ۔\nسمجھ نہ آئے تو دوبارہ پوچھو یا 'Explain differently' دباؤ۔"
@@ -455,9 +555,9 @@ const FALLBACK = {
 };
 
 const SUGGEST = {
-  en:["How does login work?","What is a route & controller?","How is the database connected?","Explain the 5 modules","What is JWT?","How is it hosted?"],
-  ru:["Login kaise kaam karta hai?","Route aur controller kya hai?","Database kaise connect hai?","5 modules samjhao","JWT kya hai?","Hosting kaise hai?"],
-  ur:["لاگ اِن کیسے چلتا ہے؟","روٹ اور کنٹرولر کیا ہے؟","ڈیٹابیس کیسے جڑا ہے؟","پانچ ماڈیولز","JWT کیا ہے؟","ہوسٹنگ کیسے ہے؟"]
+  en:["How does login work?","Doctor consultation flow?","Pharmacy dispense flow?","Lab report flow?","How does the queue theory work?","How is it secured?","How is the database connected?"],
+  ru:["Login kaise kaam karta hai?","Doctor consultation flow?","Pharmacy dispense flow?","Lab report flow?","Queue theory kaise kaam karti hai?","Security kaise hai?","Database kaise connect hai?"],
+  ur:["لاگ اِن کیسے چلتا ہے؟","ڈاکٹر کنسلٹیشن فلو؟","فارمیسی dispense فلو؟","لیب رپورٹ فلو؟","کیو تھیوری کیسے کام کرتی ہے؟","سیکیورٹی کیسے ہے؟","ڈیٹابیس کیسے جڑا ہے؟"]
 };
 
 /* =========================== ENGINE =============================== */
@@ -519,6 +619,22 @@ function answerFor(intent, lang, advance){
 }
 
 /* =========================== UI =============================== */
+/* the little greeting agent (friendly robot mascot) */
+function mascotSVG(){
+  return '<svg class="mascot m-glow" viewBox="0 0 132 132" xmlns="http://www.w3.org/2000/svg" aria-label="Zain Clone agent">'
+    +'<defs><linearGradient id="mg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#12d3c0"/><stop offset="1" stop-color="#0b8f84"/></linearGradient></defs>'
+    +'<g class="m-float">'
+    +'<line x1="66" y1="20" x2="66" y2="32" stroke="#0bAA9d" stroke-width="3"/><circle cx="66" cy="16" r="5" fill="#12d3c0"/>'
+    +'<rect x="26" y="30" width="80" height="66" rx="24" fill="url(#mg)"/>'
+    +'<rect x="34" y="40" width="64" height="46" rx="18" fill="#04231f"/>'
+    +'<g class="m-eye"><circle cx="54" cy="62" r="6.5" fill="#8ff5ea"/><circle cx="78" cy="62" r="6.5" fill="#8ff5ea"/></g>'
+    +'<path d="M54 74 Q66 82 78 74" stroke="#8ff5ea" stroke-width="3.5" fill="none" stroke-linecap="round"/>'
+    +'<circle cx="40" cy="72" r="4" fill="#0bAA9d" opacity=".5"/><circle cx="92" cy="72" r="4" fill="#0bAA9d" opacity=".5"/>'
+    +'<rect x="52" y="96" width="28" height="18" rx="7" fill="url(#mg)"/>'
+    +'<g class="m-hand"><circle cx="104" cy="70" r="8" fill="#12d3c0"/></g>'
+    +'<circle cx="24" cy="78" r="7" fill="#0b8f84"/>'
+    +'</g></svg>';
+}
 function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 function fmt(s){
   // bold **x**, inline paths, code words already fine; convert newlines
@@ -595,7 +711,7 @@ function renderChat(){
   const c=cur();
   if(!c||c.messages.length===0){
     const hero=document.createElement("div"); hero.className="hero";
-    hero.innerHTML='<div class="big">Z</div><h2>Muhammad Zain Ul Abideen</h2><p>Clone of Zain Bhai — I explain the SehatLine project code in English, Roman Urdu & Urdu. Poochho jo samajhna hai, main hoon na. 🙂</p>';
+    hero.innerHTML=mascotSVG()+'<h2>I am Muhammad Zain Ul Abideen, Clone of Zain Bhai</h2><p>Dekho, SehatLine project ka jo bhi samajhna ho — login, routes, database, doctor/pharmacy/lab flow — bas poochho. English, Roman Urdu ya Urdu, jaise chaho. Ghabrao mat, main hoon na. 🙂</p>';
     const w=document.createElement("div"); w.className="wrap"; w.appendChild(hero); chatEl.appendChild(w);
   } else {
     c.messages.forEach(m=>addMsg(m.role,m.text,m.lang,m.intentId));
