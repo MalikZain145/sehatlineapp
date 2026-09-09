@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Zain Clone — SehatLine Project Guide</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c232c; --border:#2a3441;
+    --text:#e6edf3; --muted:#8b98a5; --accent:#0bAA9d; --accent2:#12d3c0;
+    --user:#0b6b63; --bot:#1c232c; --danger:#f85149; --chip:#22303c;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;
+    background:var(--bg); color:var(--text); display:flex; height:100vh; overflow:hidden;
+  }
+  /* ---------- Sidebar ---------- */
+  #sidebar{
+    width:270px; background:var(--panel); border-right:1px solid var(--border);
+    display:flex; flex-direction:column; flex-shrink:0; transition:margin-left .25s ease;
+  }
+  .brand{padding:16px 16px 10px; display:flex; gap:10px; align-items:center;}
+  .brand .logo{
+    width:38px;height:38px;border-radius:11px;flex-shrink:0;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:flex;align-items:center;justify-content:center;font-weight:800;color:#04231f;font-size:18px;
+  }
+  .brand h1{font-size:15px;margin:0;line-height:1.1;}
+  .brand small{color:var(--muted);font-size:11px;}
+  .newchat{
+    margin:6px 12px 10px; padding:11px 12px; border:1px solid var(--border); border-radius:10px;
+    background:var(--panel2); color:var(--text); cursor:pointer; font-size:14px; font-weight:600;
+    display:flex;align-items:center;gap:8px;
+  }
+  .newchat:hover{border-color:var(--accent);}
+  .hist-title{padding:6px 18px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;}
+  #history{flex:1;overflow-y:auto;padding:0 8px;}
+  .hist-item{
+    padding:9px 11px;margin:2px 0;border-radius:8px;cursor:pointer;font-size:13px;
+    color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;justify-content:space-between;gap:6px;
+  }
+  .hist-item:hover{background:var(--panel2);color:var(--text);}
+  .hist-item.active{background:var(--panel2);color:var(--text);}
+  .hist-item .del{opacity:0;color:var(--muted);}
+  .hist-item:hover .del{opacity:1;}
+  .hist-item .del:hover{color:var(--danger);}
+  .side-foot{padding:10px 12px;border-top:1px solid var(--border);}
+  .clearall{width:100%;padding:9px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--muted);cursor:pointer;font-size:12px;}
+  .clearall:hover{border-color:var(--danger);color:var(--danger);}
+  /* ---------- Main ---------- */
+  #main{flex:1;display:flex;flex-direction:column;min-width:0;}
+  #topbar{
+    height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--panel);
+  }
+  #menuBtn{display:none;background:none;border:none;color:var(--text);font-size:22px;cursor:pointer;}
+  #topbar .who{flex:1;min-width:0;}
+  #topbar .who b{font-size:14px;}
+  #topbar .who span{display:block;color:var(--muted);font-size:11px;}
+  .langsel{display:flex;background:var(--panel2);border:1px solid var(--border);border-radius:9px;overflow:hidden;}
+  .langsel button{background:none;border:none;color:var(--muted);padding:7px 10px;font-size:12px;cursor:pointer;}
+  .langsel button.active{background:var(--accent);color:#04231f;font-weight:700;}
+  #chat{flex:1;overflow-y:auto;padding:22px 0;}
+  .wrap{max-width:820px;margin:0 auto;padding:0 18px;}
+  .msg{display:flex;gap:12px;margin-bottom:22px;align-items:flex-start;}
+  .msg .av{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;}
+  .msg.bot .av{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04231f;}
+  .msg.user .av{background:#30363d;color:var(--text);}
+  .bubble{padding:2px 2px;line-height:1.65;font-size:15px;white-space:pre-wrap;word-wrap:break-word;overflow-wrap:anywhere;flex:1;}
+  .msg.user .bubble{color:#dbe7ee;}
+  .bubble code{background:#0b1016;border:1px solid var(--border);padding:1px 6px;border-radius:5px;font-size:13px;color:#9fe9df;font-family:Consolas,monospace;}
+  .bubble .path{color:#9fe9df;font-family:Consolas,monospace;font-size:13.5px;}
+  .again{margin-top:9px;}
+  .again button{background:var(--panel2);border:1px solid var(--border);color:var(--muted);font-size:12px;padding:6px 11px;border-radius:8px;cursor:pointer;}
+  .again button:hover{border-color:var(--accent);color:var(--text);}
+  .typing span{display:inline-block;width:7px;height:7px;margin-right:3px;border-radius:50%;background:var(--muted);animation:blink 1.2s infinite;}
+  .typing span:nth-child(2){animation-delay:.2s;} .typing span:nth-child(3){animation-delay:.4s;}
+  @keyframes blink{0%,80%,100%{opacity:.25;}40%{opacity:1;}}
+  /* suggestions */
+  #suggest{max-width:820px;margin:0 auto;padding:6px 18px 0;display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{background:var(--chip);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:20px;font-size:12.5px;cursor:pointer;}
+  .chip:hover{border-color:var(--accent);}
+  /* input */
+  #inputbar{border-top:1px solid var(--border);background:var(--panel);padding:14px 0;}
+  .inrow{max-width:820px;margin:0 auto;padding:0 18px;display:flex;gap:10px;align-items:flex-end;}
+  #inp{
+    flex:1;resize:none;max-height:150px;min-height:24px;background:var(--panel2);border:1px solid var(--border);
+    border-radius:14px;color:var(--text);padding:13px 15px;font-size:15px;font-family:inherit;line-height:1.4;outline:none;
+  }
+  #inp:focus{border-color:var(--accent);}
+  #send{width:46px;height:46px;border-radius:12px;border:none;background:var(--accent);color:#04231f;font-size:20px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+  #send:hover{background:var(--accent2);}
+  .foot-note{max-width:820px;margin:6px auto 0;padding:0 18px;color:var(--muted);font-size:11px;text-align:center;}
+  /* hero */
+  .hero{text-align:center;padding:40px 18px 10px;}
+  .hero .big{width:70px;height:70px;border-radius:20px;margin:0 auto 14px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;color:#04231f;}
+  .hero h2{margin:0 0 6px;font-size:22px;}
+  .hero p{color:var(--muted);margin:0 auto;max-width:520px;font-size:14px;}
+  [dir="rtl"],.rtl{font-family:'Segoe UI','Noto Nastaliq Urdu',system-ui,sans-serif;}
+  @media(max-width:760px){
+    #sidebar{position:fixed;z-index:30;height:100%;margin-left:-270px;}
+    #sidebar.open{margin-left:0;box-shadow:0 0 40px rgba(0,0,0,.6);}
+    #menuBtn{display:block;}
+    #backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:29;}
+    #backdrop.show{display:block;}
+  }
+</style>
+</head>
+<body>
+  <div id="backdrop" onclick="toggleSidebar(false)"></div>
+
+  <aside id="sidebar">
+    <div class="brand">
+      <div class="logo">Z</div>
+      <div><h1>Zain Clone</h1><small>SehatLine Project Guide</small></div>
+    </div>
+    <button class="newchat" onclick="newChat()">＋ New chat</button>
+    <div class="hist-title">History</div>
+    <div id="history"></div>
+    <div class="side-foot">
+      <button class="clearall" onclick="clearAll()">🗑 Clear all chats</button>
+    </div>
+  </aside>
+
+  <main id="main">
+    <div id="topbar">
+      <button id="menuBtn" onclick="toggleSidebar()">☰</button>
+      <div class="who">
+        <b>Muhammad Zain Ul Abideen</b>
+        <span>Clone of Zain Bhai · SehatLine explainer</span>
+      </div>
+      <div class="langsel" id="langsel">
+        <button data-l="auto" class="active" onclick="setLang('auto')">Auto</button>
+        <button data-l="en" onclick="setLang('en')">EN</button>
+        <button data-l="ru" onclick="setLang('ru')">Roman</button>
+        <button data-l="ur" onclick="setLang('ur')">اردو</button>
+      </div>
+    </div>
+
+    <div id="chat"></div>
+
+    <div id="suggest"></div>
+
+    <div id="inputbar">
+      <div class="inrow">
+        <textarea id="inp" rows="1" placeholder="Sawal likho… (English / Roman Urdu / اردو)"></textarea>
+        <button id="send" onclick="onSend()">➤</button>
+      </div>
+      <div class="foot-note">Offline knowledge engine — SehatLine ke asli code par based. Chats sirf is browser (localStorage) mein save hoti hain.</div>
+    </div>
+  </main>
+
+<script>
+/* =========================================================================
+   ZAIN CLONE — offline knowledge engine for the SehatLine FYP project.
+   No API, no training, works by matching a question to a curated knowledge
+   base and answering in EN / Roman-Urdu / Urdu, in Zain's teaching voice.
+   Every fact below is taken from the real SehatLine codebase.
+   ========================================================================= */
+
+/* ---- Knowledge base ---------------------------------------------------- */
+/* Each item: tags (keywords, any language) + trilingual answers.
+   The FIRST answer is default; extras are used by "explain differently". */
+const KB = [
+{
+  id:"identity",
+  tags:["who are you","kون ho","kon ho","tum kon","aap kon","your name","naam","identity","introduce","apna taaruf","تم کون","آپ کون","نام","who r u"],
+  a:{
+    en:[
+      "I am Muhammad Zain Ul Abideen, the Clone of Zain Bhai. I know the SehatLine project inside-out — its frontend, backend, routes, database and every module. Ask me anything about the code and I'll explain it, calmly and clearly, as many times and as many ways as you need.",
+      "Main Zain ka digital clone hoon — think of me as Zain sitting next to you, ready to explain the SehatLine project. Login, routes, database, modules — jo poochhna hai poochho."
+    ],
+    ru:[
+      "Main Muhammad Zain Ul Abideen hoon, Clone of Zain Bhai. Mujhe SehatLine project poora yaad hai — frontend, backend, routes, database aur har module. Code ke baare mein jo bhi poochho, main aaram se, saaf saaf, jitni baar chaho samjhaunga.",
+      "Samjho main Zain hi hoon, tumhare saath baitha SehatLine samjhane ke liye. Login ho, route ho, database ho — bina jhijhak poochho."
+    ],
+    ur:[
+      "میں محمد زین العابدین ہوں، زین بھائی کا کلون۔ مجھے سہت لائن پروجیکٹ مکمل یاد ہے — فرنٹ اینڈ، بیک اینڈ، روٹس، ڈیٹابیس اور ہر ماڈیول۔ کوڈ کے بارے میں جو بھی پوچھنا ہو، میں سکون سے، صاف صاف، جتنی بار چاہو سمجھاؤں گا۔"
+    ]
+  }
+},
+{
+  id:"overview",
+  tags:["what is sehatline","project kya","kya hai project","overview","about project","yeh project","summary","introduction","project kis","کیا ہے","پروجیکٹ","تعارف","what is the app","app kya"],
+  a:{
+    en:[
+      "SehatLine is a hospital queue-management app for Pakistan (CDA Hospital demo). It has 5 role portals in ONE app: Patient, Doctor, Admin, Pharmacy and Laboratory.\nFlow: a patient books an appointment or a Chronic-OPD token → the doctor sees them and forwards them to the Pharmacy → after medicines, the patient goes to the Laboratory for tests. Everything is live (Socket.IO) and backed by a real Node + MongoDB backend.",
+      "Think of SehatLine as a digital token/queue system for a hospital. Patients don't stand in lines — they book from the app and track their turn live. Behind it: doctor, pharmacy, lab and admin all have their own screens, connected to one backend and one database."
+    ],
+    ru:[
+      "SehatLine ek hospital queue-management app hai Pakistan ke liye (CDA Hospital demo). Ek hi app mein 5 portal hain: Patient, Doctor, Admin, Pharmacy aur Laboratory.\nFlow: patient appointment ya Chronic-OPD token book karta hai → doctor dekh kar usay Pharmacy bhejta hai → medicines ke baad patient Laboratory jaata hai tests ke liye. Sab kuch live hai (Socket.IO) aur peechhe ek asli Node + MongoDB backend hai.",
+      "Aasan lafzon mein: SehatLine hospital ka digital token system hai. Patient line mein khare nahi hote — app se book karte hain aur apni baari live dekhte hain. Doctor, pharmacy, lab, admin — sab ke apne screens hain, sab ek backend aur ek database se jure hue."
+    ],
+    ur:[
+      "سہت لائن پاکستان کے لیے ہسپتال قطار مینجمنٹ ایپ ہے۔ ایک ہی ایپ میں پانچ پورٹل ہیں: پیشنٹ، ڈاکٹر، ایڈمن، فارمیسی اور لیبارٹری۔\nطریقہ: مریض اپائنٹمنٹ یا کرانک او پی ڈی ٹوکن بک کرتا ہے، ڈاکٹر دیکھ کر فارمیسی بھیجتا ہے، دواؤں کے بعد مریض ٹیسٹ کے لیے لیبارٹری جاتا ہے۔ سب کچھ لائیو ہے اور پیچھے ایک اصل Node اور MongoDB بیک اینڈ ہے۔"
+    ]
+  }
+},
+{
+  id:"stack",
+  tags:["tech stack","technologies","kaunsi technology","konsi technology","language use","framework","stack","kis cheez se bana","tools","kया technology","ٹیکنالوجی","کس چیز سے","kaun si tech","react node"],
+  a:{
+    en:[
+      "Tech stack:\n• Frontend: React Native + Expo (SDK 54) — one codebase for the whole mobile app.\n• Backend: Node.js + Express (REST API).\n• Database: MongoDB with Mongoose (models/schemas).\n• Real-time: Socket.IO (live queue updates).\n• Auth: JWT tokens + bcrypt password hashing.\n• Extras: Zod validation, Helmet + CORS + rate-limit for security, tesseract.js for CNIC OCR, node-cron for scheduled jobs.\n• Hosting: backend on Vercel (serverless), database on MongoDB Atlas, mobile app built as an APK via EAS."
+    ],
+    ru:[
+      "Tech stack:\n• Frontend: React Native + Expo (SDK 54) — poori mobile app ek hi codebase mein.\n• Backend: Node.js + Express (REST API).\n• Database: MongoDB + Mongoose (models/schemas).\n• Real-time: Socket.IO (live queue updates).\n• Auth: JWT token + bcrypt password hashing.\n• Security: Zod validation, Helmet, CORS, rate-limit; CNIC OCR ke liye tesseract.js; scheduled kaam ke liye node-cron.\n• Hosting: backend Vercel par, database MongoDB Atlas par, mobile app EAS se APK bana kar."
+    ],
+    ur:[
+      "ٹیکنالوجی:\n• فرنٹ اینڈ: React Native + Expo\n• بیک اینڈ: Node.js + Express (REST API)\n• ڈیٹابیس: MongoDB + Mongoose\n• لائیو: Socket.IO\n• سیکیورٹی/لاگ اِن: JWT ٹوکن اور bcrypt پاس ورڈ ہیشنگ، Zod، Helmet، CORS، rate-limit\n• ہوسٹنگ: بیک اینڈ Vercel، ڈیٹابیس MongoDB Atlas، ایپ EAS سے APK۔"
+    ]
+  }
+},
+{
+  id:"architecture",
+  tags:["architecture","folder structure","structure","files kaise","kaise arrange","organize","folders","file structure","backend structure","ڈھانچہ","سٹرکچر","folder","directory"],
+  a:{
+    en:[
+      "The project has two parts: frontend/ (the app) and backend/ (the server).\nBackend is modular — backend/src/modules/ has one folder per role: auth, patient, doctor, admin, pharmacy, laboratory. Each module has its own controllers/ (logic), routes/ (URLs), and models/ (database shapes).\nKey backend files: src/app.js (sets up Express + mounts all routes), src/server.js (starts it), src/config/db.js (connects MongoDB), src/config/env.js (settings), src/middleware/ (auth guard, validation, security).\nFrontend mirrors it: frontend/src/modules/<role>/screens + services (the service files call the backend)."
+    ],
+    ru:[
+      "Project ke do hisse hain: frontend/ (app) aur backend/ (server).\nBackend modular hai — backend/src/modules/ mein har role ka apna folder: auth, patient, doctor, admin, pharmacy, laboratory. Har module ke andar controllers/ (logic), routes/ (URLs) aur models/ (database ki shape).\nAsli backend files: src/app.js (Express set-up + saare routes mount), src/server.js (start karta hai), src/config/db.js (MongoDB connect), src/config/env.js (settings), src/middleware/ (auth guard, validation, security).\nFrontend bhi aise hi: frontend/src/modules/<role>/screens + services (service files backend ko call karti hain)."
+    ],
+    ur:[
+      "پروجیکٹ کے دو حصے: frontend/ (ایپ) اور backend/ (سرور)۔\nبیک اینڈ ماڈیولر ہے — backend/src/modules/ میں ہر رول کا فولڈر: auth, patient, doctor, admin, pharmacy, laboratory۔ ہر ماڈیول میں controllers (لاجک)، routes (یو آر ایل) اور models (ڈیٹابیس شکل)۔\nاہم فائلیں: src/app.js، src/server.js، src/config/db.js، src/config/env.js، src/middleware/۔"
+    ]
+  }
+},
+{
+  id:"login",
+  tags:["login","log in","signin","sign in","login kaise","login ksy","login kese","how login","login work","login flow","login route","login function","login kam","authenticate","how does login","لاگ ان","لاگ اِن","login ka","password check"],
+  a:{
+    en:[
+      "LOGIN — full journey (step by step):\n\n1) FRONTEND: On the Login screen you type email/phone + password. The screen calls login() in\n   frontend/src/modules/auth/services/authService.js\n   which runs: api.post('/auth/login', { emailOrPhone, password }).\n\n2) apiClient (frontend/src/services/apiClient.js) does fetch(baseURL + '/auth/login'). The baseURL comes from src/config/api.config.js (auto-detects your PC's IP in dev, or the hosted Vercel URL in the APK).\n\n3) ROUTE (backend): app.js mounts app.use('/api/auth', authRoutes). Inside\n   backend/src/modules/auth/routes/auth.routes.js →\n   router.post('/login', authLimiter, validate(loginSchema), authController.login).\n\n4) CONTROLLER: the login() function in\n   backend/src/modules/auth/controllers/auth.controller.js does the real work:\n   • User.findOne({ email or phone }).select('+password')  → fetch the user from MongoDB\n   • user.comparePassword(password) → bcrypt.compare(typed, hashed) checks the password\n   • checks accountStatus (suspended/deactivated)\n   • createSession(user) → makes a JWT token (jwt.sign)\n   • returns { success:true, token, user: user.toSafeJSON() }.\n\n5) DATABASE: the User model (backend/src/modules/auth/models/User.js) is a Mongoose schema. The password is never stored plain — a pre-save hook bcrypt-hashes it. Connection is made in src/config/db.js (mongoose.connect to MONGO_URI).\n\n6) BACK IN THE APP: the token is saved; every later request sends header Authorization: Bearer <token>, and middleware/auth.middleware.js (authGuard) verifies it to protect the other screens.\n\nOne line: screen → authService.login → api.post('/auth/login') → route → auth.controller.login → User model (bcrypt check) → JWT token back.",
+
+      "Let me explain login more simply, like a story:\n\nSocho login ek darbaan (guard) hai. \n• You (app) knock with your email + password — that's authService.login() sending api.post('/auth/login').\n• The knock reaches the door address /api/auth/login (the ROUTE in auth.routes.js).\n• Behind the door sits the guard = the login() function in auth.controller.js.\n• The guard opens the register (MongoDB, User model), finds your name with User.findOne, and checks your password with bcrypt.compare (comparePassword). Passwords are stored hashed, so even the guard never sees the real password.\n• If it matches, the guard gives you a stamped pass = a JWT token (createSession → jwt.sign).\n• From then on you show that pass (Authorization: Bearer token) and authGuard lets you into the other rooms (screens).\nThat's the whole login.",
+
+      "Login in 4 boxes — remember these names for the viva:\n• WHERE it starts: authService.js → login() → api.post('/auth/login').\n• WHICH URL/route: /api/auth/login  (defined in auth.routes.js).\n• WHICH function does the work: login() in auth.controller.js.\n• HOW the DB is used: User model (Mongoose) → User.findOne() to get the user, comparePassword() (bcrypt) to verify, then a JWT token is returned.\nProtected pages afterwards are guarded by auth.middleware.js (checks the Bearer token). If anyone asks 'how is it linked to the DB' → answer: through the Mongoose User model and mongoose.connect() in config/db.js."
+    ],
+    ru:[
+      "LOGIN — poora safar (step by step):\n\n1) FRONTEND: Login screen par email/phone + password likhte ho. Screen call karti hai login() jo\n   frontend/src/modules/auth/services/authService.js mein hai,\n   aur woh chalata hai: api.post('/auth/login', { emailOrPhone, password }).\n\n2) apiClient (frontend/src/services/apiClient.js) fetch(baseURL + '/auth/login') karta hai. baseURL src/config/api.config.js se aata hai (dev mein PC ka IP khud detect, APK mein hosted Vercel URL).\n\n3) ROUTE (backend): app.js mount karta hai app.use('/api/auth', authRoutes). Phir\n   backend/src/modules/auth/routes/auth.routes.js mein →\n   router.post('/login', authLimiter, validate(loginSchema), authController.login).\n\n4) CONTROLLER: asli kaam login() function karta hai\n   backend/src/modules/auth/controllers/auth.controller.js mein:\n   • User.findOne({ email ya phone }).select('+password') → MongoDB se user nikaalta hai\n   • user.comparePassword(password) → bcrypt.compare(typed, hashed) se password check\n   • accountStatus check (suspended/deactivated)\n   • createSession(user) → JWT token banata hai (jwt.sign)\n   • wapas bhejta hai { success:true, token, user: user.toSafeJSON() }.\n\n5) DATABASE: User model (backend/src/modules/auth/models/User.js) ek Mongoose schema hai. Password kabhi plain store nahi hota — pre-save hook use bcrypt se hash karta hai. Connection src/config/db.js mein banta hai (mongoose.connect MONGO_URI se).\n\n6) WAPAS APP MEIN: token save ho jaata hai; har agli request header Authorization: Bearer <token> bhejti hai, aur middleware/auth.middleware.js (authGuard) usay verify kar ke baaqi screens ko protect karta hai.\n\nEk line mein: screen → authService.login → api.post('/auth/login') → route → auth.controller.login → User model (bcrypt check) → JWT token wapas.",
+
+      "Chalo login ko aur aasan, kahani ki tarah samjhata hoon:\n\nSocho login ek darbaan hai.\n• Tum (app) email + password ke saath darwaza khatkhataate ho — yeh authService.login() hai jo api.post('/auth/login') bhejta hai.\n• Khatkhataana pahunchta hai pate par /api/auth/login (ROUTE, auth.routes.js mein).\n• Darwaze ke peechhe darbaan baitha hai = login() function (auth.controller.js).\n• Darbaan register kholta hai (MongoDB, User model), User.findOne se tumhara naam dhoondta hai, aur bcrypt.compare (comparePassword) se password milata hai. Password hashed store hota hai, is liye darbaan ko bhi asli password nazar nahi aata.\n• Match ho gaya to darbaan tumhe ek stamp-shuda pass deta hai = JWT token (createSession → jwt.sign).\n• Uske baad tum wohi pass dikhaate ho (Authorization: Bearer token) aur authGuard tumhe baaqi kamron (screens) mein jaane deta hai.\nBas yehi poora login hai.",
+
+      "Login char dabbon mein — viva ke liye ye naam yaad rakho:\n• KAHAN se shuru: authService.js → login() → api.post('/auth/login').\n• KAUNSA route/URL: /api/auth/login  (auth.routes.js mein defined).\n• KAUNSA function kaam karta hai: login() (auth.controller.js mein).\n• DB kaise use hoti hai: User model (Mongoose) → User.findOne() se user lo, comparePassword() (bcrypt) se verify, phir JWT token wapas.\nBaad ki protected pages auth.middleware.js se guard hoti hain (Bearer token check). Koi poochhe 'DB se link kaise' → jawab: Mongoose User model aur config/db.js ke mongoose.connect() ke zariye."
+    ],
+    ur:[
+      "لاگ اِن — مکمل سفر:\n\n۱) فرنٹ اینڈ: لاگ اِن اسکرین پر ای میل/فون اور پاس ورڈ لکھتے ہو۔ اسکرین login() کو کال کرتی ہے جو authService.js میں ہے، اور وہ چلاتا ہے: api.post('/auth/login')۔\n\n۲) apiClient سرور کو fetch کرتا ہے، پتہ api.config.js سے آتا ہے۔\n\n۳) روٹ: app.js میں /api/auth، پھر auth.routes.js میں router.post('/login', ..., authController.login)۔\n\n۴) کنٹرولر: اصل کام login() فنکشن (auth.controller.js) کرتا ہے: User.findOne سے یوزر نکالتا ہے، comparePassword (bcrypt) سے پاس ورڈ چیک، پھر createSession سے JWT ٹوکن بناتا ہے اور واپس بھیجتا ہے۔\n\n۵) ڈیٹابیس: User model (Mongoose)۔ پاس ورڈ کبھی سادہ محفوظ نہیں ہوتا، pre-save hook اسے bcrypt سے ہیش کرتا ہے۔ کنکشن config/db.js میں mongoose.connect سے۔\n\n۶) اس کے بعد ہر ریکویسٹ Authorization: Bearer ٹوکن بھیجتی ہے اور auth.middleware.js اسے چیک کر کے باقی اسکرینوں کی حفاظت کرتا ہے۔"
+    ]
+  }
+},
+{
+  id:"signup",
+  tags:["signup","sign up","register","account banana","naya account","registration","cnic","verification","signup kaise","account kaise","سائن اپ","اکاؤنٹ","رجسٹر","cnic verify"],
+  a:{
+    en:[
+      "SIGNUP (patient): the form collects name, email, phone, CNIC, date of birth, password + a photo of the CNIC card.\n• The CNIC photo is sent to POST /api/auth/cnic/verify. The controller cnic.controller.js runs OCR (tesseract.js in cnic.service.js) to read the card and matches the typed CNIC/name with what's on the card.\n• Then POST /api/auth/signup (auth.controller.js → signup()) creates the user with User.create(), stores the bcrypt-hashed password, and returns a JWT token so the user is logged in immediately.\nNote: on the hosted (Vercel) backend, OCR is time-limited, so if it can't finish it 'soft-passes' using the typed CNIC and still blocks duplicate accounts."
+    ],
+    ru:[
+      "SIGNUP (patient): form leti hai naam, email, phone, CNIC, date of birth, password aur CNIC card ki photo.\n• CNIC photo POST /api/auth/cnic/verify par jaati hai. Controller cnic.controller.js OCR chalata hai (tesseract.js, cnic.service.js mein) taake card parh kar likhi hui CNIC/naam ko card se match kare.\n• Phir POST /api/auth/signup (auth.controller.js → signup()) User.create() se user banata hai, bcrypt-hashed password store karta hai, aur JWT token wapas deta hai — user turant logged-in.\nNote: hosted (Vercel) backend par OCR time-limited hai, agar complete na ho to typed CNIC se 'soft-pass' kar deta hai aur duplicate account phir bhi block karta hai."
+    ],
+    ur:[
+      "سائن اپ: فارم نام، ای میل، فون، شناختی کارڈ، تاریخ پیدائش، پاس ورڈ اور شناختی کارڈ کی تصویر لیتا ہے۔\n• تصویر POST /api/auth/cnic/verify پر جاتی ہے، جہاں cnic.controller.js اور tesseract.js OCR سے کارڈ پڑھ کر لکھی معلومات سے ملاتا ہے۔\n• پھر POST /api/auth/signup میں signup() فنکشن User.create() سے یوزر بناتا ہے اور JWT ٹوکن دیتا ہے۔"
+    ]
+  }
+},
+{
+  id:"routes",
+  tags:["route","routes","routing","url","endpoint","api route","route kya","kya hota route","how routes","express route","router","route kaise","روٹ","end point","api"],
+  a:{
+    en:[
+      "A ROUTE is just a URL + method that the backend answers. Express handles them.\nIn app.js each module's routes are mounted with a prefix, e.g. app.use('/api/auth', authRoutes). Then inside a routes file you list the exact endpoints, e.g. router.post('/login', ..., controller.login) → final URL /api/auth/login.\nA route line has 3 parts: (1) method + path, (2) optional middleware (rate-limit, validation, authGuard), (3) the controller function that runs. So the route only points to the work; the actual logic lives in the controller."
+    ],
+    ru:[
+      "ROUTE bas ek URL + method hai jiska backend jawab deta hai. Express inhe handle karta hai.\napp.js mein har module ke routes ek prefix ke saath mount hote hain, jaise app.use('/api/auth', authRoutes). Phir routes file ke andar exact endpoints likhte ho, jaise router.post('/login', ..., controller.login) → final URL /api/auth/login.\nEk route line ke 3 hisse: (1) method + path, (2) optional middleware (rate-limit, validation, authGuard), (3) controller function jo chalta hai. Route sirf kaam ki taraf ishaara karta hai; asli logic controller mein hoti hai."
+    ],
+    ur:[
+      "روٹ صرف ایک URL اور طریقہ (GET/POST) ہے جس کا بیک اینڈ جواب دیتا ہے۔ Express اسے سنبھالتا ہے۔\napp.js میں ہر ماڈیول کے روٹس ایک prefix کے ساتھ لگتے ہیں، جیسے app.use('/api/auth', authRoutes)۔ پھر روٹ فائل میں router.post('/login', ..., controller.login) → مکمل URL /api/auth/login۔\nہر روٹ کے تین حصے: طریقہ+پاتھ، مڈل ویئر، اور کنٹرولر فنکشن۔"
+    ]
+  }
+},
+{
+  id:"controller_model",
+  tags:["controller","model","middleware","controller kya","model kya","mvc","controller kaam","model kaam","what is controller","what is model","schema","کنٹرولر","ماڈل","middleware kya"],
+  a:{
+    en:[
+      "Three backend building blocks:\n• CONTROLLER = the brain/logic. A function that receives the request, does the work (read/write DB, checks) and sends the response. e.g. login() in auth.controller.js.\n• MODEL = the shape of data in MongoDB, written with Mongoose (a schema). e.g. User model defines name, email, password… and methods like comparePassword. Controllers use models to talk to the database.\n• MIDDLEWARE = a checkpoint that runs BEFORE the controller — e.g. authGuard (is the token valid?), validate (is the input correct?), rate-limit (too many requests?). If a checkpoint fails, the request is stopped there.\nSo: route → middleware → controller → model → database."
+    ],
+    ru:[
+      "Backend ke teen building blocks:\n• CONTROLLER = dimaag/logic. Ek function jo request leta hai, kaam karta hai (DB parhna/likhna, checks) aur response bhejta hai. Jaise login() (auth.controller.js).\n• MODEL = MongoDB mein data ki shape, Mongoose se likhi (schema). Jaise User model naam, email, password… aur comparePassword jaise methods define karta hai. Controllers models se database se baat karte hain.\n• MIDDLEWARE = checkpoint jo controller se PEHLE chalta hai — jaise authGuard (token sahi hai?), validate (input theek hai?), rate-limit (zyada requests to nahi?). Checkpoint fail ho to request wahin ruk jaati hai.\nYaani: route → middleware → controller → model → database."
+    ],
+    ur:[
+      "بیک اینڈ کے تین حصے:\n• کنٹرولر = دماغ/لاجک۔ فنکشن جو ریکویسٹ لیتا ہے، کام کرتا ہے، جواب بھیجتا ہے (جیسے login())۔\n• ماڈل = MongoDB میں ڈیٹا کی شکل، Mongoose سے (schema)۔ جیسے User model، اور comparePassword جیسے میتھڈ۔\n• مڈل ویئر = چیک پوسٹ جو کنٹرولر سے پہلے چلتی ہے (authGuard، validate، rate-limit)۔\nترتیب: route → middleware → controller → model → database۔"
+    ]
+  }
+},
+{
+  id:"frontend_backend",
+  tags:["frontend backend","frontend backend link","kaise connect","api call","frontend kaise","how frontend talks","talks to backend","talk to backend","backend se baat","backend baat","frontend talk","apiclient","api.config","frontend se backend","کیسے جڑا","request kaise"],
+  a:{
+    en:[
+      "How the app (frontend) talks to the server (backend):\n• Every screen calls a SERVICE file (e.g. authService.js, appointmentService.js) instead of calling the network directly.\n• Those services use apiClient (frontend/src/services/apiClient.js) which does fetch(baseURL + path) and automatically attaches the JWT token header.\n• The baseURL is decided in frontend/src/config/api.config.js: in development it auto-detects your PC's LAN IP (so the phone reaches the backend on the same Wi-Fi); in the shipped APK it uses the hosted URL (https://sehatlineapp-arfk.vercel.app).\nSo data flows: screen → service → apiClient(fetch) → Express route → controller → MongoDB → response → back to the screen."
+    ],
+    ru:[
+      "App (frontend) server (backend) se kaise baat karti hai:\n• Har screen seedha network call nahi karti — ek SERVICE file ko call karti hai (jaise authService.js, appointmentService.js).\n• Ye services apiClient (frontend/src/services/apiClient.js) use karti hain jo fetch(baseURL + path) karta hai aur JWT token header khud laga deta hai.\n• baseURL decide hota hai frontend/src/config/api.config.js mein: development mein PC ka LAN IP khud detect hota hai (taake phone same Wi-Fi par backend tak pahunche); APK mein hosted URL (https://sehatlineapp-arfk.vercel.app).\nData ka bahaav: screen → service → apiClient(fetch) → Express route → controller → MongoDB → response → wapas screen."
+    ],
+    ur:[
+      "ایپ سرور سے کیسے بات کرتی ہے:\n• ہر اسکرین ایک سروس فائل کو کال کرتی ہے (authService.js وغیرہ)۔\n• سروسز apiClient استعمال کرتی ہیں جو fetch(baseURL + path) کرتا ہے اور JWT ٹوکن خود لگا دیتا ہے۔\n• baseURL کا فیصلہ api.config.js کرتا ہے — ڈیویلپمنٹ میں PC کا IP خود پکڑتا ہے، APK میں hosted Vercel URL۔"
+    ]
+  }
+},
+{
+  id:"database",
+  tags:["database","mongodb","db","mongoose","db connect","database link","database kaise","kaise store","data store","atlas","collection","schema kya","ڈیٹابیس","ڈیٹا","mongo"],
+  a:{
+    en:[
+      "Database = MongoDB (a NoSQL document database), used through Mongoose.\n• Connection: backend/src/config/db.js runs mongoose.connect(MONGO_URI). MONGO_URI comes from env.js — locally it's mongodb://127.0.0.1:27017/SehatLineApp, on the hosted backend it's a MongoDB Atlas cloud URL.\n• Data shapes are MODELS (Mongoose schemas): User, Doctor, Appointment, Prescription, LabReport, Session, etc. Each is a file under a module's models/ folder.\n• Controllers read/write with model methods: User.findOne(), User.create(), Appointment.find(), doc.save() … That's the 'link' between code and database.\nOn serverless (Vercel) there's a special connectDBCached() that reuses one connection instead of opening a new one every request."
+    ],
+    ru:[
+      "Database = MongoDB (NoSQL document database), Mongoose ke zariye use hoti hai.\n• Connection: backend/src/config/db.js mein mongoose.connect(MONGO_URI). MONGO_URI env.js se aata hai — locally mongodb://127.0.0.1:27017/SehatLineApp, hosted par MongoDB Atlas cloud URL.\n• Data ki shape = MODELS (Mongoose schemas): User, Doctor, Appointment, Prescription, LabReport, Session, waghaira. Har ek module ke models/ folder mein file hai.\n• Controllers model methods se parhte/likhte hain: User.findOne(), User.create(), Appointment.find(), doc.save()… Yehi code aur database ke beech 'link' hai.\n• Serverless (Vercel) par ek khaas connectDBCached() hai jo har request par nayi connection kholne ke bajaye ek hi reuse karta hai."
+    ],
+    ur:[
+      "ڈیٹابیس = MongoDB، Mongoose کے ذریعے۔\n• کنکشن: config/db.js میں mongoose.connect(MONGO_URI)۔ لوکل پر 127.0.0.1، hosted پر MongoDB Atlas۔\n• ڈیٹا کی شکل = ماڈلز (schemas): User، Doctor، Appointment، Prescription، LabReport وغیرہ۔\n• کنٹرولر model methods سے پڑھتے/لکھتے ہیں: findOne، create، save۔ یہی کوڈ اور ڈیٹابیس کا لنک ہے۔"
+    ]
+  }
+},
+{
+  id:"jwt",
+  tags:["jwt","token","authentication","auth","session","protected","kaise secure","token kya","how auth","authguard","bearer","محفوظ","ٹوکن","security kaise","logged in kaise"],
+  a:{
+    en:[
+      "After login the server gives a JWT (JSON Web Token) — a signed string that proves 'this user is logged in'. Made in auth.service.js with jwt.sign(payload, secret).\n• The app stores the token and sends it on every request as header Authorization: Bearer <token>.\n• For any protected route, middleware/auth.middleware.js (authGuard) reads that header, verifies it with jwt.verify, loads the user, and attaches req.user. If the token is missing/invalid, the request is rejected with 401.\n• There's also a Session model (device tracking, inactivity logout).\nPasswords themselves are protected by bcrypt hashing (never stored in plain text)."
+    ],
+    ru:[
+      "Login ke baad server ek JWT (JSON Web Token) deta hai — ek signed string jo saabit karti hai 'yeh user logged-in hai'. auth.service.js mein jwt.sign(payload, secret) se banta hai.\n• App token store karti hai aur har request par header Authorization: Bearer <token> bhejti hai.\n• Kisi bhi protected route par middleware/auth.middleware.js (authGuard) us header ko parhta hai, jwt.verify se verify karta hai, user load kar ke req.user laga deta hai. Token na ho ya galat ho to 401 se request reject.\n• Ek Session model bhi hai (device tracking, inactivity logout).\nPassword khud bcrypt hashing se mehfooz hote hain (kabhi plain store nahi)."
+    ],
+    ur:[
+      "لاگ اِن کے بعد سرور ایک JWT ٹوکن دیتا ہے (auth.service.js میں jwt.sign سے)۔\n• ایپ ہر ریکویسٹ پر Authorization: Bearer ٹوکن بھیجتی ہے۔\n• محفوظ روٹ پر auth.middleware.js (authGuard) اسے jwt.verify سے چیک کرتا ہے، ورنہ 401۔\n• پاس ورڈ bcrypt سے ہیش ہوتے ہیں، کبھی سادہ محفوظ نہیں ہوتے۔"
+    ]
+  }
+},
+{
+  id:"socket",
+  tags:["socket","socket.io","real time","realtime","live","queue update","live queue","kaise live","real time kaise","notification","لائیو","سوکٹ","live update"],
+  a:{
+    en:[
+      "Real-time updates use Socket.IO. The backend keeps a live connection open with every logged-in app.\n• When something changes (a doctor calls the next patient, pharmacy dispenses, admin adds a doctor), the controller does io.emit('queue:update' / 'pharmacy:update' / 'admin:update', …).\n• The app is listening (onQueueUpdate, onPharmacyUpdate, onAdminUpdate) and instantly refreshes the screen — no manual reload.\nNote: on the Vercel serverless backend, live sockets don't stay open, so there the app falls back to pull-to-refresh + polling every few seconds."
+    ],
+    ru:[
+      "Real-time updates Socket.IO se hoti hain. Backend har logged-in app ke saath ek live connection khula rakhta hai.\n• Jab kuch badalta hai (doctor next patient bulaata hai, pharmacy dispense karti hai, admin doctor add karta hai), controller io.emit('queue:update' / 'pharmacy:update' / 'admin:update', …) karta hai.\n• App sun rahi hoti hai (onQueueUpdate, onPharmacyUpdate, onAdminUpdate) aur turant screen refresh kar deti hai — bina manual reload.\nNote: Vercel serverless par live socket khula nahi rehta, is liye wahan app pull-to-refresh + har kuch second polling par chali jaati hai."
+    ],
+    ur:[
+      "لائیو اپڈیٹس Socket.IO سے۔ بیک اینڈ ہر لاگ اِن ایپ کے ساتھ لائیو کنکشن رکھتا ہے۔\n• تبدیلی پر کنٹرولر io.emit(...) کرتا ہے، ایپ سن کر فوراً اسکرین ریفریش کرتی ہے۔\n• Vercel پر سوکٹ کھلا نہیں رہتا، اس لیے وہاں pull-to-refresh اور polling استعمال ہوتی ہے۔"
+    ]
+  }
+},
+{
+  id:"modules",
+  tags:["modules","5 portals","roles","portal","patient doctor admin pharmacy lab","kitne module","role","کردار","portals","har module","modules kya"],
+  a:{
+    en:[
+      "Five role portals (each logs in with its own account and sees its own screens):\n1) PATIENT — book appointments / Chronic-OPD tokens, live queue tracking, reports, profile.\n2) DOCTOR — sees the patient queue, does the consultation, forwards to pharmacy; uses queueing theory for ordering.\n3) ADMIN — manages doctors (add/edit/delete/bulk), classifies chronic patients, reads reports, system metrics.\n4) PHARMACY — the dispensing queue: waiting → preparing → ready → dispensed; inventory; then pushes the patient to the lab.\n5) LABORATORY — sample → process → upload report; the report auto-appears in the patient's records.\nAll five live in one app, split by role; the backend has a matching module for each."
+    ],
+    ru:[
+      "Paanch role portals (har ek apne account se login, apni screens):\n1) PATIENT — appointment / Chronic-OPD token book, live queue tracking, reports, profile.\n2) DOCTOR — patient queue dekhta hai, consultation karta hai, pharmacy bhejta hai; ordering ke liye queueing theory.\n3) ADMIN — doctors manage (add/edit/delete/bulk), chronic patients classify, reports, system metrics.\n4) PHARMACY — dispensing queue: waiting → preparing → ready → dispensed; inventory; phir patient ko lab bhejta hai.\n5) LABORATORY — sample → process → report upload; report khud patient ke records mein aa jaati hai.\nPaanchon ek hi app mein, role ke hisaab se; backend mein har ek ka matching module hai."
+    ],
+    ur:[
+      "پانچ پورٹل (ہر ایک اپنے اکاؤنٹ سے):\n۱) پیشنٹ — اپائنٹمنٹ/ٹوکن، لائیو قطار، رپورٹس۔\n۲) ڈاکٹر — قطار، کنسلٹیشن، فارمیسی بھیجنا۔\n۳) ایڈمن — ڈاکٹرز مینج، کرانک درجہ بندی، رپورٹس۔\n۴) فارمیسی — دوائیں: waiting→preparing→ready→dispensed، پھر لیب۔\n۵) لیبارٹری — سیمپل→پروسیس→رپورٹ اپلوڈ۔"
+    ]
+  }
+},
+{
+  id:"appointment",
+  tags:["appointment","booking","book appointment","reschedule","queue theory","token","chronic","opd","appointment kaise","slot","اپائنٹمنٹ","بکنگ","booking kaise"],
+  a:{
+    en:[
+      "Appointments (cardiology/OPD): the patient picks a doctor → an available day → a free time slot, then POST /api/patient/appointments (appointment.controller.js → bookAppointment) saves it. Slots come from each doctor's own configured slots and days; the hospital booking window is 8 AM–1 PM (a doctor can be given a later cut-off with bookingEnd).\n• Reschedule: POST /api/patient/appointments/:id/reschedule moves an existing booking to a new date/time/doctor.\n• Live queue: getActiveAppointment counts how many patients are ahead using a priority-aware order (elderly/critical first). Chronic-OPD uses a token system instead of clock slots."
+    ],
+    ru:[
+      "Appointments (cardiology/OPD): patient doctor chunta hai → available din → free time slot, phir POST /api/patient/appointments (appointment.controller.js → bookAppointment) save karta hai. Slots har doctor ke apne configured slots aur din se aate hain; hospital booking window 8 AM–1 PM hai (kisi doctor ko bookingEnd se later cut-off diya ja sakta hai).\n• Reschedule: POST /api/patient/appointments/:id/reschedule maujooda booking ko nayi date/time/doctor par move karta hai.\n• Live queue: getActiveAppointment priority-aware order se ginta hai kitne patients aage hain (buzurg/critical pehle). Chronic-OPD clock slots ki jagah token system use karta hai."
+    ],
+    ur:[
+      "اپائنٹمنٹ: مریض ڈاکٹر، دن اور خالی سلاٹ چنتا ہے، پھر POST /api/patient/appointments (bookAppointment) محفوظ کرتا ہے۔ ونڈو صبح ۸ سے دوپہر ۱ بجے، کسی ڈاکٹر کو bookingEnd سے زیادہ وقت دیا جا سکتا ہے۔\n• ری شیڈول: /reschedule سے تاریخ/وقت/ڈاکٹر بدل جاتا ہے۔\n• کرانک او پی ڈی ٹوکن سسٹم استعمال کرتا ہے۔"
+    ]
+  }
+},
+{
+  id:"hosting",
+  tags:["hosting","deploy","deployment","host","vercel","atlas","apk","kaise host","server kaha","hosting kaise","build apk","eas","ہوسٹنگ","ڈیپلائے","kaha chal raha"],
+  a:{
+    en:[
+      "Deployment:\n• Backend runs on Vercel as serverless functions (entry: api/index.js exports the Express app). Because it's serverless, WebSockets don't persist (app falls back to polling) and each function has a ~10s limit.\n• Database is on MongoDB Atlas (cloud); the app is configured with USE_PRODUCTION = true to point at the hosted URL.\n• The mobile app is built into an installable APK using EAS Build (Expo). To install on any phone you share the direct .apk artifact link (the Expo dashboard page link needs login, so share the artifact link)."
+    ],
+    ru:[
+      "Deployment:\n• Backend Vercel par serverless functions ki tarah chalta hai (entry: api/index.js jo Express app export karta hai). Serverless hone ki wajah se WebSocket persist nahi hote (app polling par aa jaati hai) aur har function ~10s limit rakhta hai.\n• Database MongoDB Atlas (cloud) par hai; app mein USE_PRODUCTION = true karke hosted URL par point kiya jaata hai.\n• Mobile app EAS Build (Expo) se installable APK banti hai. Kisi bhi phone par install ke liye direct .apk artifact link share karo (Expo dashboard page login maangta hai, is liye artifact link bhejo)."
+    ],
+    ur:[
+      "ڈیپلائے:\n• بیک اینڈ Vercel پر serverless (api/index.js)۔ سوکٹ persist نہیں ہوتے، ہر فنکشن ~۱۰ سیکنڈ۔\n• ڈیٹابیس MongoDB Atlas پر؛ ایپ میں USE_PRODUCTION = true۔\n• ایپ EAS Build سے APK۔ انسٹال کے لیے direct .apk لنک شیئر کرو۔"
+    ]
+  }
+},
+{
+  id:"logins_demo",
+  tags:["demo account","test account","login credentials","password kya","kaunsa account","demo login","credentials","account details","username password","اکاؤنٹ پاس ورڈ","کریڈینشل","test login"],
+  a:{
+    en:[
+      "Demo logins (for the viva):\n• Admin: admin@sehatline.com / admin123\n• Laboratory: laboratory@sehatline.com / laboratory123\n• Pharmacy: pharmacy@sehatline.com / pharmacy123\n• Doctors (cardiology): cardio.1@sehatline.pk … cardio.5@sehatline.pk / doctor@123\n• Any patient: sign up in the app.\nRemember: the doctor/staff default password is doctor@123 (with the @)."
+    ],
+    ru:[
+      "Demo logins (viva ke liye):\n• Admin: admin@sehatline.com / admin123\n• Laboratory: laboratory@sehatline.com / laboratory123\n• Pharmacy: pharmacy@sehatline.com / pharmacy123\n• Doctors (cardiology): cardio.1@sehatline.pk … cardio.5@sehatline.pk / doctor@123\n• Patient: app mein signup kar lo.\nYaad rahe: doctor/staff ka default password doctor@123 hai (@ ke saath)."
+    ],
+    ur:[
+      "ڈیمو لاگ اِن:\n• ایڈمن: admin@sehatline.com / admin123\n• لیبارٹری: laboratory@sehatline.com / laboratory123\n• فارمیسی: pharmacy@sehatline.com / pharmacy123\n• ڈاکٹرز: cardio.1@sehatline.pk تا cardio.5@sehatline.pk / doctor@123\n• پیشنٹ: ایپ میں سائن اپ۔"
+    ]
+  }
+},
+{
+  id:"help",
+  tags:["help","what can i ask","kya poochu","kya pooch sakta","options","madad","what do you know","tum kya jante","مدد","کیا پوچھوں","help me"],
+  a:{
+    en:[
+      "Ask me anything about the SehatLine project — for example:\n• How does login work? (which route, file, function, DB)\n• How does signup / CNIC verification work?\n• What is a route / controller / model / middleware?\n• How does the frontend talk to the backend?\n• How is the database connected?\n• What is JWT / how are pages protected?\n• How does the live queue (Socket.IO) work?\n• The 5 modules, appointments, hosting, demo logins.\nAnd if any answer isn't clear, just ask again or tap 'Explain differently' — I'll re-explain another way."
+    ],
+    ru:[
+      "SehatLine project ke baare mein kuch bhi poochho — jaise:\n• Login kaise chalta hai? (kaunsa route, file, function, DB)\n• Signup / CNIC verification kaise?\n• Route / controller / model / middleware kya hai?\n• Frontend backend se kaise baat karta hai?\n• Database kaise connect hai?\n• JWT kya hai / pages kaise protect hote hain?\n• Live queue (Socket.IO) kaise chalti hai?\n• 5 modules, appointments, hosting, demo logins.\nKoi jawab samajh na aaye to dobara poochho ya 'Explain differently' dabao — main doosre tareeqe se samjha dunga."
+    ],
+    ur:[
+      "سہت لائن کے بارے میں کچھ بھی پوچھو — مثلاً:\n• لاگ اِن کیسے چلتا ہے؟\n• سائن اپ/شناختی کارڈ کیسے؟\n• روٹ/کنٹرولر/ماڈل/مڈل ویئر کیا ہے؟\n• فرنٹ اینڈ بیک اینڈ سے کیسے بات کرتا ہے؟\n• ڈیٹابیس کیسے جڑا ہے؟ JWT کیا ہے؟\n• لائیو قطار، ماڈیولز، ہوسٹنگ۔\nسمجھ نہ آئے تو دوبارہ پوچھو یا 'Explain differently' دباؤ۔"
+    ]
+  }
+},
+{
+  id:"thanks",
+  tags:["thanks","thank you","shukriya","thanku","thankyou","great","acha","perfect","done","شکریہ","مہربانی","nice"],
+  a:{
+    en:["Anytime! Keep asking until every piece is crystal clear — that's exactly what I'm here for. You've got this. 💪"],
+    ru:["Koi baat nahi! Jab tak har cheez bilkul clear na ho jaye, poochte raho — main isi liye to hoon. Tum kar loge, tension mat lo. 💪"],
+    ur:["کوئی بات نہیں! جب تک ہر چیز بالکل صاف نہ ہو جائے پوچھتے رہو — میں اسی لیے ہوں۔ تم کر لو گے۔ 💪"]
+  }
+}
+];
+
+/* ---- Greeting intent (handled separately for a warm opener) ---- */
+const GREET = {
+  en:"Assalam-o-alaikum! I am Muhammad Zain Ul Abideen, Clone of Zain Bhai. Ask me anything about the SehatLine project — login, routes, database, modules — in English, Roman Urdu or Urdu. Where should we start?",
+  ru:"Assalam-o-alaikum! Main Muhammad Zain Ul Abideen hoon, Clone of Zain Bhai. SehatLine project ke baare mein kuch bhi poochho — login, routes, database, modules — English, Roman Urdu ya Urdu mein. Kahan se shuru karein?",
+  ur:"السلام علیکم! میں محمد زین العابدین ہوں، زین بھائی کا کلون۔ سہت لائن پروجیکٹ کے بارے میں کچھ بھی پوچھو — لاگ اِن، روٹس، ڈیٹابیس، ماڈیولز — انگریزی، رومن اردو یا اردو میں۔ کہاں سے شروع کریں؟"
+};
+
+const FALLBACK = {
+  en:"I didn't catch that exactly. I'm the SehatLine project guide — try asking about login, signup, routes, controllers, the database, JWT, Socket.IO, the 5 modules, appointments, or hosting. Or tap a suggestion below.",
+  ru:"Yeh theek se samajh nahi aaya. Main SehatLine project ka guide hoon — login, signup, routes, controllers, database, JWT, Socket.IO, 5 modules, appointments ya hosting ke baare mein poochho. Ya neeche koi suggestion dabao.",
+  ur:"یہ ٹھیک سے سمجھ نہیں آیا۔ میں سہت لائن پروجیکٹ کا گائیڈ ہوں — لاگ اِن، سائن اپ، روٹس، کنٹرولر، ڈیٹابیس، JWT، ماڈیولز یا ہوسٹنگ کے بارے میں پوچھو۔"
+};
+
+const SUGGEST = {
+  en:["How does login work?","What is a route & controller?","How is the database connected?","Explain the 5 modules","What is JWT?","How is it hosted?"],
+  ru:["Login kaise kaam karta hai?","Route aur controller kya hai?","Database kaise connect hai?","5 modules samjhao","JWT kya hai?","Hosting kaise hai?"],
+  ur:["لاگ اِن کیسے چلتا ہے؟","روٹ اور کنٹرولر کیا ہے؟","ڈیٹابیس کیسے جڑا ہے؟","پانچ ماڈیولز","JWT کیا ہے؟","ہوسٹنگ کیسے ہے؟"]
+};
+
+/* =========================== ENGINE =============================== */
+let uiLang = "auto";                 // auto | en | ru | ur
+let variantIdx = {};                 // per-intent variant rotation
+let chats = [];                      // all conversations
+let curId = null;                    // current chat id
+
+const $ = s => document.querySelector(s);
+const chatEl = $("#chat"), inp = $("#inp");
+
+/* Roman-Urdu detector words */
+const RU_WORDS = ["kaise","kese","ksy","kaunsa","konsa","kya","kyu","kyun","kaam","kam","hai","hota","rha","raha","kro","karo","batao","samjha","samjhao","poocho","poochu","mein","kaha","kahan","ka","ki","ke","tum","aap","kon","kaun","nahi","acha","theek","bhai","yeh","wo","ho","krta","krna","dede","dedo","chal","chalta"];
+
+function detectLang(t){
+  if(/[؀-ۿ]/.test(t)) return "ur";
+  const low = " "+t.toLowerCase().replace(/[^a-z\s]/g," ")+" ";
+  let hits=0; RU_WORDS.forEach(w=>{ if(low.includes(" "+w+" ")) hits++; });
+  return hits>=1 ? "ru" : "en";
+}
+function replyLang(userText){ return uiLang==="auto" ? detectLang(userText) : uiLang; }
+
+/* normalize for matching */
+function norm(t){
+  return " "+t.toLowerCase()
+    .replace(/[^a-z0-9؀-ۿ\s]/g," ")
+    .replace(/\s+/g," ").trim()+" ";
+}
+function scoreIntent(intent, nText){
+  let s=0;
+  intent.tags.forEach(tag=>{
+    const tg = tag.toLowerCase().trim();
+    if(!tg) return;
+    if(tg.includes(" ")){ if(nText.includes(" "+tg+" ")||nText.includes(tg)) s+=2.2; }
+    else { if(nText.includes(" "+tg+" ")) s+=1.4; else if(nText.includes(tg) && tg.length>3) s+=0.6; }
+  });
+  return s;
+}
+function findIntent(text){
+  const n = norm(text);
+  if(/^\s*(hi|hello|hey|salam|asalam|assalam|aoa|السلام|سلام|hy)\b/.test(n)) return {id:"__greet"};
+  let best=null, bestScore=0;
+  KB.forEach(it=>{ const sc=scoreIntent(it,n); if(sc>bestScore){bestScore=sc; best=it;} });
+  return bestScore>=1 ? best : null;
+}
+function answerFor(intent, lang, advance){
+  if(intent.id==="__greet") return GREET[lang]||GREET.en;
+  const arr = (intent.a[lang]&&intent.a[lang].length)?intent.a[lang]:intent.a.en;
+  if(variantIdx[intent.id]==null) variantIdx[intent.id]=0;   // record the baseline shown
+  if(advance) variantIdx[intent.id]++;                        // move to the next variant
+  const i = variantIdx[intent.id] % arr.length;
+  const pick = arr[i];
+  // "another way" prefix whenever we're re-explaining (rotated, or only one variant exists)
+  if(advance && (i!==0 || arr.length===1)){
+    const pre = {en:"Sure — another way to see it:\n\n", ru:"Theek hai — ek aur tareeqe se:\n\n", ur:"ٹھیک ہے — ایک اور طرح سے:\n\n"}[lang]||"";
+    return pre+pick;
+  }
+  return pick;
+}
+
+/* =========================== UI =============================== */
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function fmt(s){
+  // bold **x**, inline paths, code words already fine; convert newlines
+  let h = esc(s).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>");
+  h = h.replace(/(\/api\/[^\s,)]+|[a-zA-Z0-9_.\/-]+\.(?:js|ts|tsx|json))/g,'<span class="path">$1</span>');
+  return h.replace(/\n/g,"<br>");
+}
+function addMsg(role,text,lang,intentId){
+  const isUr = lang==="ur";
+  const wrap=document.createElement("div"); wrap.className="wrap";
+  const m=document.createElement("div"); m.className="msg "+role;
+  const av=document.createElement("div"); av.className="av"; av.textContent= role==="bot"?"Z":"🧑";
+  const b=document.createElement("div"); b.className="bubble"; if(isUr){b.classList.add("rtl");b.setAttribute("dir","rtl");} else b.setAttribute("dir","auto");
+  b.innerHTML=fmt(text);
+  m.appendChild(av); m.appendChild(b); wrap.appendChild(m);
+  if(role==="bot" && intentId && intentId!=="__greet" && intentId!=="__fallback"){
+    const again=document.createElement("div"); again.className="again";
+    const btn=document.createElement("button");
+    btn.textContent = lang==="ur"?"↺ ایک اور طرح سے سمجھاؤ" : lang==="ru"?"↺ Aur tareeqe se samjhao":"↺ Explain differently";
+    btn.onclick=()=>{ const t=answerFor(KB.find(k=>k.id===intentId),lang,true); addMsg("bot",t,lang,intentId); persist("bot",t,lang,intentId); scrollDown(); };
+    again.appendChild(btn); b.appendChild(again);
+  }
+  chatEl.appendChild(wrap);
+}
+function typing(){
+  const wrap=document.createElement("div"); wrap.className="wrap"; wrap.id="typingRow";
+  wrap.innerHTML='<div class="msg bot"><div class="av">Z</div><div class="bubble typing"><span></span><span></span><span></span></div></div>';
+  chatEl.appendChild(wrap); scrollDown();
+}
+function stopTyping(){ const t=$("#typingRow"); if(t) t.remove(); }
+function scrollDown(){ chatEl.scrollTop=chatEl.scrollHeight; }
+
+function renderSuggest(){
+  const lang = uiLang==="auto"?"en":uiLang;
+  const box=$("#suggest"); box.innerHTML="";
+  (SUGGEST[lang]||SUGGEST.en).forEach(q=>{
+    const c=document.createElement("div"); c.className="chip"; c.textContent=q;
+    c.onclick=()=>{ inp.value=q; onSend(); };
+    box.appendChild(c);
+  });
+}
+
+/* =========================== CHAT STORE =============================== */
+function load(){ try{ chats=JSON.parse(localStorage.getItem("zc_chats")||"[]"); }catch(e){ chats=[]; } }
+function save(){ try{ localStorage.setItem("zc_chats",JSON.stringify(chats)); }catch(e){} }
+function cur(){ return chats.find(c=>c.id===curId); }
+function persist(role,text,lang,intentId){
+  const c=cur(); if(!c) return;
+  c.messages.push({role,text,lang,intentId});
+  if(role==="user" && (c.title==="New chat"||!c.title)) c.title=text.slice(0,38);
+  save(); renderHistory();
+}
+function newChat(){
+  curId="c"+Date.now();
+  chats.unshift({id:curId,title:"New chat",messages:[]});
+  save(); renderHistory(); renderChat(); toggleSidebar(false);
+}
+function openChat(id){ curId=id; renderChat(); toggleSidebar(false); }
+function delChat(id,ev){ ev.stopPropagation(); chats=chats.filter(c=>c.id!==id); if(curId===id) curId=chats[0]?chats[0].id:null; if(!curId) newChat(); save(); renderHistory(); renderChat(); }
+function clearAll(){ chats=[]; save(); newChat(); }
+
+function renderHistory(){
+  const h=$("#history"); h.innerHTML="";
+  chats.forEach(c=>{
+    const d=document.createElement("div"); d.className="hist-item"+(c.id===curId?" active":"");
+    const t=document.createElement("span"); t.textContent=c.title||"New chat"; t.style.overflow="hidden"; t.style.textOverflow="ellipsis";
+    const x=document.createElement("span"); x.className="del"; x.textContent="✕"; x.onclick=(e)=>delChat(c.id,e);
+    d.appendChild(t); d.appendChild(x); d.onclick=()=>openChat(c.id);
+    h.appendChild(d);
+  });
+}
+function renderChat(){
+  chatEl.innerHTML="";
+  const c=cur();
+  if(!c||c.messages.length===0){
+    const hero=document.createElement("div"); hero.className="hero";
+    hero.innerHTML='<div class="big">Z</div><h2>Muhammad Zain Ul Abideen</h2><p>Clone of Zain Bhai — I explain the SehatLine project code in English, Roman Urdu & Urdu. Poochho jo samajhna hai, main hoon na. 🙂</p>';
+    const w=document.createElement("div"); w.className="wrap"; w.appendChild(hero); chatEl.appendChild(w);
+  } else {
+    c.messages.forEach(m=>addMsg(m.role,m.text,m.lang,m.intentId));
+  }
+  renderHistory(); renderSuggest(); scrollDown();
+}
+
+/* =========================== SEND =============================== */
+function onSend(){
+  const text=inp.value.trim(); if(!text) return;
+  if(!cur()) newChat();
+  const lang=replyLang(text);
+  addMsg("user",text,lang); persist("user",text,lang);
+  inp.value=""; inp.style.height="auto"; scrollDown();
+
+  typing();
+  setTimeout(()=>{
+    stopTyping();
+    const intent=findIntent(text);
+    let out, iid, alang=lang;
+    if(!intent){ out=(FALLBACK[lang]||FALLBACK.en); iid="__fallback"; }
+    else {
+      // rotate variant if the SAME intent was just asked again
+      const c=cur(); const last=[...c.messages].reverse().find(m=>m.role==="bot" && m.intentId);
+      const advance = last && last.intentId===intent.id;
+      out=answerFor(intent,lang,advance); iid=intent.id;
+    }
+    addMsg("bot",out,alang,iid); persist("bot",out,alang,iid); scrollDown();
+  }, 380+Math.random()*350);
+}
+
+function setLang(l){
+  uiLang=l;
+  document.querySelectorAll("#langsel button").forEach(b=>b.classList.toggle("active",b.dataset.l===l));
+  renderSuggest();
+}
+function toggleSidebar(force){
+  const sb=$("#sidebar"), bd=$("#backdrop");
+  const open = force==null ? !sb.classList.contains("open") : force;
+  sb.classList.toggle("open",open); bd.classList.toggle("show",open);
+}
+
+/* input auto-grow + Enter to send */
+inp.addEventListener("input",()=>{ inp.style.height="auto"; inp.style.height=Math.min(inp.scrollHeight,150)+"px"; });
+inp.addEventListener("keydown",e=>{ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); onSend(); } });
+
+/* boot */
+load();
+if(chats.length===0){ newChat(); } else { curId=chats[0].id; renderChat(); }
+renderSuggest();
+</script>
+</body>
+</html>
