@@ -9,8 +9,10 @@
   html,body{height:100%;margin:0;}
   body{
     font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;
-    background:var(--bg); color:var(--text); display:flex; height:100vh; overflow:hidden;
+    background:var(--bg); color:var(--text); display:flex; height:100vh; height:100dvh; overflow:hidden;
+    -webkit-text-size-adjust:100%; overscroll-behavior:none;
   }
+  *{-webkit-tap-highlight-color:transparent;}
   /* ---------- Sidebar ---------- */
   #sidebar{
     width:270px; background:var(--panel); border-right:1px solid var(--border);
@@ -50,9 +52,10 @@
     height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--panel);
   }
   #menuBtn{display:none;background:none;border:none;color:var(--text);font-size:22px;cursor:pointer;}
-  #topbar .who{flex:1;min-width:0;}
-  #topbar .who b{font-size:14px;}
-  #topbar .who span{display:block;color:var(--muted);font-size:11px;}
+  #topbar .who{flex:1;min-width:0;overflow:hidden;}
+  #topbar .who b{font-size:14px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  #topbar .who span{display:block;color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .langsel{flex-shrink:0;}
   .langsel{display:flex;background:var(--panel2);border:1px solid var(--border);border-radius:9px;overflow:hidden;}
   .langsel button{background:none;border:none;color:var(--muted);padding:7px 10px;font-size:12px;cursor:pointer;}
   .langsel button.active{background:var(--accent);color:#04231f;font-weight:700;}
@@ -137,12 +140,51 @@
   .m-glow{filter:drop-shadow(0 8px 22px rgba(11,170,157,.35));}
   @media(prefers-reduced-motion:reduce){.m-float,.m-eye,.m-hand{animation:none;}}
   [dir="rtl"],.rtl{font-family:'Segoe UI','Noto Nastaliq Urdu',system-ui,sans-serif;}
+  /* notch / gesture-bar safe areas (0 on devices without them) */
+  #inputbar{padding-bottom:calc(14px + env(safe-area-inset-bottom));}
+  #sidebar{padding-bottom:env(safe-area-inset-bottom);}
+  /* tablets & phones: sidebar becomes a slide-in drawer */
   @media(max-width:760px){
-    #sidebar{position:fixed;z-index:30;height:100%;margin-left:-270px;}
+    #sidebar{position:fixed;z-index:30;height:100%;margin-left:-100%;width:80vw;max-width:310px;}
     #sidebar.open{margin-left:0;box-shadow:0 0 40px rgba(0,0,0,.6);}
-    #menuBtn{display:block;}
+    #menuBtn{display:block;padding:4px 6px;}
     #backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:29;}
     #backdrop.show{display:block;}
+    #topbar{padding:0 12px;gap:8px;}
+    .langsel button{padding:8px 9px;font-size:11px;}
+    .wrap{padding:0 14px;}
+    #suggest,.foot-note{padding-left:14px;padding-right:14px;}
+    .inrow{padding-left:12px;padding-right:12px;}
+  }
+  /* phones */
+  @media(max-width:480px){
+    #topbar{height:54px;}
+    #topbar .who b{font-size:13px;}
+    #topbar .who span{display:none;}
+    .hero{padding:22px 14px 6px;}
+    .mascot{width:104px;height:104px;margin-bottom:4px;}
+    .hero h2{font-size:18px;}
+    .hero p{font-size:13px;max-width:100%;}
+    #chat{padding:16px 0;}
+    .msg{gap:9px;margin-bottom:18px;}
+    .msg .av{width:30px;height:30px;font-size:13px;}
+    .msg.bot .av.botav svg{width:32px;height:32px;}
+    .bubble{font-size:14.5px;}
+    .msg.user .bubble{max-width:84%;}
+    .msg.bot .bubble{max-width:100%;}
+    #inp{font-size:16px;padding:11px 13px;}   /* >=16px = no iOS zoom-on-focus */
+    #send{width:44px;height:44px;font-size:18px;}
+    .chip,.fchip{font-size:12px;padding:8px 12px;}
+    .codeblock pre{font-size:11.5px;padding:11px 12px;}
+    .codeblock .cb-head{font-size:10.5px;}
+    .codeblock .cb-note{font-size:12px;}
+    .aw-status{font-size:13px;}
+  }
+  /* very small phones */
+  @media(max-width:360px){
+    .langsel button{padding:7px 6px;font-size:10.5px;}
+    .hero h2{font-size:16.5px;}
+    .mascot{width:92px;height:92px;}
   }
 </style>
 
