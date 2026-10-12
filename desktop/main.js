@@ -59,7 +59,14 @@ async function createWindow() {
     backgroundColor: '#0e1319',
     autoHideMenuBar: true,
     icon: path.join(__dirname, 'icon.png'),
-    webPreferences: { contextIsolation: true, nodeIntegration: false },
+    webPreferences: {
+      contextIsolation: true,
+      nodeIntegration: false,
+      // This is a trusted desktop shell that only loads our own bundled UI, so
+      // we disable the browser CORS check — otherwise calls from the local
+      // 127.0.0.1 origin to the hosted API are blocked and show "cannot reach".
+      webSecurity: false,
+    },
   });
   win.setMenuBarVisibility(false);
 
