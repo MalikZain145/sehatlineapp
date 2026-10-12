@@ -39,8 +39,6 @@ export default function CnicCamera({ side = 'front', onCapture, onCancel }) {
   const [permission, requestPermission] = useCameraPermissions ? useCameraPermissions() : [null, null];
   const [ready, setReady] = useState(false);
   const [capturing, setCapturing] = useState(false);
-  const [autoCountdown, setAutoCountdown] = useState(0);
-  const autoDoneRef = useRef(false);
 
   useEffect(() => {
     if (permission && !permission.granted && permission.canAskAgain) {
@@ -48,25 +46,9 @@ export default function CnicCamera({ side = 'front', onCapture, onCancel }) {
     }
   }, [permission, requestPermission]);
 
-  // Real-time auto-capture: once the camera is ready, give the user ~2s to line
-  // the card up inside the frame, then capture automatically (they can still tap
-  // sooner). The backend preprocesses + auto-rotates, so this single shot reads
-  // reliably; if it isn't a CNIC the flow simply reopens and tries again.
-  useEffect(() => {
-    if (!ready || autoDoneRef.current) return;
-    let n = 2;
-    setAutoCountdown(n);
-    const iv = setInterval(() => {
-      n -= 1;
-      setAutoCountdown(n);
-      if (n <= 0) {
-        clearInterval(iv);
-        if (!autoDoneRef.current && !capturing) { autoDoneRef.current = true; capture(); }
-      }
-    }, 700);
-    return () => clearInterval(iv);
-  }, [ready]);
-
+  // Manual capture only — the user frames the card inside the box and taps the
+  // shutter. (Auto-capture was removed: it fired before the card was lined up,
+  // and behaved differently on iOS vs Android.)
   const capture = async () => {
     if (!cameraRef.current || capturing) return;
     setCapturing(true);
@@ -160,7 +142,7 @@ export default function CnicCamera({ side = 'front', onCapture, onCancel }) {
       <View style={styles.hintWrap} pointerEvents="none">
         <Text style={styles.hint}>Line the card up inside the frame</Text>
         <Text style={styles.hintSub}>
-          {autoCountdown > 0 ? `Hold steady — capturing automatically in ${autoCountdown}…` : 'Get close, keep it flat, avoid glare — you can crop & rotate next'}
+          Get close, keep it flat, avoid glare — you can crop &amp; rotate next
         </Text>
       </View>
 
@@ -176,7 +158,7 @@ export default function CnicCamera({ side = 'front', onCapture, onCancel }) {
             ? <ActivityIndicator color={COLORS.secondary} />
             : <View style={styles.shutterInner} />}
         </TouchableOpacity>
-        <Text style={styles.footerText}>{capturing ? 'Capturing…' : (autoCountdown > 0 ? `Auto-capturing in ${autoCountdown}…  ·  tap to capture now` : 'Tap to capture')}</Text>
+        <Text style={styles.footerText}>{capturing ? 'Capturing…' : 'Tap the shutter to capture'}</Text>
       </View>
     </View>
   );

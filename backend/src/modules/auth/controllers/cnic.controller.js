@@ -47,6 +47,36 @@ async function findExistingByIdentity(body, readCnic = '') {
   return { existing, normCard };
 }
 
+// Accept the capture with only the duplicate guard. Used whenever OCR cannot be
+// trusted to REJECT a real user — i.e. a degraded read, or any read on the
+// hosted (serverless) backend where the 10s function limit makes OCR flaky.
+// This is what makes signup behave identically on iOS and Android.
+async function softPass(req, res, side) {
+  if (side === 'front') {
+    const { existing, normCard } = await findExistingByIdentity(req.body);
+    if (existing) {
+      try { fs.unlinkSync(req.file.path); } catch (_) {}
+      const isCard = normCard && existing.cdaCard === normCard;
+      return res.status(409).json({
+        success: false,
+        code: 'ALREADY_REGISTERED',
+        field: isCard ? 'cdaCard' : 'cnic',
+        message: isCard
+          ? 'This CDA card number is already registered to an account. Please log in instead.'
+          : 'This CNIC is already registered to an account. Please log in instead.',
+      });
+    }
+  }
+  return res.json({
+    success: true,
+    verified: false,
+    message: 'CNIC image accepted.',
+    side,
+    imagePath: issuedPathFor(side, req.file.path),
+    verdict: { isCnic: true, confidence: 0, degraded: true },
+  });
+}
+
 // POST /api/auth/cnic/verify  (multipart: field "image", "side", and optional
 // user fields: cnic, name, dob — sent for the front image to enable matching)
 async function verifyCnic(req, res, next) {
@@ -60,41 +90,17 @@ async function verifyCnic(req, res, next) {
 
     const verdict = await detectCnic(req.file.path, side);
 
-    // ---- Hosted soft-pass ----
-    // On the serverless (Vercel free tier) backend, OCR can't reliably finish
-    // inside the platform's ~10s function limit. Rather than block signup, we
-    // accept the captured image using the user's typed details. We STILL run
-    // the duplicate guard (a cheap DB query) so the same CNIC/CDA card can't
-    // create two accounts. The response is flagged unverified so it's honest.
+    // OCR timed out / could not read → accept (duplicate guard only). On the
+    // hosted backend this is the common path within the function time limit.
     if (verdict.degraded) {
-      logger.warn(`CNIC OCR degraded on server — soft-pass (${side})`);
-      if (side === 'front') {
-        const { existing, normCard } = await findExistingByIdentity(req.body);
-        if (existing) {
-          try { fs.unlinkSync(req.file.path); } catch (_) {}
-          const isCard = normCard && existing.cdaCard === normCard;
-          return res.status(409).json({
-            success: false,
-            code: 'ALREADY_REGISTERED',
-            field: isCard ? 'cdaCard' : 'cnic',
-            message: isCard
-              ? 'This CDA card number is already registered to an account. Please log in instead.'
-              : 'This CNIC is already registered to an account. Please log in instead.',
-          });
-        }
-      }
-      return res.json({
-        success: true,
-        verified: false,
-        message: 'CNIC image accepted. Full card verification is limited on the server.',
-        side,
-        imagePath: issuedPathFor(side, req.file.path),
-        verdict: { isCnic: true, confidence: 0, degraded: true },
-      });
+      logger.warn(`CNIC OCR degraded — soft-pass (${side})`);
+      return softPass(req, res, side);
     }
 
-    // If it doesn't look like a CNIC, delete the saved file (don't keep junk).
+    // If it doesn't look like a CNIC: the hosted backend accepts (OCR there is
+    // too flaky to reject a real user); a local backend rejects with guidance.
     if (!verdict.isCnic) {
+      if (SERVERLESS) return softPass(req, res, side);
       try { fs.unlinkSync(req.file.path); } catch (_) {}
       logger.warn(`CNIC rejected (${side}) confidence=${verdict.confidence} signals=${JSON.stringify(verdict.signals)}`);
 
@@ -136,7 +142,9 @@ async function verifyCnic(req, res, next) {
       );
 
       if (!match.match) {
-        // Remove the stored image — it didn't match the entered data.
+        // Hosted: OCR is too unreliable to reject on a mismatch — accept
+        // (duplicate guard still applies). Local: reject with a precise error.
+        if (SERVERLESS) return softPass(req, res, side);
         try { fs.unlinkSync(req.file.path); } catch (_) {}
         logger.warn(`CNIC data MISMATCH: ${match.message}`);
         return res.status(422).json({
@@ -168,9 +176,10 @@ async function verifyCnic(req, res, next) {
       }
     }
 
-    logger.success(`CNIC accepted (${side}) confidence=${verdict.confidence}`);
+    logger.success(`CNIC verified (${side}) confidence=${verdict.confidence}`);
     return res.json({
       success: true,
+      verified: true,
       message: 'CNIC verified successfully',
       side,
       imagePath: issuedPathFor(side, req.file.path),

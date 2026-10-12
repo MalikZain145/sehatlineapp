@@ -70,6 +70,11 @@ app.get('/api/health', (req, res) => {
   res.json({ success: true, service: 'SehatLine API', time: new Date().toISOString() });
 });
 
+// Public appointment verification page — the target of the QR on the
+// appointment pass/PDF, so anyone can scan it and confirm the appointment.
+app.get('/api/appointments/verify/:id',
+  require('./modules/patient/controllers/appointment.controller').verifyAppointmentPublic);
+
 // Feature routes
 app.use('/api/auth', authRoutes);
 app.use('/api/patient', patientRoutes);

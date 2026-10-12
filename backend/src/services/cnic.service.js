@@ -468,10 +468,13 @@ async function detectCnic(imagePathOrBuffer, side = 'front') {
   // finish in time we return a `degraded` verdict so the caller can soft-pass
   // signup instead of hard-failing. Locally (no timeout pressure) we keep the
   // full multi-orientation search for maximum accuracy.
+  // The app now uploads a normalised ~1500px JPEG, so OCR is fast enough on the
+  // hosted backend to try upright AND upside-down (the loop early-exits the
+  // moment it gets a strong read, so an upright card still finishes in one pass).
   const SERVERLESS = !!(process.env.VERCEL || process.env.NOW_REGION || process.env.AWS_REGION);
-  const orientations = SERVERLESS ? [0] : [0, 180, 90, 270];
-  const perPassMs = SERVERLESS ? 7000 : 30000;
-  const deadline = Date.now() + (SERVERLESS ? 8000 : 120000);
+  const orientations = SERVERLESS ? [0, 180] : [0, 180, 90, 270];
+  const perPassMs = SERVERLESS ? 4500 : 30000;
+  const deadline = Date.now() + (SERVERLESS ? 8500 : 120000);
 
   try {
     let best = null;

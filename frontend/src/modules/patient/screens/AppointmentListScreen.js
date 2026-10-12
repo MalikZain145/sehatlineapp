@@ -14,6 +14,8 @@ import { showConfirm } from '../../../components/confirm';
 import appointmentService from '../services/appointmentService';
 import { useTheme } from "../../../context/ThemeContext";
 import { useSession } from "../../../context/SessionContext";
+import { SvgXml } from "react-native-svg";
+import { downloadAppointmentPdf, appointmentQrSvg } from "../services/appointmentPdf";
 const {
   width,
   height
@@ -157,6 +159,7 @@ const AppointmentListScreen = ({
   } = useTheme();
   const { user } = useSession();
   const styles = makeStyles(COLORS);
+  const [pdfBusy, setPdfBusy] = useState(false);
   const [activeTab, setActiveTab] = useState('upcoming');
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useMinLoading(true);
@@ -446,6 +449,7 @@ const AppointmentListScreen = ({
   const renderTokenModal = () => {
     if (!tokenModalApp) return null;
     const deptCfg = getDeptCfg(tokenModalApp.department);
+    const qrSvg = appointmentQrSvg(tokenModalApp);
     return <BottomSheet visible={!!tokenModalApp} onClose={() => setTokenModalApp(null)} overlayStyle={styles.modalOverlay} sheetStyle={styles.modalContent}>
             <TouchableOpacity style={styles.modalClose} onPress={() => setTokenModalApp(null)}>
               <Ionicons name="close" size={22} color={COLORS.text} />
@@ -465,8 +469,14 @@ const AppointmentListScreen = ({
               </View>
 
               <View style={styles.qrBox}>
-                <Ionicons name="qr-code-outline" size={60} color="rgba(255,255,255,0.9)" />
-                <Text style={styles.qrHint}>Scan at hospital</Text>
+                {qrSvg ? (
+                  <View style={styles.qrWhite}>
+                    <SvgXml xml={qrSvg} width={118} height={118} />
+                  </View>
+                ) : (
+                  <Ionicons name="qr-code-outline" size={60} color="rgba(255,255,255,0.9)" />
+                )}
+                <Text style={styles.qrHint}>Scan to verify appointment</Text>
               </View>
             </LinearGradient>
 
@@ -485,11 +495,23 @@ const AppointmentListScreen = ({
               <TouchableOpacity style={[styles.modalActionBtn, {
               backgroundColor: COLORS.primary,
               borderColor: COLORS.primary
-            }]} onPress={() => setTokenModalApp(null)}>
-                <Ionicons name="download-outline" size={18} color={COLORS.white} />
+            }]} disabled={pdfBusy} onPress={async () => {
+              const appt = tokenModalApp;
+              setPdfBusy(true);
+              try {
+                await downloadAppointmentPdf(appt, { patientName: user?.name });
+              } catch (e) {
+                Alert.alert('Download failed', e?.message || 'Could not create the PDF. Please try again.');
+              } finally {
+                setPdfBusy(false);
+              }
+            }}>
+                {pdfBusy
+                  ? <ActivityIndicator size="small" color={COLORS.white} />
+                  : <Ionicons name="download-outline" size={18} color={COLORS.white} />}
                 <Text style={[styles.modalActionText, {
                 color: COLORS.white
-              }]}>Download</Text>
+              }]}>{pdfBusy ? 'Preparing…' : 'Download PDF'}</Text>
               </TouchableOpacity>
             </View>
       </BottomSheet>;
@@ -952,6 +974,11 @@ const makeStyles = COLORS => StyleSheet.create({
   qrBox: {
     alignItems: 'center',
     gap: hp(0.5)
+  },
+  qrWhite: {
+    backgroundColor: '#FFFFFF',
+    padding: 10,
+    borderRadius: 12
   },
   qrHint: {
     color: 'rgba(255,255,255,0.7)',

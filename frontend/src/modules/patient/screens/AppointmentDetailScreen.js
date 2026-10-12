@@ -8,6 +8,9 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { SHADOWS } from '../../../theme';
 import { showConfirm } from '../../../components/confirm';
 import { useTheme } from "../../../context/ThemeContext";
+import { SvgXml } from "react-native-svg";
+import { useSession } from "../../../context/SessionContext";
+import { downloadAppointmentPdf, appointmentQrSvg } from "../services/appointmentPdf";
 const {
   width,
   height
@@ -21,6 +24,8 @@ const AppointmentDetailScreen = ({
   const {
     colors: COLORS
   } = useTheme();
+  const { user } = useSession();
+  const [pdfBusy, setPdfBusy] = React.useState(false);
   const styles = makeStyles(COLORS);
   const appointment = route?.params?.appointment || {
     id: 'SHL-99281',
@@ -90,6 +95,18 @@ const AppointmentDetailScreen = ({
       }
     });
   };
+  const handleDownloadPdf = async () => {
+    if (pdfBusy) return;
+    setPdfBusy(true);
+    try {
+      await downloadAppointmentPdf(appointment, { patientName: user?.name });
+    } catch (e) {
+      Alert.alert('Download failed', e?.message || 'Could not create the PDF. Please try again.');
+    } finally {
+      setPdfBusy(false);
+    }
+  };
+  const qrSvg = appointmentQrSvg(appointment);
   const handleReschedule = () => navigation.navigate('BookAppointmentScreen', {
     rescheduleId: appointment.id || appointment._id,
     currentLabel: `${appointment.doctorName || appointment.specialty || 'Specialist'} • ${appointment.time || ''}`.trim()
@@ -173,9 +190,11 @@ const AppointmentDetailScreen = ({
 
             <View style={styles.qrContainer}>
               <View style={styles.qrBox}>
-                <Ionicons name="qr-code-outline" size={60} color={COLORS.white} />
+                {qrSvg
+                  ? <SvgXml xml={qrSvg} width={120} height={120} />
+                  : <Ionicons name="qr-code-outline" size={60} color={COLORS.white} />}
               </View>
-              <Text style={styles.qrDesc}>Scan at hospital desk for check-in</Text>
+              <Text style={styles.qrDesc}>Scan to verify — valid appointment</Text>
             </View>
 
             <View style={styles.tokenActions}>
@@ -206,6 +225,12 @@ const AppointmentDetailScreen = ({
 
         {/* Buttons */}
         <View style={styles.btnContainer}>
+          <TouchableOpacity style={styles.downloadBtn} onPress={handleDownloadPdf} disabled={pdfBusy} activeOpacity={0.85}>
+            {pdfBusy
+              ? <Ionicons name="hourglass-outline" size={20} color={COLORS.primary} />
+              : <Ionicons name="download-outline" size={20} color={COLORS.primary} />}
+            <Text style={styles.downloadText}>{pdfBusy ? 'Preparing PDF…' : 'Download PDF'}</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.rescheduleBtn} onPress={handleReschedule} activeOpacity={0.8}>
             <LinearGradient colors={[COLORS.primary, COLORS.secondary || '#1A5276']} style={styles.rescheduleGradient} start={{
             x: 0,
@@ -372,10 +397,9 @@ const makeStyles = COLORS => StyleSheet.create({
     marginTop: hp(0.5)
   },
   qrBox: {
-    width: wp(20),
-    height: wp(20),
     borderRadius: wp(3),
-    backgroundColor: COLORS.white + '20',
+    backgroundColor: '#FFFFFF',
+    padding: 12,
     justifyContent: 'center',
     alignItems: 'center'
   },
@@ -497,6 +521,22 @@ const makeStyles = COLORS => StyleSheet.create({
   },
   cancelText: {
     color: COLORS.danger || '#E74C3C',
+    fontSize: wp(4),
+    fontWeight: '700'
+  },
+  downloadBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: hp(1.8),
+    borderRadius: wp(3.5),
+    borderWidth: 1.5,
+    borderColor: COLORS.primary,
+    gap: wp(2),
+    backgroundColor: COLORS.primary + '0D'
+  },
+  downloadText: {
+    color: COLORS.primary,
     fontSize: wp(4),
     fontWeight: '700'
   }

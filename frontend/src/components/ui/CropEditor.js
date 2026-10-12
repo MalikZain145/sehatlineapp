@@ -134,12 +134,18 @@ export default function CropEditor({ photo, side, onDone, onRetake, busy = false
       };
 
       const actions = [{ crop }];
-      // Upscale small crops — OCR needs roughly 1000px across to read a CNIC.
+      // Normalise the output to a consistent OCR-friendly size on BOTH iOS and
+      // Android: upscale tiny crops, and cap large ones. A ~1500px-wide JPEG is
+      // sharp enough for the 13-digit number yet small enough to upload and OCR
+      // within the server's time limit (large iOS photos were timing out).
       if (crop.width < 1000) actions.push({ resize: { width: 1400 } });
+      else if (crop.width > 1600) actions.push({ resize: { width: 1500 } });
 
       const result = await ImageManipulator.manipulateAsync(
         current.uri, actions,
-        { compress: 0.95, format: ImageManipulator.SaveFormat.JPEG }
+        // Re-encoding here also BAKES the EXIF orientation into the pixels, so
+        // the backend always receives an upright image (fixes iOS rotation).
+        { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
       );
       setCropping(false);
       onDone(result.uri);

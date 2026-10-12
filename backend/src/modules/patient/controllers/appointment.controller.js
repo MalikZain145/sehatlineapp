@@ -450,9 +450,51 @@ async function getDoctors(req, res, next) {
   }
 }
 
+// ── PUBLIC appointment verification (the QR target) ────────────────────────
+// GET /api/appointments/verify/:id  — no auth. A QR on the appointment PDF/pass
+// points here, so anyone scanning it (hospital desk, guard) gets a page that
+// confirms the appointment is genuine, straight from the database.
+function verifyPage(ok, title, sub, rows, note) {
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const body = (rows || []).map(([k, v]) => `<div class="row"><span class="k">${esc(k)}</span><span class="v">${esc(v)}</span></div>`).join('');
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SehatLine — Appointment</title><style>
+    body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:#0e1319;color:#e7edf4;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:20px}
+    .card{background:#161d26;border:1px solid #28323f;border-radius:18px;max-width:420px;width:100%;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+    .top{padding:28px 22px;text-align:center;color:#fff;background:${ok ? 'linear-gradient(135deg,#0b9d90,#0b8f84)' : 'linear-gradient(135deg,#b44,#922)'}}
+    .badge{font-size:48px;line-height:1}.ttl{font-size:21px;font-weight:800;margin:10px 0 2px}.sub{opacity:.92;font-size:13px}
+    .body{padding:8px 22px}.row{display:flex;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid #28323f;font-size:14.5px}
+    .row:last-child{border-bottom:none}.k{color:#8a97a8}.v{font-weight:700;text-align:right}
+    .note{padding:14px 22px;color:#8a97a8;font-size:12px;text-align:center;border-top:1px solid #28323f}.brand{font-weight:800;color:#1ecaba}</style></head>
+    <body><div class="card"><div class="top"><div class="badge">${ok ? '&#10003;' : '&#10007;'}</div><div class="ttl">${esc(title)}</div><div class="sub">${esc(sub)}</div></div>
+    <div class="body">${body}</div><div class="note">${esc(note)} &middot; <span class="brand">SehatLine</span></div></div></body></html>`;
+}
+async function verifyAppointmentPublic(req, res) {
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  try {
+    const a = await Appointment.findById(req.params.id).lean();
+    if (!a) return res.status(404).send(verifyPage(false, 'Appointment Not Found', 'Verification failed', [], 'No matching appointment exists.'));
+    if (a.status === 'cancelled') return res.status(200).send(verifyPage(false, 'Appointment Cancelled', 'Not valid', [], 'This appointment was cancelled.'));
+    const User = require('../../auth/models/User');
+    const u = await User.findById(a.user).select('name').lean().catch(() => null);
+    const dept = String(a.department || 'cardiology');
+    const rows = [
+      ['Patient', (u && u.name) || 'Patient'],
+      ['Doctor', a.doctorName || 'Specialist'],
+      ['Department', dept.charAt(0).toUpperCase() + dept.slice(1)],
+      ['Date', a.date],
+      ['Time', a.time],
+      ['Status', String(a.status).replace(/^\w/, (c) => c.toUpperCase())],
+      ['Reference', String(a._id).slice(-8).toUpperCase()],
+    ];
+    return res.status(200).send(verifyPage(true, 'Valid Appointment', 'Verified from SehatLine records', rows, 'Scanned ' + new Date().toLocaleString()));
+  } catch (e) {
+    return res.status(400).send(verifyPage(false, 'Invalid Code', 'Could not verify', [], 'This QR code could not be read.'));
+  }
+}
+
 module.exports = {
   getSlots, bookAppointment, myAppointments, getAppointment, getActiveAppointment,
-  cancelAppointment, reschedule, getDoctors, CARDIO_DOCTORS,
+  cancelAppointment, reschedule, getDoctors, CARDIO_DOCTORS, verifyAppointmentPublic,
   // exported for tests
   _internals: { slotBookable, weekdayOf, SESSION_START, SESSION_END },
 };
