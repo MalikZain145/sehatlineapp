@@ -1,0 +1,42 @@
+{
+  "name": "sehatline-desktop",
+  "version": "1.0.0",
+  "description": "SehatLine desktop app (Windows) — Electron shell around the Expo web build.",
+  "author": "SehatLine",
+  "main": "main.js",
+  "scripts": {
+    "sync-web": "node sync-web.js",
+    "start": "electron .",
+    "dist": "node sync-web.js && electron-builder --win portable nsis",
+    "dist:portable": "node sync-web.js && electron-builder --win portable"
+  },
+  "build": {
+    "appId": "pk.sehatline.desktop",
+    "productName": "SehatLine",
+    "files": [
+      "main.js",
+      "web/**/*",
+      "icon.png"
+    ],
+    "directories": {
+      "output": "dist-build"
+    },
+    "win": {
+      "target": ["portable", "nsis"],
+      "icon": "icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "SehatLine"
+    },
+    "portable": {
+      "artifactName": "SehatLine-Portable.exe"
+    }
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  }
+}
