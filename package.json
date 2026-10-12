@@ -8,6 +8,6 @@
     "postinstall": "npm install --prefix backend --no-audit --no-fund"
   },
   "engines": {
-    "node": "20.x"
+    "node": "22.x"
   }
 }
