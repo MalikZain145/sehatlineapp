@@ -20,7 +20,11 @@ import { Platform, NativeModules } from 'react-native';
 // Live backend hosted on Vercel. The shipped APK talks to this URL.
 const PRODUCTION_API_URL = 'https://sehatlineapp-arfk.vercel.app';
 // TRUE = the app uses the hosted backend above (for the APK / demo).
-// Flip to FALSE for local development against your PC's LAN IP.
+// FALSE = the app auto-detects the LAN IP of the PC running the backend
+//         (the same PC Expo/Metro is served from) — the dev default for
+//         running against a local backend over Wi-Fi.
+// NOTE: a shareable APK MUST use TRUE so it reaches the live Vercel backend;
+// flip to FALSE only for local LAN development, then flip back before building.
 const USE_PRODUCTION = true;
 
 const LOCAL_PORT = 5000;

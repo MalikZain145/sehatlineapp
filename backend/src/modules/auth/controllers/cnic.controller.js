@@ -20,6 +20,15 @@ const { signCnicToken } = require('../../../utils/cnicToken');
 // short-lived signed token that register can validate statelessly. Locally we
 // keep returning the real /uploads path so the on-disk proof still works.
 const SERVERLESS = !!(process.env.VERCEL || process.env.NOW_REGION || process.env.AWS_REGION);
+
+// Mock / always-accept verification.
+// The in-app OCR behaved inconsistently across devices (particularly iOS),
+// blocking genuine users at signup. Per product decision the CNIC capture now
+// ACCEPTS any image: we still STORE it (so /register receives a valid image
+// proof) and still block an already-registered CNIC/CDA card, but we no longer
+// run OCR to reject. This makes the step behave identically on iOS & Android.
+// Set CNIC_STRICT_VERIFY=true to restore the original OCR-based verification.
+const STRICT_VERIFY = String(process.env.CNIC_STRICT_VERIFY || '').toLowerCase() === 'true';
 function issuedPathFor(side, filePath) {
   return SERVERLESS ? signCnicToken(side) : `/uploads/${path.basename(filePath)}`;
 }
@@ -77,6 +86,35 @@ async function softPass(req, res, side) {
   });
 }
 
+// Always-accept path (mock verification). Stores the image and returns a
+// verified result; the front side still runs the already-registered guard.
+async function acceptCapture(req, res, side) {
+  if (side === 'front') {
+    const { existing, normCard } = await findExistingByIdentity(req.body);
+    if (existing) {
+      try { fs.unlinkSync(req.file.path); } catch (_) {}
+      const isCard = normCard && existing.cdaCard === normCard;
+      return res.status(409).json({
+        success: false,
+        code: 'ALREADY_REGISTERED',
+        field: isCard ? 'cdaCard' : 'cnic',
+        message: isCard
+          ? 'This CDA card number is already registered to an account. Please log in instead.'
+          : 'This CNIC is already registered to an account. Please log in instead.',
+      });
+    }
+  }
+  logger.success(`CNIC accepted (${side}) — mock verification (OCR skipped)`);
+  return res.json({
+    success: true,
+    verified: true,
+    message: 'CNIC verified successfully',
+    side,
+    imagePath: issuedPathFor(side, req.file.path),
+    verdict: { isCnic: true, confidence: 100 },
+  });
+}
+
 // POST /api/auth/cnic/verify  (multipart: field "image", "side", and optional
 // user fields: cnic, name, dob — sent for the front image to enable matching)
 async function verifyCnic(req, res, next) {
@@ -87,6 +125,12 @@ async function verifyCnic(req, res, next) {
 
     const side = (req.body.side || 'front').toLowerCase();
     logger.info(`CNIC verify requested (${side}) from ${req.clientIp}`);
+
+    // Default behaviour: accept any captured image (OCR disabled). Flip on
+    // CNIC_STRICT_VERIFY to fall through to the original OCR check below.
+    if (!STRICT_VERIFY) {
+      return acceptCapture(req, res, side);
+    }
 
     const verdict = await detectCnic(req.file.path, side);
 

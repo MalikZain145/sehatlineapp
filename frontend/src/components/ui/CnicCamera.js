@@ -29,6 +29,15 @@ try {
   CameraView = null;
 }
 
+// Loaded defensively too — used to NORMALISE the freshly captured photo.
+let ImageManipulator = null;
+try {
+  // eslint-disable-next-line global-require
+  ImageManipulator = require('expo-image-manipulator');
+} catch (e) {
+  ImageManipulator = null;
+}
+
 const { width, height } = Dimensions.get('window');
 const CNIC_RATIO = 1.585;                      // real CNIC aspect ratio
 const FRAME_W = width * 0.86;
@@ -55,10 +64,44 @@ export default function CnicCamera({ side = 'front', onCapture, onCancel }) {
     try {
       const photo = await cameraRef.current.takePictureAsync({
         quality: 0.95,
+        // iOS must PROCESS the frame so the image is written upright; skipping
+        // it leaves an EXIF-rotated file. Android is already upright.
         skipProcessing: Platform.OS === 'android',
+        // We bake orientation into the pixels below, so raw EXIF is not needed.
+        exif: false,
       });
+
+      // NORMALISE before cropping. On iOS, takePictureAsync's reported
+      // width/height (and EXIF orientation) are unreliable, so CropEditor's
+      // pixel math could crop the WRONG region — the backend OCR then reads
+      // background instead of the card and rejects it ("Not a CNIC"). Re-encoding
+      // once here bakes orientation into the pixels and returns dimensions that
+      // actually match the image, so the crop box maps correctly on both
+      // platforms. We cap the long edge to keep detail high but uploads small.
+      let normalised = photo;
+      if (ImageManipulator && photo?.uri) {
+        try {
+          const actions = [];
+          const longEdge = Math.max(photo.width || 0, photo.height || 0);
+          if (longEdge > 2200) {
+            actions.push(
+              (photo.width || 0) >= (photo.height || 0)
+                ? { resize: { width: 2200 } }
+                : { resize: { height: 2200 } }
+            );
+          }
+          const res = await ImageManipulator.manipulateAsync(
+            photo.uri, actions,
+            { compress: 0.95, format: ImageManipulator.SaveFormat.JPEG }
+          );
+          normalised = { uri: res.uri, width: res.width, height: res.height };
+        } catch (_) {
+          normalised = photo;   // manipulation failed → fall back to raw capture
+        }
+      }
+
       setCapturing(false);
-      onCapture(photo);       // { uri, width, height } → crop editor
+      onCapture(normalised);  // { uri, width, height } → crop editor
     } catch (e) {
       setCapturing(false);
       onCapture(null, e);
