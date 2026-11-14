@@ -11,6 +11,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../../Theme/themeContext";
 import GradientHeader from "../../components/common/GradientHeader";
+import { topPad } from '../../../../utils/safeArea';
 
 export default function HelpSupportScreen({ navigation }) {
   const { theme } = useTheme();
@@ -419,8 +420,8 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    height: 105,
-    paddingTop: 45,
+    height: topPad(105),
+    paddingTop: topPad(45),
     paddingHorizontal: 18,
     flexDirection: "row",
     alignItems: "center",

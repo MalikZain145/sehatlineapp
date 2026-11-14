@@ -17,6 +17,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const { width } = Dimensions.get("window");
 import { useTheme } from "../../Theme/themeContext";
 import { useProfile } from "../../context/profileContext";
+import { topPad } from '../../../../utils/safeArea';
 
 interface Props {
   visible: boolean;
@@ -288,7 +289,7 @@ const styles = StyleSheet.create({
   header: {
     alignItems: "center",
 
-    paddingTop: 40,
+    paddingTop: topPad(40),
     paddingBottom: 18,
 
     paddingHorizontal: 20,

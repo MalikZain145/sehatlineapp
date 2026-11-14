@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../../Theme/themeContext";
 import laboratoryService from "../../services/laboratoryService";
 import GradientHeader from "../../components/common/GradientHeader";
+import { topPad } from '../../../../utils/safeArea';
 
 // Relative "x min ago" label from an ISO date.
 function relTime(iso) {
@@ -375,9 +376,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 header: {
-  height: 100,
+  height: topPad(100),
   paddingHorizontal: 18,
-  paddingTop: 35,
+  paddingTop: topPad(35),
   flexDirection: "row",
   alignItems: "center",
 

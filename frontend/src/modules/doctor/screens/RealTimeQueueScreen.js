@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, Dimensions, StatusBar, Platform, SafeAreaView, Image, RefreshControl, ActivityIndicator, Modal, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { SkeletonList, SkeletonScreen } from '../../../components/ui/Skeleton';
 import useMinLoading from '../../../hooks/useMinLoading';
 import AsyncStorage from '@react-native-async-storage/async-storage';

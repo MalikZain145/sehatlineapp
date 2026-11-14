@@ -14,6 +14,7 @@ import { useTheme } from "../../Theme/themeContext";
 import { useLaboratory } from "../../context/LaboratoryContext";
 import SideMenu from "../../components/common/SideMenu";
 import laboratoryService from "../../services/laboratoryService";
+import { topPad } from '../../../../utils/safeArea';
 
 
 export default function DashboardScreen() {
@@ -1427,7 +1428,7 @@ logoSection: {
   marginBottom: 20,
 },
 appHeader: {
-  marginTop: 40,
+  marginTop: topPad(40),
   marginBottom: 25,
 },
 

@@ -13,6 +13,7 @@ import { useTheme } from "../../Theme/themeContext";
 import { useLaboratory } from "../../context/LaboratoryContext";
 import laboratoryService from "../../services/laboratoryService";
 import GradientHeader from "../../components/common/GradientHeader";
+import { topPad } from '../../../../utils/safeArea';
 
 export default function AnalyticsScreen({ navigation }) {
   const { theme } = useTheme();
@@ -702,9 +703,9 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
   header: {
-  height: 100,
+  height: topPad(100),
   paddingHorizontal: 18,
-  paddingTop: 35,
+  paddingTop: topPad(35),
   flexDirection: "row",
   alignItems: "center",
 },

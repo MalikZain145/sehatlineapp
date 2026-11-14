@@ -62,8 +62,13 @@ app.use('/api', apiLimiter);
 // Security: block NoSQL injection in request bodies, queries and params.
 app.use(noSqlGuard);
 
-// Serve uploaded CNIC images
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+// Uploaded CNIC images are identity documents — they must NOT be publicly
+// downloadable by anyone who guesses a filename (names are timestamp-based).
+// Nothing in the app reads them over HTTP, so static serving is OFF unless
+// explicitly enabled for local debugging with SERVE_UPLOADS=true.
+if (String(process.env.SERVE_UPLOADS || '').toLowerCase() === 'true') {
+  app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+}
 
 // Health check
 app.get('/api/health', (req, res) => {

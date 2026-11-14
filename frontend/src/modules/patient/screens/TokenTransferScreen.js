@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, TouchableOpacity, 
   SafeAreaView, Alert, Animated 
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { showConfirm } from '../../../components/confirm';
 

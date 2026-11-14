@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Platform, StatusBar, Image, RefreshControl, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { SkeletonList, SkeletonScreen } from '../../../components/ui/Skeleton';
 import useMinLoading from '../../../hooks/useMinLoading';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -10,6 +10,7 @@ import DoctorHeader from '../components/DoctorHeader';
 import doctorService from '../services/doctorService';
 import { APP_VERSION } from '../../../constants/version';
 import { useTheme } from "../../../context/ThemeContext";
+import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
 const {
   width,
   height
@@ -382,7 +383,7 @@ const makeStyles = COLORS => StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 56 : (StatusBar.currentHeight || 28) + 14,
+    paddingTop: STATUS_BAR_HEIGHT + 14,
     paddingBottom: 18,
     backgroundColor: COLORS.background
   },

@@ -16,7 +16,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, BackHandler, Dimensions, StatusBar, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { SkeletonList, SkeletonCard, SkeletonScreen } from '../../../components/ui/Skeleton';
 import useMinLoading from '../../../hooks/useMinLoading';
 import { useFocusEffect } from '@react-navigation/native';
@@ -25,6 +25,7 @@ import { onQueueUpdate, connectSocket } from '../../../services/socket';
 import { setupNotifications, notify } from '../../../services/notifications';
 import ThemedPrompt from '../../../components/common/ThemedPrompt';
 import { useTheme } from "../../../context/ThemeContext";
+import { topPad } from '../../../utils/safeArea';
 const {
   width
 } = Dimensions.get('window');
@@ -188,7 +189,7 @@ const makeStyles = COLORS => StyleSheet.create({
     color: COLORS.textSecondary
   },
   header: {
-    paddingTop: Platform.OS === 'ios' ? 56 : 40,
+    paddingTop: topPad(40),
     paddingBottom: 20,
     paddingHorizontal: 20,
     alignItems: 'center'

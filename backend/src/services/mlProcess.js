@@ -22,18 +22,34 @@ function ping(url) {
   });
 }
 
-// Try `python` then `python3` — whichever launches uvicorn.
-function launch() {
+// Try `python` then `python3` / `py` — whichever actually launches uvicorn.
+// BUG FIX: spawn() never throws for a missing binary — it returns a child and
+// emits 'error' later — so the old loop always "succeeded" on the first name
+// and never tried the others. Wait briefly for 'error'/'spawn' on each one.
+function trySpawn(bin, args) {
+  return new Promise((resolve) => {
+    let c;
+    try {
+      c = spawn(bin, args, { cwd: ML_DIR, stdio: 'ignore', shell: false, windowsHide: true });
+    } catch (e) { return resolve(null); }
+    let settled = false;
+    const done = (v) => { if (!settled) { settled = true; resolve(v); } };
+    c.once('error', () => done(null));
+    c.once('spawn', () => {
+      // Started — but a Python without uvicorn/fastapi exits at once.
+      const t = setTimeout(() => done(c), 1500);
+      c.once('exit', () => { clearTimeout(t); done(null); });
+    });
+  });
+}
+
+async function launch() {
   const port = (env.mlServiceUrl.match(/:(\d+)/) || [, '8000'])[1];
   const args = ['-m', 'uvicorn', 'server:app', '--host', '127.0.0.1', '--port', String(port), '--log-level', 'warning'];
   const candidates = process.platform === 'win32' ? ['python', 'py', 'python3'] : ['python3', 'python'];
-
   for (const bin of candidates) {
-    try {
-      const c = spawn(bin, args, { cwd: ML_DIR, stdio: 'ignore', shell: false });
-      c.on('error', () => {}); // ignore "not found", we'll try the next binary
-      return c;
-    } catch (e) { /* try next */ }
+    const c = await trySpawn(bin, args);
+    if (c) return c;
   }
   return null;
 }
@@ -47,7 +63,7 @@ async function startMlService(logger) {
     return;
   }
 
-  child = launch();
+  child = await launch();
   if (!child) {
     logger?.warn?.('Could not start Python ML service (python not found) — using rule-based fallback.');
     return;

@@ -9,7 +9,7 @@
 
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, StatusBar, Platform, ActivityIndicator, KeyboardAvoidingView } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import ScreenHeader from '../../../components/ui/ScreenHeader';
 import useBottomInset from '../../../hooks/useBottomInset';
 import ThemedPrompt from '../../../components/common/ThemedPrompt';

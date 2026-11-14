@@ -6,7 +6,7 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput,
   StatusBar, Platform, Image, ActivityIndicator,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -14,6 +14,7 @@ import { useTheme } from '../../../context/ThemeContext';
 import authService from '../../auth/services/authService';
 import settingsService from '../../patient/services/settingsService';
 import { showConfirm, showInfo } from '../../../components/confirm';
+import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
 
 export default function AdminProfileScreen({ navigation }) {
   const { colors: COLORS } = useTheme();
@@ -126,7 +127,7 @@ const makeStyles = (COLORS) => StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12,
-    paddingTop: Platform.OS === 'ios' ? 54 : (StatusBar.currentHeight || 28) + 10, paddingBottom: 10, backgroundColor: COLORS.primary,
+    paddingTop: STATUS_BAR_HEIGHT + 10, paddingBottom: 10, backgroundColor: COLORS.primary,
   },
   hBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
   headerTitle: { fontSize: 17, fontWeight: '800', color: '#FFF' },

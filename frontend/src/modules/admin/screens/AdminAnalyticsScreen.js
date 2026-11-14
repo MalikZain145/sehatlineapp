@@ -5,12 +5,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Platform, Dimensions, RefreshControl,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { BarChart, PieChart } from 'react-native-chart-kit';
 import { useTheme } from '../../../context/ThemeContext';
 import { SkeletonScreen } from '../../../components/ui/Skeleton';
 import useMinLoading from '../../../hooks/useMinLoading';
 import adminService from '../services/adminService';
+import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
 
 const SCREEN_W = Dimensions.get('window').width;
 const SLICE = ['#0BAA9D', '#8B5CF6', '#0EA5E9', '#F59E0B', '#94A3B8'];
@@ -139,7 +140,7 @@ const makeStyles = (COLORS) => StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12,
-    paddingTop: Platform.OS === 'ios' ? 56 : (StatusBar.currentHeight || 28) + 12, paddingBottom: 12,
+    paddingTop: STATUS_BAR_HEIGHT + 12, paddingBottom: 12,
     backgroundColor: COLORS.background, borderBottomWidth: 1, borderBottomColor: COLORS.border || '#E5E7EB',
   },
   hBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },

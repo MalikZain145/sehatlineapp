@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import CustomHeader from '../../../components/CustomHeader';
 
 const CartScreen = ({ navigation }) => {
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    elevation: 4,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.12, shadowRadius: 4.2, elevation: 4,
   },
   itemInfo: { flex: 1 },
   itemName: { fontSize: 17, fontWeight: '600', color: '#1E3A8A' },
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    elevation: 5,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.14, shadowRadius: 5.0, elevation: 5,
   },
   totalLabel: { fontSize: 18, color: '#1E3A8A' },
   totalValue: { fontSize: 24, fontWeight: 'bold', color: '#00D4FF' },

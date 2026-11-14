@@ -13,7 +13,7 @@ import { COLORS } from "../theme"; // static palette for module-scope maps; comp
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 const DANGER = COLORS.danger || '#EF4444';
 
 // ── Base themed modal shell ────────────────────────────────────────────────

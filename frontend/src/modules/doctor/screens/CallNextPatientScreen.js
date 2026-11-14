@@ -18,13 +18,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView, StatusBar, Dimensions, Platform, Image, Alert, Modal, TextInput, FlatList, KeyboardAvoidingView, Animated, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BrandRow from '../../../components/BrandRow';
 import BottomSheet from '../../../components/ui/BottomSheet';
 import doctorService from '../services/doctorService';
 import { showConfirm, showInfo } from '../../../components/confirm';
 import { useTheme } from "../../../context/ThemeContext";
+import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
 const {
   width,
   height
@@ -1345,7 +1346,7 @@ const makeStyles = COLORS => StyleSheet.create({
   },
   headerGradient: {
     paddingHorizontal: wp(4),
-    paddingTop: Platform.OS === 'ios' ? 56 : (StatusBar.currentHeight || 28) + 14,
+    paddingTop: STATUS_BAR_HEIGHT + 14,
     paddingBottom: hp(1.2),
     backgroundColor: COLORS.background
   },

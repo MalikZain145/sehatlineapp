@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import CustomHeader from '../../../components/CustomHeader';
 
 const DietPrecautionScreen = ({ navigation }) => {
@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 16,
     marginBottom: 20,
-    elevation: 4,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.12, shadowRadius: 4.2, elevation: 4,
   },
   sectionTitle: { fontSize: 18, fontWeight: '600', color: '#1E3A8A', marginBottom: 15 },
   tip: { fontSize: 16, color: '#10B981', marginVertical: 6 },

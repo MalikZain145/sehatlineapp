@@ -17,6 +17,7 @@ import { useTheme } from "../../Theme/themeContext";
 import laboratoryService from "../../services/laboratoryService";
 import GradientHeader from "../../components/common/GradientHeader";
 import { labAlert } from "../../components/common/LabAlert";
+import { topPad } from '../../../../utils/safeArea';
 
 function toRow(r) {
   const first = (r.items && r.items[0]) || {};
@@ -582,8 +583,8 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    minHeight: 105,
-    paddingTop: 42,
+    minHeight: topPad(105),
+    paddingTop: topPad(42),
     paddingHorizontal: 16,
     flexDirection: "row",
     alignItems: "center",

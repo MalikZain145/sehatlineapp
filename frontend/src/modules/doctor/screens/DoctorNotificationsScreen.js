@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform, StatusBar, Image, RefreshControl, FlatList, Alert, Modal, TextInput, ActivityIndicator, ScrollView, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { SkeletonList, SkeletonScreen } from '../../../components/ui/Skeleton';
 import useMinLoading from '../../../hooks/useMinLoading';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -10,6 +10,7 @@ import BrandRow from '../../../components/BrandRow';
 import { showConfirm } from '../../../components/confirm';
 import doctorService from '../services/doctorService';
 import { useTheme } from "../../../context/ThemeContext";
+import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
 import { COLORS } from "../../../theme"; // static brand palette for module-scope maps; components shadow it via useTheme()
 const {
   width,
@@ -832,7 +833,7 @@ const makeStyles = COLORS => StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 56 : (StatusBar.currentHeight || 28) + 14,
+    paddingTop: STATUS_BAR_HEIGHT + 14,
     paddingBottom: 16,
     backgroundColor: COLORS.background
   },

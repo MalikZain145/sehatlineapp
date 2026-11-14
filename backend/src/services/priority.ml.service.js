@@ -7,7 +7,6 @@
 // the transparent rules.
 
 const env = require('../config/env');
-const { computePriority } = require('../modules/patient/services/priority.service');
 
 const ML_URL = env.mlServiceUrl || 'http://127.0.0.1:8000';
 const TIMEOUT_MS = 1500;
@@ -50,46 +49,112 @@ function buildPatient({ user = {}, vital = null, extra = {} }) {
   };
 }
 
-// Score ONE patient. Returns { score, level, source }.
+// ── Clinical rule score (0-100) — exact JS port of ml-service/SehatLine/core.py
+// `rule_score`. This is the ground truth the neural net was trained to
+// approximate, so it is used (a) as the fallback whenever the Python service
+// is unreachable — which is ALWAYS the case on the hosted (Vercel) backend —
+// and (b) as a safety floor under the NN: a learned model must never score a
+// patient with clinical red flags (low SpO2, BP crisis, …) LOWER than the
+// rules do. Previously the fallback ignored vitals entirely, so on the live
+// backend a patient with SpO2 85% got no priority at all.
+const ELDERLY_AGE = 60;
+const CRITICAL_KEYWORDS = [
+  'heart', 'cardiac', 'cardio', 'chest pain', 'stroke', 'kidney', 'renal',
+  'respiratory', 'copd', 'asthma', 'cancer', 'seizure', 'hypertension crisis',
+];
+const LEVELS = [[85, 'critical'], [65, 'high'], [45, 'elderly'], [25, 'normal'], [0, 'low']];
+
+function levelFor(score) {
+  for (const [t, name] of LEVELS) if (score >= t) return name;
+  return 'low';
+}
+
+const num = (v) => { const n = Number(v); return Number.isFinite(n) ? n : 0; };
+const clip = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+
+function ruleScore(p = {}) {
+  const age = num(p.age);
+  const conditions = Array.isArray(p.conditions) ? p.conditions : [];
+  const joined = conditions.map((c) => String(c).toLowerCase()).join(' ');
+  const critical = CRITICAL_KEYWORDS.some((k) => joined.includes(k)) ? 1 : 0;
+  const systolic = num(p.systolic); const diastolic = num(p.diastolic);
+  const hr = num(p.heartRate); const spo2 = num(p.spo2);
+  const sugar = num(p.bloodSugar); const temp = num(p.temperature);
+
+  let s = 0;
+  if (age >= ELDERLY_AGE) s += 15 + clip(age - ELDERLY_AGE, 0, 30) / 3;
+  s += critical * 25;
+  s += clip(conditions.length, 0, 5) * 2.5;
+  if (spo2 > 0) s += spo2 < 90 ? 30 : spo2 < 94 ? 15 : 0;
+  s += systolic >= 180 ? 25 : systolic >= 160 ? 15 : (systolic > 0 && systolic < 90) ? 12 : 0;
+  s += diastolic >= 110 ? 12 : 0;
+  s += sugar >= 300 ? 18 : sugar >= 250 ? 12 : (sugar > 0 && sugar < 60) ? 15 : 0;
+  s += temp >= 103 ? 15 : temp >= 101 ? 8 : 0;
+  s += hr >= 120 ? 10 : (hr > 0 && hr < 50) ? 10 : 0;
+  s += (p.isPregnant ? 12 : 0) + (p.hasDisability ? 10 : 0);
+  s += clip(num(p.daysSinceLastVisit) / 30, 0, 4) * 2;
+  s += clip(num(p.missedAppointments), 0, 5) * 1.5;
+  s = clip(s, 0, 100);
+  // Red-flag override (mirrors core.py): one life-threatening vital alone
+  // makes the patient at least "critical" (85).
+  const redFlag = (spo2 > 0 && spo2 < 90) || systolic >= 180 || diastolic >= 120
+    || (sugar > 0 && sugar < 60) || sugar >= 400 || temp >= 104
+    || hr >= 130 || (hr > 0 && hr < 40);
+  if (redFlag) s = Math.max(s, 85);
+  return Math.round(s * 100) / 100;
+}
+
+// Score ONE patient. Returns { score, level, source } on a 0-100 scale.
 async function scorePatient(patient) {
+  const rule = ruleScore(patient);
   try {
     const r = await callMl('/score', patient);
-    return { score: r.priorityScore, level: r.priorityLevel, source: 'ml' };
+    const ml = num(r.priorityScore);
+    // Safety floor: never below the clinical rules.
+    const score = Math.max(ml, rule);
+    return { score, level: levelFor(score), source: ml >= rule ? 'ml' : 'ml+rule-floor' };
   } catch (e) {
-    const p = computePriority({
-      age: patient.age,
-      conditions: patient.conditions,
-      isPregnant: patient.isPregnant,
-      disability: patient.hasDisability,
-    });
-    // Rule score is on a 0-1000-ish scale; normalise to 0-100 to stay
-    // comparable with the ML output.
-    const score = Math.min(100, Math.round(p.score / 10));
-    return { score, level: p.level, source: 'rule-fallback' };
+    return { score: rule, level: levelFor(rule), source: 'rule-fallback' };
   }
 }
 
 // Rank a BATCH of patients (the booking-rush case). Returns the service's
-// ranked array, or a locally-sorted fallback.
+// ranked array (with the same safety floor), or a locally-sorted fallback.
 async function rankPatients(patients) {
+  const rules = new Map(patients.map((p) => [String(p.id), ruleScore(p)]));
+  let ranked; let source;
   try {
     const r = await callMl('/prioritize', { patients });
-    return { ranked: r.ranked, source: r.engine || 'ml' };
-  } catch (e) {
-    const scored = patients.map((p) => {
-      const pr = computePriority({ age: p.age, conditions: p.conditions, isPregnant: p.isPregnant, disability: p.hasDisability });
-      return { id: p.id, priorityScore: Math.min(100, Math.round(pr.score / 10)), priorityLevel: pr.level };
+    ranked = (r.ranked || []).map((x) => {
+      const score = Math.max(num(x.priorityScore), rules.get(String(x.id)) || 0);
+      return { ...x, priorityScore: score, priorityLevel: levelFor(score) };
     });
-    scored.sort((a, b) => b.priorityScore - a.priorityScore);
-    scored.forEach((s, i) => { s.rank = i + 1; });
-    return { ranked: scored, source: 'rule-fallback' };
+    source = r.engine || 'ml';
+  } catch (e) {
+    ranked = patients.map((p) => {
+      const score = rules.get(String(p.id)) || 0;
+      return { id: p.id, priorityScore: score, priorityLevel: levelFor(score) };
+    });
+    source = 'rule-fallback';
   }
+  ranked.sort((a, b) => b.priorityScore - a.priorityScore);
+  ranked.forEach((x, i) => { x.rank = i + 1; });
+  return { ranked, source };
 }
 
 function computeAge(dob) {
   if (!dob) return 0;
-  const m = String(dob).match(/\b(19|20)\d{2}\b/);
-  return m ? Math.max(new Date().getFullYear() - parseInt(m[0], 10), 0) : 0;
+  const str = String(dob).trim();
+  // Prefer an exact date (YYYY-MM-DD / ISO); fall back to just the year.
+  let d = /^\d{4}-\d{2}-\d{2}/.test(str) ? new Date(str.slice(0, 10) + 'T00:00:00') : null;
+  if (!d || Number.isNaN(d.getTime())) {
+    const m = str.match(/\b(19|20)\d{2}\b/);
+    return m ? Math.max(new Date().getFullYear() - parseInt(m[0], 10), 0) : 0;
+  }
+  const now = new Date();
+  let age = now.getFullYear() - d.getFullYear();
+  if (now.getMonth() < d.getMonth() || (now.getMonth() === d.getMonth() && now.getDate() < d.getDate())) age -= 1;
+  return Math.max(age, 0);
 }
 
-module.exports = { scorePatient, rankPatients, buildPatient, ML_URL };
+module.exports = { scorePatient, rankPatients, buildPatient, ruleScore, levelFor, computeAge, ML_URL };

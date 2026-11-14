@@ -7,7 +7,7 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput,
   StatusBar, Platform, Modal, RefreshControl, ActivityIndicator, KeyboardAvoidingView,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTheme } from '../../../context/ThemeContext';
@@ -16,6 +16,7 @@ import BottomSheet from '../../../components/ui/BottomSheet';
 import useMinLoading from '../../../hooks/useMinLoading';
 import doctorService from '../services/doctorService';
 import { showConfirm, showInfo } from '../../../components/confirm';
+import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
 
 const CATEGORIES = ['General', 'Diabetes', 'Blood Pressure', 'Heart', 'Eye', 'Hepatitis', 'Dental', 'Women Health'];
 const pad = (n) => String(n).padStart(2, '0');
@@ -65,8 +66,9 @@ export default function DoctorCampsScreen({ navigation }) {
   };
 
   const onPickDate = (event, selected) => {
-    setShowDate(false);
-    if (event.type === 'set' && selected) setForm((f) => ({ ...f, date: toDateStr(selected) }));
+    // iOS spinner fires on every wheel tick — keep it open (closed via Done).
+    if (Platform.OS !== 'ios') setShowDate(false);
+    if ((event.type === 'set' || Platform.OS === 'ios') && selected) setForm((f) => ({ ...f, date: toDateStr(selected) }));
   };
 
   const fmtDate = (d) => { try { return new Date(d + 'T00:00:00').toLocaleDateString('en-PK', { weekday: 'short', day: 'numeric', month: 'short' }); } catch (e) { return d; } };
@@ -138,6 +140,11 @@ export default function DoctorCampsScreen({ navigation }) {
                 <Text style={{ color: form.date ? COLORS.text : COLORS.textLight, fontSize: 14 }}>{form.date ? fmtDate(form.date) + `  (${form.date})` : 'Tap to pick a date'}</Text>
               </TouchableOpacity>
               {showDate && <DateTimePicker value={form.date ? new Date(form.date + 'T00:00:00') : new Date()} mode="date" minimumDate={new Date()} display={Platform.OS === 'ios' ? 'spinner' : 'default'} onChange={onPickDate} />}
+              {showDate && Platform.OS === 'ios' && (
+                <TouchableOpacity onPress={() => setShowDate(false)} style={{ alignSelf: 'flex-end', paddingVertical: 8, paddingHorizontal: 14 }}>
+                  <Text style={{ color: COLORS.primary, fontWeight: '800' }}>Done</Text>
+                </TouchableOpacity>
+              )}
 
               <View style={styles.row2}>
                 <View style={{ flex: 1 }}>
@@ -175,7 +182,7 @@ const makeStyles = (COLORS) => StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12,
-    paddingTop: Platform.OS === 'ios' ? 56 : (StatusBar.currentHeight || 28) + 12, paddingBottom: 12, backgroundColor: COLORS.background,
+    paddingTop: STATUS_BAR_HEIGHT + 12, paddingBottom: 12, backgroundColor: COLORS.background,
     borderBottomWidth: 1, borderBottomColor: COLORS.border || '#E5E7EB',
   },
   hBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },

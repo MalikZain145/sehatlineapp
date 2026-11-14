@@ -9,6 +9,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "../../Theme/themeContext";
+import { topPad } from '../../../../utils/safeArea';
 
 
 interface Props {
@@ -82,7 +83,7 @@ export default function GradientHeader({
 
 const styles = StyleSheet.create({
   header: {
-    paddingTop: 55,
+    paddingTop: topPad(55),
     paddingBottom: 35,
     paddingHorizontal: 20,
     borderBottomLeftRadius: 30,

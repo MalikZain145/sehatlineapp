@@ -21,7 +21,7 @@ import authService from '../modules/auth/services/authService';
 import { setUnauthorizedHandler } from '../services/apiClient';
 import { getExpoPushToken, addNotificationResponseListener } from '../services/notifications';
 import { onSystemRestart } from '../services/socket';
-import { reloadApp, applyDeployedUpdate } from '../utils/appReload';
+import { reloadApp } from '../utils/appReload';
 import { INACTIVITY_LIMIT_MS, HEARTBEAT_INTERVAL_MS, bootstrapApiBaseUrl } from '../config/api.config';
 
 const SessionContext = createContext(null);
@@ -110,8 +110,7 @@ export function SessionProvider({ children, navigationRef }) {
 
   // ---- boot: restore session if a token exists ----
   useEffect(() => {
-    // Production: if a new version was deployed, apply it and reload on launch.
-    applyDeployedUpdate().catch(() => {});
+    // OTA updates are handled by <UpdatePrompt /> (asks the user first).
     (async () => {
       try {
         // Resolve the current backend URL (from the GitHub config) BEFORE any

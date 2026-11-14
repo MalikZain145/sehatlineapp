@@ -309,7 +309,9 @@ async function generateToken(req, res, next) {
     // AI/ML triage score using the patient's most recent vitals (falls back to
     // the transparent rule score if the ML service is down). This is what lets
     // the queue put critical-vitals + elderly patients ahead automatically.
-    let priorityScore = priority.score;
+    // priority.score is on the legacy 50-1100 rule scale; tokens are stored on
+    // the 0-100 triage scale (same as scorePatient) so they sort together.
+    let priorityScore = Math.min(100, Math.round(priority.score / 11));
     let priorityLevel = priority.level;
     try {
       const vital = await Vital.findOne({ user: req.user._id }).sort({ recordedAt: -1 }).lean();
@@ -322,8 +324,14 @@ async function generateToken(req, res, next) {
     // Guarantee the follow-up boost even when the ML score is used: a reports
     // review is prioritised over standard patients (but stays below any higher
     // clinical priority the ML/rules already assigned).
-    if (isFollowUp && priorityScore < LEVEL_SCORE.high) {
-      priorityScore = LEVEL_SCORE.high;
+    //
+    // BUG FIX: scorePatient() returns a 0-100 score, but this used to clamp
+    // follow-ups up to LEVEL_SCORE.high (=700, the old rule scale) — which put
+    // every follow-up AHEAD of genuinely critical patients (85-100). Use the
+    // 0-100 "high" threshold instead so critical patients still go first.
+    const FOLLOWUP_FLOOR = 65; // = 'high' on the 0-100 triage scale
+    if (isFollowUp && priorityScore < FOLLOWUP_FLOOR) {
+      priorityScore = FOLLOWUP_FLOOR;
       priorityLevel = 'high';
     }
 
@@ -419,7 +427,14 @@ async function getActiveToken(req, res, next) {
     const ahead = await Token.countDocuments({
       department: token.department,
       status: { $in: ['in-queue', 'in-progress'] },
-      priorityScore: { $gt: token.priorityScore },
+      // Same order as orderByPriority: higher score first, then FIFO on ties.
+      // (Counting only strictly-higher scores ignored equal-priority patients
+      // who arrived earlier, so "ahead" and the ETA were too optimistic.)
+      _id: { $ne: token._id },
+      $or: [
+        { priorityScore: { $gt: token.priorityScore } },
+        { priorityScore: token.priorityScore, issuedAt: { $lt: token.issuedAt } },
+      ],
     });
 
     // Live M/M/s-informed estimated wait: patients ahead ÷ doctors on duty × MEASURED service time.

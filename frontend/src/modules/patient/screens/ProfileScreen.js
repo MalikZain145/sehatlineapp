@@ -13,7 +13,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image,
 import { Skeleton, SkeletonCircle, SkeletonCard } from '../../../components/ui/Skeleton';
 import useMinLoading from '../../../hooks/useMinLoading';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import settingsService from '../services/settingsService';
 import ThemedPrompt from '../../../components/common/ThemedPrompt';
 import { showConfirm } from '../../../components/confirm';

@@ -17,6 +17,7 @@ import { useTheme } from "../../Theme/themeContext";
 import { useLaboratory } from "../../context/LaboratoryContext";
 import GradientHeader from "../../components/common/GradientHeader";
 import { labAlert } from "../../components/common/LabAlert";
+import { topPad } from '../../../../utils/safeArea';
 
 export default function UploadReportScreen({
   route,
@@ -669,8 +670,8 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    height: 105,
-    paddingTop: 45,
+    height: topPad(105),
+    paddingTop: topPad(45),
     paddingHorizontal: 18,
     flexDirection: "row",
     alignItems: "center",

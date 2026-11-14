@@ -13,7 +13,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, Platform } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import ScreenHeader from '../../../components/ui/ScreenHeader';
 import ThemedPrompt from '../../../components/common/ThemedPrompt';
 import FadeInView from '../../../components/ui/FadeInView';

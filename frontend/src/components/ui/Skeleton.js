@@ -17,11 +17,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Animated, StyleSheet, Easing, StatusBar, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../context/ThemeContext';
+import { STATUS_BAR_HEIGHT } from '../../utils/safeArea';
 
 // Top padding that clears the status bar / notch. Pass `topInset` on a skeleton
 // that renders at the very top of a screen (i.e. the header isn't shown while
 // loading) so the shimmer doesn't sit under the notch / too high.
-const TOP_INSET = (Platform.OS === 'android' ? (StatusBar.currentHeight || 24) : 52) + 14;
+const TOP_INSET = STATUS_BAR_HEIGHT + 14;
 
 // Palette derived purely from a dark/light flag, so it can be overridden.
 function palette(dark) {

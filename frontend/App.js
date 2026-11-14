@@ -15,6 +15,7 @@ import { SessionProvider } from './src/context/SessionContext';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import ActivityWrapper from './src/components/common/ActivityWrapper';
 import { ConfirmHost } from './src/components/confirm';
+import UpdatePrompt from './src/components/common/UpdatePrompt';
 
 // Inner shell — runs INSIDE ThemeProvider so the navigation container and the
 // root view use the app's own background. Without this the container defaults to
@@ -43,6 +44,8 @@ function AppShell({ navigationRef }) {
             <StatusBar style={isDark ? 'light' : 'dark'} />
             <RootNavigator />
             <ConfirmHost />
+            {/* OTA: "New update available" → tap → app restarts on new version */}
+            <UpdatePrompt />
           </ActivityWrapper>
         </SessionProvider>
       </NavigationContainer>

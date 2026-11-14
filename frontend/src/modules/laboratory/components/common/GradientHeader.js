@@ -10,6 +10,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
 import { useTheme } from "../../Theme/themeContext";
+import { topPad } from '../../../../utils/safeArea';
 
 // Vertical gradient header (top darker → bottom lighter), like the pharmacy
 // module. Light: teal → light-teal → white, white title, dark-slate tagline.
@@ -61,7 +62,7 @@ export default function GradientHeader({
 
 const styles = StyleSheet.create({
   header: {
-    paddingTop: 55,
+    paddingTop: topPad(55),
     paddingBottom: 32,
     paddingHorizontal: 20,
     borderBottomLeftRadius: 30,

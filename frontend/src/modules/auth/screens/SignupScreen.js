@@ -10,7 +10,7 @@ import {
   KeyboardAvoidingView, Platform, StatusBar, Animated, ActivityIndicator, Alert, Dimensions, Image, Modal,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { COLORS } from '../../../theme';
 import authService from '../services/authService';
 import { showInfo, showConfirm } from '../../../components/confirm';
@@ -23,15 +23,23 @@ import AuthLogo from '../../../components/ui/AuthLogo';
 import BottomWave from '../../../components/ui/BottomWave';
 import CnicCamera from '../../../components/ui/CnicCamera';
 import CropEditor from '../../../components/ui/CropEditor';
+import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
 
 const { width } = Dimensions.get('window');
 
 // ---- Layout constants (consistent spacing on both Android and iOS) ----
-const TOP_INSET = Platform.OS === 'ios' ? 56 : (StatusBar.currentHeight || 28) + 12;
+const TOP_INSET = STATUS_BAR_HEIGHT + 12;
 const HEADER_PAD_BOTTOM = 8;
 const PROGRESS_PAD_TOP = 6;    // tight: keep the form high on the page
 const PROGRESS_PAD_BOTTOM = 14;
 const CARD_GAP = 4;
+// CNIC photo capture step. DISABLED: the in-app camera/crop flow was unreliable
+// on iOS and blocked real users at signup. The typed CNIC + CDA card are still
+// required and still checked for duplicates (step "Identity"). Set to true to
+// bring the camera step back (backend: also set CNIC_REQUIRE_IMAGES=true).
+const CNIC_CAPTURE_ENABLED = false;
+// Internal step ids: 0 Personal, 1 Identity, 2 CNIC capture, 3 Security.
+const STEP_ORDER = CNIC_CAPTURE_ENABLED ? [0, 1, 2, 3] : [0, 1, 3];
 const ALLOWED = 'gmail.com, yahoo.com, outlook.com, hotmail.com, live.com, icloud.com, protonmail.com';
 
 export default function SignupScreen({ navigation }) {
@@ -109,7 +117,7 @@ export default function SignupScreen({ navigation }) {
       if (!form.cdaCard.trim()) e.cdaCard = 'CDA card number is required';
       else if (form.cdaCard.length !== 4) e.cdaCard = 'Enter the 4-digit card number';
       if (!form.dob) e.dob = 'Date of birth is required';
-    } else if (step === 2) {
+    } else if (step === 2 && CNIC_CAPTURE_ENABLED) {
       // Both sides must have passed the backend OCR check.
       if (!cnicFront) e.cnicFront = 'Capture the front of your CNIC';
       if (!cnicBack) e.cnicBack = 'Capture the back of your CNIC';
@@ -234,12 +242,39 @@ export default function SignupScreen({ navigation }) {
       }
     }
 
-    if (step < 3) setStep(step + 1);
+    // On the Identity step, catch an already-registered CNIC / CDA card now
+    // (this used to happen during CNIC photo verification).
+    if (step === 1) {
+      try {
+        setLoading(true);
+        const res = await authService.checkAvailability({
+          cnic: form.cnic,
+          cdaCard: cardForBackend(),
+        });
+        setLoading(false);
+        if (res && res.available === false) {
+          const which = res.field === 'cdaCard' ? 'CDA card number' : res.field === 'cnic' ? 'CNIC' : 'account';
+          setErrors((er) => ({ ...er, [res.field === 'cdaCard' ? 'cdaCard' : 'cnic']: `This ${which} is already registered` }));
+          showConfirm({
+            title: 'Already Registered', message: `This ${which} is already registered. Please log in instead.`, icon: 'person-circle',
+            confirmLabel: 'Log In', cancelLabel: 'OK',
+            onConfirm: () => navigation.navigate('Login'),
+          });
+          return;
+        }
+      } catch (err) {
+        setLoading(false);
+      }
+    }
+
+    const pos = STEP_ORDER.indexOf(step);
+    if (pos < STEP_ORDER.length - 1) setStep(STEP_ORDER[pos + 1]);
     else handleSignup();
   };
 
   const back = () => {
-    if (step > 0) setStep(step - 1);
+    const pos = STEP_ORDER.indexOf(step);
+    if (pos > 0) setStep(STEP_ORDER[pos - 1]);
     else navigation.goBack();
   };
 
@@ -255,9 +290,11 @@ export default function SignupScreen({ navigation }) {
         cdaCard: cardForBackend(),
         dob: form.dob,
         address: form.address,
-        cnicFrontImage: cnicFront?.imagePath || '',
-        cnicBackImage: cnicBack?.imagePath || '',
-        cnicVerified: !!(cnicFront && cnicBack),
+        // Only sent when the (disabled) capture step is turned back on.
+        ...(CNIC_CAPTURE_ENABLED ? {
+          cnicFrontImage: cnicFront?.imagePath || '',
+          cnicBackImage: cnicBack?.imagePath || '',
+        } : {}),
       });
       setLoading(false);
       // Save session + go home.
@@ -289,7 +326,8 @@ export default function SignupScreen({ navigation }) {
     </View>
   );
 
-  const STEPS = ['Personal', 'Identity', 'Verify', 'Security'];
+  const STEPS = CNIC_CAPTURE_ENABLED ? ['Personal', 'Identity', 'Verify', 'Security'] : ['Personal', 'Identity', 'Security'];
+  const stepPos = STEP_ORDER.indexOf(step);
 
   return (
     <View style={styles.container}>
@@ -316,21 +354,21 @@ export default function SignupScreen({ navigation }) {
           <View style={styles.progress}>
             {STEPS.map((s, i) => (
               <View key={s} style={styles.progressItem}>
-                <View style={[styles.progressDot, i <= step && styles.progressDotActive]}>
-                  {i < step
+                <View style={[styles.progressDot, i <= stepPos && styles.progressDotActive]}>
+                  {i < stepPos
                     ? <Ionicons name="checkmark" size={14} color="#FFF" />
-                    : <Text style={[styles.progressNum, i <= step && styles.progressNumActive]}>{i + 1}</Text>}
+                    : <Text style={[styles.progressNum, i <= stepPos && styles.progressNumActive]}>{i + 1}</Text>}
                 </View>
                 {/* Only the active step shows its label — 4 labels would
                     overflow on small (320px) screens. */}
-                {i === step && <Text style={styles.progressLabelActive}>{s}</Text>}
-                {i < STEPS.length - 1 && <View style={[styles.progressLine, i < step && styles.progressLineActive]} />}
+                {i === stepPos && <Text style={styles.progressLabelActive}>{s}</Text>}
+                {i < STEPS.length - 1 && <View style={[styles.progressLine, i < stepPos && styles.progressLineActive]} />}
               </View>
             ))}
           </View>
         </FadeInView>
 
-        <ScrollView style={styles.body} contentContainerStyle={styles.bodyContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+        <ScrollView style={styles.body} contentContainerStyle={styles.bodyContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "none"}>
           <FadeInView delay={150}>
           <View style={styles.card}>
             {/* STEP 0 — Personal */}
@@ -447,7 +485,7 @@ export default function SignupScreen({ navigation }) {
             )}
 
             {/* STEP 2 — CNIC Verification */}
-            {step === 2 && (
+            {step === 2 && CNIC_CAPTURE_ENABLED && (
               <>
                 <Text style={styles.stepTitle}>Verify Your CNIC</Text>
                 <Text style={styles.stepSub}>Capture both sides with the camera. We check the card and match it to your details.</Text>
@@ -590,7 +628,7 @@ export default function SignupScreen({ navigation }) {
       </KeyboardAvoidingView>
 
       {/* In-app camera → manual crop → backend verification (no gallery) */}
-      <Modal visible={!!cameraSide} animationType="slide" onRequestClose={() => !verifying && setCameraSide(null)}>
+      {CNIC_CAPTURE_ENABLED && <Modal visible={!!cameraSide} animationType="slide" onRequestClose={() => !verifying && setCameraSide(null)}>
         {pendingPhoto ? (
           <CropEditor
             photo={pendingPhoto}
@@ -606,7 +644,7 @@ export default function SignupScreen({ navigation }) {
             onCancel={() => setCameraSide(null)}
           />
         )}
-      </Modal>
+      </Modal>}
 
       <ModernDatePicker
         visible={showCalendar}

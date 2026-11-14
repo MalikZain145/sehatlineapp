@@ -6,7 +6,7 @@ import {
   ScrollView, TouchableWithoutFeedback, Keyboard, Animated
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS, SIZES, SHADOWS, FONTS } from '../../../theme';
 import FadeInView from '../../../components/ui/FadeInView';
@@ -17,6 +17,7 @@ import { authenticateBiometric, hashToken } from '../../../utils/biometric';
 import { ROLE_HOME_ROUTE } from '../../../constants';
 import { api } from '../../../services/apiClient';
 import { useSession } from '../../../context/SessionContext';
+import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
 
 const { width, height } = Dimensions.get('window');
 
@@ -558,13 +559,13 @@ const styles = StyleSheet.create({
   },
   scrollContainerKeyboard: {
     justifyContent: 'flex-start',
-    paddingTop: Platform.OS === 'ios' ? 20 : 10,
+    paddingTop: Platform.OS === 'ios' ? STATUS_BAR_HEIGHT + 8 : 10,
   },
 
   // Toast Notification
   toastContainer: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 50 : 30,
+    top: Platform.OS === 'ios' ? STATUS_BAR_HEIGHT + 8 : 30,
     left: 20,
     right: 20,
     zIndex: 1000,

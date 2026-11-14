@@ -8,7 +8,7 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput,
   StatusBar, Platform, Modal, RefreshControl, ActivityIndicator, KeyboardAvoidingView,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as DocumentPicker from 'expo-document-picker';
 import { useTheme } from '../../../context/ThemeContext';
@@ -17,6 +17,7 @@ import useMinLoading from '../../../hooks/useMinLoading';
 import adminService from '../services/adminService';
 import BottomSheet from '../../../components/ui/BottomSheet';
 import { showConfirm, showInfo } from '../../../components/confirm';
+import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
 
 const EMPTY = { name: '', email: '', phone: '' };
 
@@ -228,7 +229,7 @@ const makeStyles = (COLORS) => StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12,
-    paddingTop: Platform.OS === 'ios' ? 56 : (StatusBar.currentHeight || 28) + 14, paddingBottom: 12, backgroundColor: COLORS.background,
+    paddingTop: STATUS_BAR_HEIGHT + 14, paddingBottom: 12, backgroundColor: COLORS.background,
   },
   hBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
   searchRow: { paddingHorizontal: 14, paddingBottom: 8 },

@@ -7,7 +7,8 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Dimensions, Image, ScrollView, Platform, StatusBar } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigationState } from '@react-navigation/native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { STATUS_BAR_HEIGHT } from '../../utils/safeArea';
 const {
   width,
   height
@@ -185,7 +186,7 @@ const makeStyles = (COLORS, isDark = false) => StyleSheet.create({
     })
   },
   header: {
-    paddingTop: Platform.OS === 'ios' ? 56 : (StatusBar.currentHeight || 28) + 20,
+    paddingTop: STATUS_BAR_HEIGHT + 20,
     paddingBottom: 24,
     paddingHorizontal: 20,
     alignItems: 'center'

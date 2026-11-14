@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform, StatusBar, ScrollView, Image, ActivityIndicator, Alert, RefreshControl, Modal } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { SkeletonList, SkeletonScreen } from '../../../components/ui/Skeleton';
 import BottomSheet from '../../../components/ui/BottomSheet';
 import useMinLoading from '../../../hooks/useMinLoading';
@@ -14,6 +14,7 @@ import { showConfirm, showInfo } from '../../../components/confirm';
 import FadeInView from '../../../components/ui/FadeInView';
 import doctorService from '../services/doctorService';
 import { useTheme } from "../../../context/ThemeContext";
+import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
 const {
   width
 } = Dimensions.get('window');
@@ -547,7 +548,7 @@ const makeStyles = COLORS => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 56 : (StatusBar.currentHeight || 28) + 14,
+    paddingTop: STATUS_BAR_HEIGHT + 14,
     paddingBottom: 18,
     backgroundColor: COLORS.background
   },

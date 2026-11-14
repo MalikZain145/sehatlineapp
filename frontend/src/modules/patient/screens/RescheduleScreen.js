@@ -11,7 +11,7 @@ import {
 // SafeAreaView from react-native is deprecated; this one handles notches
 // and the Android gesture bar correctly.
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { showConfirm } from '../../../components/confirm';
 
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     width: width * 0.16, height: 75, justifyContent: 'center', alignItems: 'center', 
     borderRadius: 15, backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' 
   },
-  dateCardActive: { backgroundColor: '#00EAFF', borderColor: '#00EAFF', elevation: 10 },
+  dateCardActive: { backgroundColor: '#00EAFF', borderColor: '#00EAFF', shadowColor: '#000', shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.21, shadowRadius: 9.0, elevation: 10 },
   dayText: { color: 'rgba(255,255,255,0.5)', fontSize: 12 },
   dateText: { color: '#FFF', fontSize: 18, fontWeight: 'bold', marginTop: 4 },
   activeText: { color: '#000033', fontWeight: 'bold' },

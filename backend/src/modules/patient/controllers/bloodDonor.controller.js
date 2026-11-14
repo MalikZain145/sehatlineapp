@@ -65,13 +65,15 @@ async function optIn(req, res, next) {
     if (!bloodGroup || !BLOOD_GROUPS.includes(bloodGroup)) {
       return fail(res, 400, 'A valid blood group is required.', 'NO_GROUP');
     }
-    if (!city || !city.trim()) {
+    if (!city || typeof city !== 'string' || !city.trim()) {
       return fail(res, 400, 'City is required so requests near you can find you.', 'NO_CITY');
     }
-    if (!req.user.cnicVerified) {
+    // CNIC photo capture was removed from signup, so new accounts never get
+    // cnicVerified=true. Gate on the account-verified flag instead.
+    if (!(req.user.cnicVerified || req.user.isVerified)) {
       return fail(
         res, 403,
-        'Only CNIC-verified accounts can join the donor network — this keeps it trustworthy for people in an emergency.',
+        'Only verified accounts can join the donor network — this keeps it trustworthy for people in an emergency.',
         'NOT_VERIFIED'
       );
     }

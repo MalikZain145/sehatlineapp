@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-nati
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../../Theme/themeContext";
 import GradientHeader from "../../components/common/GradientHeader";
+import { topPad } from '../../../../utils/safeArea';
 
 const SECTIONS = [
   { h: "Authorized Use", b: "This module is for authorized CDA Hospital laboratory staff only. You must use it strictly to process the tests referred to the laboratory and to publish accurate results." },
@@ -37,7 +38,7 @@ export default function TermsConditionsScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { height: 105, paddingTop: 45, paddingHorizontal: 18, flexDirection: "row", alignItems: "center" },
+  header: { height: topPad(105), paddingTop: topPad(45), paddingHorizontal: 18, flexDirection: "row", alignItems: "center" },
   headerBtn: { width: 42, height: 42, alignItems: "center", justifyContent: "center" },
   headerTitle: { flex: 1, textAlign: "center", color: "#FFFFFF", fontSize: 21, fontWeight: "800" },
   content: { padding: 22 },

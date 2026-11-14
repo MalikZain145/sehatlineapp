@@ -14,6 +14,7 @@ import { useTheme } from "../../Theme/themeContext";
 import { useState, useEffect, useCallback } from "react";
 import pharmacyService from "../../services/pharmacyService";
 import { onPharmacyUpdate } from "../../../../services/socket";
+import { topPad } from '../../../../utils/safeArea';
 
 interface Props {
   onMenuPress: () => void;
@@ -138,7 +139,7 @@ return (
 const styles = StyleSheet.create({
 
 container: {
-  marginTop: 40,
+  marginTop: topPad(40),
   marginBottom: 25,
 },
 

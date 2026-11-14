@@ -19,6 +19,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useRoute } from "@react-navigation/native";
 import GradientHeader from "../components/common/GradientHeader";
 import { pharmAlert } from "../components/common/PharmAlert";
+import { topPad } from '../../../utils/safeArea';
 
 
 export default function PrepareMedicineScreen() {
@@ -209,7 +210,7 @@ headerRow: {
   paddingTop: 8,
 },
 header: {
-  paddingTop: 60,
+  paddingTop: topPad(60),
   paddingBottom: 30,
   paddingHorizontal: 20,
   borderBottomLeftRadius: 30,

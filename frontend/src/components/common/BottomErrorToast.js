@@ -12,7 +12,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text, View, Platform } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { SIZES } from '../../theme';
 import { useTheme } from "../../context/ThemeContext";
 export default function BottomErrorToast({

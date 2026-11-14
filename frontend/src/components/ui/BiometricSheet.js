@@ -10,7 +10,7 @@
 
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Modal, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, Dimensions } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import settingsService from '../../modules/patient/services/settingsService';
 import { authenticateBiometric, isBiometricAvailable } from '../../utils/biometric';
 import { useTheme } from "../../context/ThemeContext";

@@ -29,14 +29,25 @@ const otpLimiter = rateLimit({
   message: { success: false, code: 'RATE_LIMIT', message: 'Too many code requests. Try again later.' },
 });
 
+// Lookup endpoints (availability / CNIC upload) are account-enumeration and
+// disk-filling targets if left unthrottled — generous, but bounded.
+const lookupLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, code: 'RATE_LIMIT', message: 'Too many requests. Try again later.' },
+});
+
 // ── Public ────────────────────────────────────────────────
 router.post('/signup', authLimiter, validate(V.signupSchema), authController.signup);
-router.post('/check-availability', authController.checkAvailability);
+router.post('/check-availability', lookupLimiter, authController.checkAvailability);
 router.post('/login', authLimiter, validate(V.loginSchema), authController.login);
 router.post('/fingerprint-login', authLimiter, authController.fingerprintLogin);
 
-// CNIC real-time verification (image upload)
-router.post('/cnic/verify', upload.single('image'), cnicController.verifyCnic);
+// CNIC image upload. The app no longer uses this (capture step removed);
+// kept for older app builds still in the field, so they keep working.
+router.post('/cnic/verify', lookupLimiter, upload.single('image'), cnicController.verifyCnic);
 
 // Forgot password (email + phone based)
 router.post('/forgot/request', otpLimiter, validate(V.forgotRequestSchema), passwordController.requestReset);

@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Platform, Image, ActivityIndicator } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -12,6 +12,7 @@ import { useTheme } from '../../../context/ThemeContext';
 import authService from '../../auth/services/authService';
 import settingsService from '../../patient/services/settingsService';
 import { showConfirm, showInfo } from '../../../components/confirm';
+import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
 
 const ITEMS = [
   { label: 'Analytics', desc: 'Trends, department split & KPIs', icon: 'bar-chart', route: 'AdminAnalytics' },
@@ -115,7 +116,7 @@ const makeStyles = (COLORS) => StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   hero: {
     alignItems: 'center',
-    paddingTop: (Platform.OS === 'ios' ? 60 : (StatusBar.currentHeight || 28) + 24),
+    paddingTop: (STATUS_BAR_HEIGHT + 24),
     paddingBottom: 26, borderBottomLeftRadius: 28, borderBottomRightRadius: 28,
   },
   avatar: { width: 78, height: 78, borderRadius: 39, backgroundColor: 'rgba(255,255,255,0.22)', borderWidth: 2, borderColor: 'rgba(255,255,255,0.6)', alignItems: 'center', justifyContent: 'center' },

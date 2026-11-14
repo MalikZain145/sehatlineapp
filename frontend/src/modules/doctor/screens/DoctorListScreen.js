@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, TextInput, FlatList, Platform, StatusBar, Dimensions, Linking, Animated, RefreshControl } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { SIZES, SHADOWS } from '../../../theme';
 import { useTheme } from "../../../context/ThemeContext";
+import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
 const {
   width
 } = Dimensions.get('window');
@@ -542,7 +543,7 @@ const makeStyles = COLORS => StyleSheet.create({
     backgroundColor: COLORS.background
   },
   headerGradient: {
-    paddingTop: Platform.OS === 'ios' ? 50 : StatusBar.currentHeight + 10,
+    paddingTop: STATUS_BAR_HEIGHT + 10,
     paddingBottom: 16,
     paddingHorizontal: SIZES.lg
   },

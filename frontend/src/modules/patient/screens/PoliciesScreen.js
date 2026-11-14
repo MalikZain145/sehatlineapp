@@ -9,7 +9,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, LayoutAnimation, Platform, UIManager } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import ScreenHeader from '../../../components/ui/ScreenHeader';
 import { SkeletonList } from '../../../components/ui/Skeleton';
 import useMinLoading from '../../../hooks/useMinLoading';

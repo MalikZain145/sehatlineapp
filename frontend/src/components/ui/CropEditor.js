@@ -14,8 +14,9 @@ import {
   View, Text, StyleSheet, TouchableOpacity, Image, Dimensions,
   PanResponder, ActivityIndicator, Platform, StatusBar,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { COLORS } from '../../theme';
+import { STATUS_BAR_HEIGHT } from '../../utils/safeArea';
 
 let ImageManipulator = null;
 try {
@@ -238,7 +239,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 12,
-    paddingTop: Platform.OS === 'ios' ? 56 : (StatusBar.currentHeight || 28) + 10,
+    paddingTop: STATUS_BAR_HEIGHT + 10,
     paddingBottom: 10,
   },
   iconBtn: { width: 44, height: 44, justifyContent: 'center', alignItems: 'center' },

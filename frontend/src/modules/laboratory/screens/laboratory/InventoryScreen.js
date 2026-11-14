@@ -11,6 +11,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../../Theme/themeContext";
 import { useLaboratory } from "../../context/LaboratoryContext";
+import { topPad } from '../../../../utils/safeArea';
 
 export default function InventoryScreen({ navigation }) {
   const { theme } = useTheme();
@@ -451,9 +452,9 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    minHeight: 105,
+    minHeight: topPad(105),
     paddingHorizontal: 18,
-    paddingTop: 45,
+    paddingTop: topPad(45),
     flexDirection: "row",
     alignItems: "center",
   },

@@ -9,7 +9,7 @@ import {
   KeyboardAvoidingView, Platform, StatusBar, ActivityIndicator, Alert, Dimensions, BackHandler,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { COLORS } from '../../../theme';
 import authService from '../services/authService';
 import { showInfo } from '../../../components/confirm';
@@ -17,6 +17,7 @@ import PasswordStrength, { scorePassword } from '../../../components/ui/Password
 import FadeInView from '../../../components/ui/FadeInView';
 import AuthLogo from '../../../components/ui/AuthLogo';
 import BottomWave from '../../../components/ui/BottomWave';
+import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
 
 const { width } = Dimensions.get('window');
 
@@ -192,7 +193,7 @@ export default function ForgotPasswordScreen({ navigation }) {
           <View style={{ width: 40 }} />
         </View>
 
-        <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "none"}>
           {/* Brand mark — same as Login */}
           <FadeInView delay={50}>
             <AuthLogo compact />
@@ -350,7 +351,7 @@ const styles = StyleSheet.create({
   headerBg: { position: 'absolute', top: 0, left: 0, right: 0, height: 340 },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 16, paddingTop: Platform.OS === 'ios' ? 56 : (StatusBar.currentHeight || 28) + 12, paddingBottom: 8,
+    paddingHorizontal: 16, paddingTop: STATUS_BAR_HEIGHT + 12, paddingBottom: 8,
   },
   backBtn: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
   headerTitle: { color: '#FFF', fontSize: 17, fontWeight: '800' },

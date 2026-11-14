@@ -2,7 +2,7 @@
   "expo": {
     "name": "SehatLine",
     "slug": "sehatline",
-    "version": "5.3.1",
+    "version": "5.4.0",
     "orientation": "portrait",
     "scheme": "sehatline",
     "icon": "./assets/sehatline-icon.png",
@@ -67,12 +67,22 @@
           "cameraPermission": "SehatLine uses the camera to verify your CNIC."
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-updates"
     ],
     "extra": {
       "eas": {
         "projectId": "ed02123a-39a8-479a-91bd-aa0043d5ecf8"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/ed02123a-39a8-479a-91bd-aa0043d5ecf8",
+      "enabled": true,
+      "checkAutomatically": "NEVER",
+      "fallbackToCacheTimeout": 0
     }
   }
 }

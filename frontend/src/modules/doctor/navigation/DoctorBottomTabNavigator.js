@@ -3,7 +3,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, StyleSheet, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import DoctorPortalScreen from '../screens/DoctorPortalScreen';
 import DoctorProfileScreen from '../screens/DoctorProfileScreen';
 import DoctorNotificationsScreen from '../screens/DoctorNotificationsScreen';

@@ -15,6 +15,7 @@ import { labAlert } from "../../components/common/LabAlert";
 import BiometricSheet from "../../../../components/ui/BiometricSheet";
 import settingsService from "../../../patient/services/settingsService";
 import { APP_VERSION } from "../../../../constants/version";
+import { topPad } from '../../../../utils/safeArea';
 
 export default function SettingsScreen({ navigation }) {
   const { theme, toggleTheme } = useTheme();
@@ -381,8 +382,8 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    height: 105,
-    paddingTop: 45,
+    height: topPad(105),
+    paddingTop: topPad(45),
     paddingHorizontal: 18,
     flexDirection: "row",
     alignItems: "center",

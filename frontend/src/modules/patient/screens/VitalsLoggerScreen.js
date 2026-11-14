@@ -12,7 +12,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, ActivityIndicator, RefreshControl, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { SkeletonList, SkeletonCard } from '../../../components/ui/Skeleton';
 import BottomSheet from '../../../components/ui/BottomSheet';
 import useMinLoading from '../../../hooks/useMinLoading';

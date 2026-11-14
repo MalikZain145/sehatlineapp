@@ -4,8 +4,9 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Platform } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTheme } from '../../../context/ThemeContext';
+import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
 
 const HIT = { top: 12, bottom: 12, left: 12, right: 12 };
 
@@ -30,7 +31,7 @@ const makeStyles = (COLORS) => StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 56 : (StatusBar.currentHeight || 28) + 12,
+    paddingTop: STATUS_BAR_HEIGHT + 12,
     paddingBottom: 14,
     backgroundColor: COLORS.background,
   },

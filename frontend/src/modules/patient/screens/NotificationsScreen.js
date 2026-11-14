@@ -5,7 +5,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl, ActivityIndicator, StatusBar, Platform, Alert, Modal, ScrollView } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { SkeletonList } from '../../../components/ui/Skeleton';
 import BottomSheet from '../../../components/ui/BottomSheet';
 import useMinLoading from '../../../hooks/useMinLoading';
@@ -15,6 +15,7 @@ import useBottomInset from '../../../hooks/useBottomInset';
 
 // Each notification type gets its own accent, so the list is scannable.
 import { useTheme } from "../../../context/ThemeContext";
+import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
 import { COLORS } from "../../../theme"; // static brand palette for module-scope maps; components shadow it via useTheme()
 const TYPE_STYLE = {
   health_tip: {
@@ -284,7 +285,7 @@ const makeStyles = (COLORS, isDark = false) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 56 : (StatusBar.currentHeight || 28) + 12,
+    paddingTop: STATUS_BAR_HEIGHT + 12,
     paddingBottom: 14,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.borderLight

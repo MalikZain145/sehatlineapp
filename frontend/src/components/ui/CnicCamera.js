@@ -14,8 +14,9 @@ import {
   View, Text, StyleSheet, TouchableOpacity, Dimensions,
   ActivityIndicator, Platform, StatusBar,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { COLORS } from '../../theme';
+import { STATUS_BAR_HEIGHT } from '../../utils/safeArea';
 
 // expo-camera is loaded defensively so a missing/old install never crashes the app.
 let CameraView = null;
@@ -232,7 +233,7 @@ const styles = StyleSheet.create({
     position: 'absolute', top: 0, left: 0, right: 0,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 12,
-    paddingTop: Platform.OS === 'ios' ? 56 : (StatusBar.currentHeight || 28) + 10,
+    paddingTop: STATUS_BAR_HEIGHT + 10,
     zIndex: 2,
   },
   closeBtn: { width: 44, height: 44, justifyContent: 'center', alignItems: 'center' },

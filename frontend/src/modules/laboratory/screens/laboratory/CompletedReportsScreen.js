@@ -23,6 +23,7 @@ import {
   shareLaboratoryReport,
 } from "../../services/pdfService";
 import GradientHeader from "../../components/common/GradientHeader";
+import { topPad } from '../../../../utils/safeArea';
 
 export default function CompletedReportsScreen({ navigation }) {
   const { theme } = useTheme();
@@ -403,7 +404,7 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    paddingTop: 55,
+    paddingTop: topPad(55),
     paddingHorizontal: 20,
     paddingBottom: 18,
     flexDirection: "row",
@@ -449,9 +450,9 @@ const styles = StyleSheet.create({
   },
 
   header: {
-  height: 100,
+  height: topPad(100),
   paddingHorizontal: 18,
-  paddingTop: 35,
+  paddingTop: topPad(35),
   flexDirection: "row",
   alignItems: "center",
 },

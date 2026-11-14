@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../../Theme/themeContext";
 import { useLaboratory } from "../../context/LaboratoryContext";
 import GradientHeader from "../../components/common/GradientHeader";
+import { topPad } from '../../../../utils/safeArea';
 
 export default function QueueScreen({ navigation }) {
   const { theme } = useTheme();
@@ -653,9 +654,9 @@ const styles = StyleSheet.create({
   },
 
   header: {
-  height: 100,
+  height: topPad(100),
   paddingHorizontal: 18,
-  paddingTop: 35,
+  paddingTop: topPad(35),
   flexDirection: "row",
   alignItems: "center",
 },

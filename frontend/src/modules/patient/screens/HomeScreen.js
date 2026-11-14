@@ -14,7 +14,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import BrandLogo from '../../../components/ui/BrandLogo';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, StatusBar, Platform, RefreshControl, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import useBottomInset from '../../../hooks/useBottomInset';
 import tokenService from '../services/tokenService';
@@ -28,6 +28,7 @@ import Sidebar from '../../../components/ui/Sidebar';
 import FadeInView from '../../../components/ui/FadeInView';
 import { useSession } from '../../../context/SessionContext';
 import { useTheme } from "../../../context/ThemeContext";
+import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
 const {
   width
 } = Dimensions.get('window');
@@ -426,7 +427,7 @@ const makeStyles = COLORS => StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 56 : (StatusBar.currentHeight || 28) + 14,
+    paddingTop: STATUS_BAR_HEIGHT + 14,
     paddingBottom: 18
   },
   // No border, no background — just the glyph, per the reference.

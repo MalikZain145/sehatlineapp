@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import CustomHeader from '../../../components/CustomHeader';
 
 const SOSScreen = ({ navigation }) => {
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 40,
-    elevation: 15,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.25, shadowRadius: 13.0, elevation: 15,
   },
   sosButtonText: { color: '#fff', fontSize: 52, fontWeight: 'bold' },
   sosButtonSub: { color: '#fff', fontSize: 16, marginTop: 8, letterSpacing: 2 },

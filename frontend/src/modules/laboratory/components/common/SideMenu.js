@@ -19,6 +19,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../../Theme/themeContext";
 import { useSession } from "../../../../context/SessionContext";
 import laboratoryService from "../../services/laboratoryService";
+import { topPad } from '../../../../utils/safeArea';
 
 const { width } = Dimensions.get("window");
 const drawerWidth = width * 0.82;
@@ -164,7 +165,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20, borderBottomRightRadius: 20, overflow: "hidden",
     shadowColor: "#000", shadowOpacity: 0.18, shadowRadius: 18, shadowOffset: { width: 4, height: 0 }, elevation: 10,
   },
-  header: { alignItems: "center", paddingTop: 40, paddingBottom: 18, paddingHorizontal: 20 },
+  header: { alignItems: "center", paddingTop: topPad(40), paddingBottom: 18, paddingHorizontal: 20 },
   avatar: { width: 64, height: 64, borderRadius: 32, backgroundColor: "#73E8DA", justifyContent: "center", alignItems: "center" },
   avatarText: { color: "#fff", fontSize: 28, fontWeight: "800" },
   avatarImg: { width: 64, height: 64, borderRadius: 32 },

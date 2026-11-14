@@ -1,7 +1,7 @@
 // src/screens/doctor/TodayQueueScreen.js
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Dimensions, Platform, StatusBar, Image, Alert } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SkeletonList } from '../../../components/ui/Skeleton';
 import useMinLoading from '../../../hooks/useMinLoading';
@@ -10,6 +10,7 @@ import { APP_VERSION } from '../../../constants/version';
 import doctorService from '../services/doctorService';
 import { onQueueUpdate } from '../../../services/socket';
 import { useTheme } from "../../../context/ThemeContext";
+import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
 const {
   width,
   height
@@ -210,7 +211,7 @@ const makeStyles = COLORS => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 56 : (StatusBar.currentHeight || 28) + 14,
+    paddingTop: STATUS_BAR_HEIGHT + 14,
     paddingBottom: 18,
     backgroundColor: COLORS.background
   },

@@ -7,12 +7,13 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   StatusBar, Platform, ActivityIndicator, RefreshControl,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTheme } from '../../../context/ThemeContext';
 import { SkeletonList, SkeletonScreen } from '../../../components/ui/Skeleton';
 import useMinLoading from '../../../hooks/useMinLoading';
 import adminService from '../services/adminService';
 import { showInfo } from '../../../components/confirm';
+import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
 
 const CATEGORIES = [
   { key: 'all', label: 'All' },
@@ -133,7 +134,7 @@ const makeStyles = (COLORS) => StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12,
-    paddingTop: Platform.OS === 'ios' ? 56 : (StatusBar.currentHeight || 28) + 14, paddingBottom: 12, backgroundColor: COLORS.background,
+    paddingTop: STATUS_BAR_HEIGHT + 14, paddingBottom: 12, backgroundColor: COLORS.background,
   },
   hBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
 

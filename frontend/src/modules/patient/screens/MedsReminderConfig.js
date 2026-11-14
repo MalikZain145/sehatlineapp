@@ -14,7 +14,7 @@ import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput,
   Modal, Platform, ActivityIndicator,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { SkeletonList } from '../../../components/ui/Skeleton';
 import BottomSheet from '../../../components/ui/BottomSheet';
 import useMinLoading from '../../../hooks/useMinLoading';
@@ -74,9 +74,11 @@ const MedsReminderConfig = ({ navigation }) => {
     setModalVisible(true);
   };
 
-  const onPickTime = (event, selected) => {
-    setShowPicker(false);
-    if (event.type === 'set' && selected) {
+  // iOS: the spinner fires onChange on EVERY wheel tick, so closing on the
+  // first event added a half-scrolled time. Keep it open and commit on "Done".
+  const [iosPending, setIosPending] = useState(null);
+  const commitTime = (selected) => {
+    if (selected) {
       const hour = selected.getHours();
       const minute = selected.getMinutes();
       setDraftTimes((prev) => {
@@ -84,6 +86,11 @@ const MedsReminderConfig = ({ navigation }) => {
         return [...prev, { hour, minute }].sort((a, b) => a.hour - b.hour || a.minute - b.minute);
       });
     }
+  };
+  const onPickTime = (event, selected) => {
+    if (Platform.OS === 'ios') { if (selected) setIosPending(selected); return; }
+    setShowPicker(false);
+    if (event.type === 'set' && selected) commitTime(selected);
   };
 
   const removeDraftTime = (idx) => setDraftTimes((prev) => prev.filter((_, i) => i !== idx));
@@ -230,6 +237,16 @@ const MedsReminderConfig = ({ navigation }) => {
                 display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                 onChange={onPickTime}
               />
+            )}
+            {showPicker && Platform.OS === 'ios' && (
+              <TouchableOpacity
+                style={[styles.addTimeChip, { alignSelf: 'flex-end', marginBottom: 8 }]}
+                onPress={() => { commitTime(iosPending || new Date()); setIosPending(null); setShowPicker(false); }}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="checkmark" size={16} color={COLORS.primary} />
+                <Text style={styles.addTimeText}>Done</Text>
+              </TouchableOpacity>
             )}
 
             <TouchableOpacity style={[styles.saveBtn, saving && { opacity: 0.7 }]} onPress={saveReminder} disabled={saving} activeOpacity={0.85}>

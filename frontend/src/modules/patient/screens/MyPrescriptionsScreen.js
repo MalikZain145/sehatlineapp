@@ -5,7 +5,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import { SkeletonList } from '../../../components/ui/Skeleton';
 import useMinLoading from '../../../hooks/useMinLoading';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import ScreenHeader from '../../../components/ui/ScreenHeader';
 import useBottomInset from '../../../hooks/useBottomInset';
 import prescriptionService from '../services/prescriptionService';

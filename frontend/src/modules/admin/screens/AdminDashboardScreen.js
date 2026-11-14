@@ -7,7 +7,7 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl,
   StatusBar, Platform, Image,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../../context/ThemeContext';
@@ -15,6 +15,7 @@ import { SkeletonScreen } from '../../../components/ui/Skeleton';
 import useMinLoading from '../../../hooks/useMinLoading';
 import adminService from '../services/adminService';
 import { onAdminUpdate } from '../../../services/socket';
+import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
 
 const ACCENT = { teal: '#0BAA9D', green: '#10B981', amber: '#F59E0B', purple: '#8B5CF6', blue: '#0EA5E9' };
 
@@ -177,7 +178,7 @@ const makeStyles = (COLORS, isDark) => StyleSheet.create({
   scroll: { paddingBottom: 20 },
 
   hero: {
-    paddingTop: (Platform.OS === 'ios' ? 56 : (StatusBar.currentHeight || 28) + 16),
+    paddingTop: (STATUS_BAR_HEIGHT + 16),
     paddingHorizontal: 18, paddingBottom: 26,
     borderBottomLeftRadius: 28, borderBottomRightRadius: 28,
   },

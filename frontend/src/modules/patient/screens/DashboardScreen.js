@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import CustomHeader from '../../../components/CustomHeader';
 
 const DashboardScreen = ({ navigation }) => {
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 20,
     marginBottom: 25,
-    elevation: 5,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.14, shadowRadius: 5.0, elevation: 5,
   },
   overviewTitle: { fontSize: 20, fontWeight: 'bold', color: '#1E3A8A', marginBottom: 15 },
   statsGrid: { flexDirection: 'row', justifyContent: 'space-around' },
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 18,
     marginBottom: 25,
-    elevation: 4,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.12, shadowRadius: 4.2, elevation: 4,
   },
   appointmentHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
   time: { fontSize: 22, fontWeight: 'bold', color: '#1E3A8A' },
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     flexDirection: 'row',
     marginBottom: 25,
-    elevation: 4,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.12, shadowRadius: 4.2, elevation: 4,
   },
   insightContent: { flex: 1, marginLeft: 15 },
   insightTitle: { fontSize: 17, fontWeight: '600', color: '#1E3A8A' },
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 20,
     borderRadius: 18,
-    elevation: 4,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.12, shadowRadius: 4.2, elevation: 4,
   },
   navButton: { alignItems: 'center' },
   navLabel: { fontSize: 13, marginTop: 8, color: '#1E3A8A', fontWeight: '500' },

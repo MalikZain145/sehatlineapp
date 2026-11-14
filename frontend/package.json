@@ -1,12 +1,14 @@
 {
   "name": "sehatline-frontend",
-  "version": "5.3.0",
+  "version": "5.4.0",
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "update": "eas update --branch preview --message",
+    "update:prod": "eas update --branch production --message"
   },
   "dependencies": {
     "@expo/metro-runtime": "~6.1.2",
@@ -35,6 +37,7 @@
     "expo-secure-store": "~15.0.8",
     "expo-sharing": "~14.0.7",
     "expo-status-bar": "~3.0.9",
+    "expo-updates": "~29.0.20",
     "qrcode-generator": "^2.0.4",
     "react": "19.1.0",
     "react-dom": "19.1.0",

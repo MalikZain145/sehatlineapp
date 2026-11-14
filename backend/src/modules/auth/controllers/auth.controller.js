@@ -90,7 +90,12 @@ async function signup(req, res, next) {
     };
 
     const cnicVerified = isVerifiedImage(cnicFrontImage, 'front') && isVerifiedImage(cnicBackImage, 'back');
-    if (!cnicVerified) {
+    // CNIC photo capture has been REMOVED from the app (it was unreliable on
+    // iOS and blocked genuine users). Images are therefore optional: signup
+    // needs only the typed CNIC + CDA card (both still unique-checked above).
+    // Set CNIC_REQUIRE_IMAGES=true to make the photos mandatory again.
+    const requireImages = String(process.env.CNIC_REQUIRE_IMAGES || '').toLowerCase() === 'true';
+    if (requireImages && !cnicVerified) {
       logger.warn(`Signup rejected — CNIC not verified (${email})`);
       return fail(res, 422, 'Please verify both sides of your CNIC before creating an account.', 'CNIC_NOT_VERIFIED');
     }
@@ -106,8 +111,9 @@ async function signup(req, res, next) {
       cdaCard: cdaCard ? (cdaCard.endsWith('-RB') ? cdaCard : `${cdaCard}-RB`) : '',
       dob: dob || '',
       address: address || '',
-      cnicFrontImage,
-      cnicBackImage,
+      // Only keep image refs that WE issued (never store arbitrary strings).
+      cnicFrontImage: cnicVerified ? cnicFrontImage : '',
+      cnicBackImage: cnicVerified ? cnicBackImage : '',
       cnicVerified,
       cnicUploadedAt: new Date(),
       accountStatus: 'active',
@@ -392,7 +398,8 @@ async function checkAvailability(req, res, next) {
     if (cnic) checks.push({ field: 'cnic', query: { cnic: String(cnic) }, label: 'CNIC' });
     if (phone) checks.push({ field: 'phone', query: { phone: String(phone).replace(/^0+/, '') }, label: 'phone number' });
     if (cdaCard) {
-      const card = cdaCard.endsWith('-RB') ? cdaCard : `${cdaCard}-RB`;
+      const raw = String(cdaCard);
+      const card = raw.endsWith('-RB') ? raw : `${raw}-RB`;
       checks.push({ field: 'cdaCard', query: { cdaCard: card }, label: 'CDA card number' });
     }
 

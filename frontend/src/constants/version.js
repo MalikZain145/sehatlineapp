@@ -9,7 +9,7 @@
 // with "version" in package.json and app.json.
 // ============================================================
 
-export const APP_VERSION = '5.3.0';
+export const APP_VERSION = '5.4.0';
 
 // Short build channel label shown next to the version.
 export const APP_CHANNEL = 'AI Priority Care';

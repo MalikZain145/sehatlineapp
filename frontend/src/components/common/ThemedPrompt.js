@@ -9,7 +9,7 @@ import { COLORS } from "../../theme"; // static palette for module-scope maps; c
 
 import React from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, Dimensions, Platform } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 const {
   width
 } = Dimensions.get('window');

@@ -8,7 +8,7 @@
 
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, ActivityIndicator, ScrollView, Platform } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import feedbackService from '../../modules/patient/services/feedbackService';
 
 // Three yes/no questions. Default "No" (the good outcome).
