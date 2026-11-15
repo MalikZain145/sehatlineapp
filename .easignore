@@ -1,0 +1,14 @@
+# Exclude server-side and non-mobile code from the EAS (Android/iOS) build archive.
+# The Expo app only needs frontend/. This also avoids an antivirus-locked
+# backend script that breaks the build upload.
+backend/
+ml-service/
+api/
+docs/
+desktop/
+zain-clone/
+*.log
+*.tunnel.log
+*.tunnel.log.err
+cloudflared.exe
+backend-url.json
