@@ -5,7 +5,10 @@ import json
 import numpy as np
 
 from .core import FEATURES, build_matrix, rule_score, level_for
-from .model import SehatLineNet
+# NOTE: .model imports torch, so it is imported lazily inside __init__ —
+# importing it here made `from SehatLine import SehatLine` crash (and the whole
+# FastAPI service fail to start) on any machine without torch, despite the
+# documented rule-fallback.
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -29,9 +32,14 @@ class SehatLine:
         scaler_path = scaler_path or os.path.join(_HERE, "scaler.json")
         try:
             import torch  # imported lazily so the package imports even w/o torch
+            from .model import SehatLineNet
             self._torch = torch
             net = SehatLineNet(len(FEATURES))
-            net.load_state_dict(torch.load(weights_path, map_location="cpu"))
+            try:
+                state = torch.load(weights_path, map_location="cpu", weights_only=True)
+            except TypeError:  # torch < 1.13 has no weights_only
+                state = torch.load(weights_path, map_location="cpu")
+            net.load_state_dict(state)
             net.eval()
             with open(scaler_path, "r") as f:
                 meta = json.load(f)
@@ -50,12 +58,19 @@ class SehatLine:
     def _predict(self, X):
         if X.shape[0] == 0:
             return np.zeros(0)
+        rules = rule_score(X)
         if self.trained:
             Xs = (X - self._mean) / self._std
             with self._torch.no_grad():
                 out = self._net(self._torch.tensor(Xs, dtype=self._torch.float32)).numpy()
-            return np.clip(out, 0, 100)
-        return rule_score(X)
+            out = np.nan_to_num(np.clip(out, 0, 100), nan=0.0)
+            # SAFETY FLOOR. Evaluated against its own training target, the
+            # network regresses to the mean on rare high-risk cases: it scored
+            # ~96% of rule-"critical" patients below 85 (e.g. SpO2 85% -> 6.9
+            # instead of 30). A triage model must never under-rank clinical
+            # red flags, so the clinical rule is a hard lower bound.
+            return np.maximum(out, rules)
+        return rules
 
     def score(self, patient):
         s = float(round(float(self._predict(build_matrix([patient]))[0]), 2))

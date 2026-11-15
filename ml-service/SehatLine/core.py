@@ -33,31 +33,53 @@ def _has_critical(conditions):
     return 1 if any(k in joined for k in CRITICAL_KEYWORDS) else 0
 
 
+def _f(v):
+    try:
+        return float(v or 0)
+    except (TypeError, ValueError):
+        return 0.0
+
+
 def patient_to_row(p):
-    age = float(p.get("age") or 0)
+    age = _f(p.get("age"))
     conditions = p.get("conditions") or []
+    if not isinstance(conditions, (list, tuple)):
+        conditions = [conditions]
     return [
         age,
         1.0 if age >= ELDERLY_AGE else 0.0,
         float(len(conditions)),
         float(_has_critical(conditions)),
-        float(p.get("systolic") or 0),
-        float(p.get("diastolic") or 0),
-        float(p.get("heartRate") or 0),
-        float(p.get("spo2") or 0),
-        float(p.get("bloodSugar") or 0),
-        float(p.get("temperature") or 0),
+        _f(p.get("systolic")),
+        _f(p.get("diastolic")),
+        _f(p.get("heartRate")),
+        _f(p.get("spo2")),
+        _f(p.get("bloodSugar")),
+        _f(p.get("temperature")),
         1.0 if p.get("isPregnant") else 0.0,
         1.0 if p.get("hasDisability") else 0.0,
-        float(p.get("daysSinceLastVisit") or 0),
-        float(p.get("missedAppointments") or 0),
+        _f(p.get("daysSinceLastVisit")),
+        _f(p.get("missedAppointments")),
     ]
+
+
+# Physiologically plausible bounds (≈ the training distribution). Clipping
+# stops garbage / out-of-range input (age 500, 10 000 days since last visit,
+# NaN) from making the network extrapolate — e.g. days=10000 used to score 100.
+_BOUNDS = np.array([
+    (0, 110), (0, 1), (0, 10), (0, 1),          # age, elderly, #conditions, critical
+    (0, 260), (0, 160), (0, 250), (0, 100),     # systolic, diastolic, HR, SpO2
+    (0, 600), (0, 110),                         # sugar (mg/dL), temperature (°F)
+    (0, 1), (0, 1), (0, 365), (0, 10),          # pregnant, disability, days, missed
+], dtype=float)
 
 
 def build_matrix(patients):
     if not patients:
         return np.zeros((0, len(FEATURES)), dtype=float)
-    return np.array([patient_to_row(p) for p in patients], dtype=float)
+    X = np.array([patient_to_row(p) for p in patients], dtype=float)
+    X = np.nan_to_num(X, nan=0.0, posinf=0.0, neginf=0.0)
+    return np.clip(X, _BOUNDS[:, 0], _BOUNDS[:, 1])
 
 
 def rule_score(X):
@@ -85,4 +107,11 @@ def rule_score(X):
     s += pregnant * 12.0 + disability * 10.0
     s += np.clip(days_since / 30.0, 0, 4) * 2.0
     s += np.clip(missed, 0, 5) * 1.5
-    return np.clip(s, 0, 100)
+    s = np.clip(s, 0, 100)
+    # Red-flag override: any single life-threatening vital is an emergency on
+    # its own (the additive weights alone put e.g. SpO2 85% at only 30/100 =
+    # "normal"). These patients are always at least "critical" (85).
+    red = (((spo2 > 0) & (spo2 < 90)) | (systolic >= 180) | (diastolic >= 120)
+           | ((sugar > 0) & (sugar < 60)) | (sugar >= 400) | (temp >= 104)
+           | (hr >= 130) | ((hr > 0) & (hr < 40)))
+    return np.where(red, np.maximum(s, 85.0), s)

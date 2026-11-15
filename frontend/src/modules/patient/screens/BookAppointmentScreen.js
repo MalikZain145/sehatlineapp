@@ -198,9 +198,12 @@ export default function BookAppointmentScreen({
             closePrompt();
             // After a reschedule the old slot is no longer "active", so leave
             // the locked queue screen and land on the appointments list.
+            // Keep Home UNDER the list so the back button works. (index 0 /
+            // a single route left nothing to go back to — on iOS, which has no
+            // hardware back key, users were stuck on "My Appointments".)
             navigation.reset({
-              index: 0,
-              routes: [{ name: 'AppointmentListScreen' }]
+              index: 1,
+              routes: [{ name: 'HomeScreen' }, { name: 'AppointmentListScreen' }]
             });
           }
         });

@@ -49,6 +49,11 @@ class Batch(BaseModel):
 app = FastAPI(title="SehatLine Priority ML Service", version="2.0.0")
 
 
+def _d(m):
+    # pydantic v2 renamed .dict() -> .model_dump() (dict() is deprecated)
+    return m.model_dump() if hasattr(m, "model_dump") else m.dict()
+
+
 @app.get("/health")
 def health():
     return {"ok": True, "engine": MODEL.engine, "features": FEATURES}
@@ -56,9 +61,9 @@ def health():
 
 @app.post("/score")
 def score(p: Patient):
-    return MODEL.score(p.dict())
+    return MODEL.score(_d(p))
 
 
 @app.post("/prioritize")
 def prioritize(batch: Batch):
-    return MODEL.prioritize([p.dict() for p in batch.patients])
+    return MODEL.prioritize([_d(p) for p in batch.patients])

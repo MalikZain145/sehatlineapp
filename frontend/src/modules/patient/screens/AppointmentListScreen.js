@@ -517,6 +517,13 @@ const AppointmentListScreen = ({
       </BottomSheet>;
   };
 
+  // Back: if there is no screen behind this one (e.g. it was opened via a
+  // navigation.reset or a notification), go Home instead of doing nothing.
+  const goBackSafe = () => {
+    if (navigation.canGoBack()) navigation.goBack();
+    else navigation.reset({ index: 0, routes: [{ name: 'HomeScreen' }] });
+  };
+
   // ── Root ──────────────────────────────────────────────────────────────────────
   if (loading) {
     return <View style={styles.container}>
@@ -528,7 +535,7 @@ const AppointmentListScreen = ({
       <LinearGradient colors={[COLORS.primary + '08', COLORS.background, COLORS.background]} style={StyleSheet.absoluteFill} />
 
       <View style={styles.header}>
-        <TouchableOpacity style={styles.headerBtn} onPress={() => navigation.goBack()} activeOpacity={0.7}>
+        <TouchableOpacity style={styles.headerBtn} onPress={goBackSafe} activeOpacity={0.7} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
           <Ionicons name="arrow-back" size={24} color={COLORS.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Appointments</Text>
