@@ -10,8 +10,6 @@ import {
 } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
-import * as DocumentPicker from "expo-document-picker";
-import * as FileSystem from "expo-file-system/legacy";
 
 import { useTheme } from "../../Theme/themeContext";
 import { useLaboratory } from "../../context/LaboratoryContext";
@@ -32,77 +30,6 @@ export default function CompletedReportsScreen({ navigation }) {
   const { completedReports, refreshCompleted, refreshQueue } = useLaboratory();
 
   const [loadingId, setLoadingId] = useState(null);
-
-  // ── Bulk PDF upload: pick N PDFs → send one per waiting patient, advancing a
-  // progress bar as each report is confirmed saved to the patient's My Reports.
-  const [uploading, setUploading] = useState(false);
-  const [progress, setProgress] = useState(0);      // 0..1
-  const [progressText, setProgressText] = useState("");
-
-  // Read the card number from a PDF's file name (the token that carries digits,
-  // e.g. "CDA-12345 CBC.pdf" → "CDA-12345"; "C-1.pdf" → "C-1").
-  const cardFromName = (name) => {
-    const base = String(name || "").replace(/\.pdf$/i, "").trim();
-    const tokens = base.split(/[\s_]+/).filter(Boolean);
-    const withDigit = tokens.find((t) => /\d/.test(t));
-    return (withDigit || base).trim();
-  };
-
-  const handleUpload = async () => {
-    try {
-      const picked = await DocumentPicker.getDocumentAsync({
-        type: "application/pdf",
-        multiple: true,
-        copyToCacheDirectory: true,
-      });
-      if (picked.canceled) return;
-      const pdfs = picked.assets || [];
-      if (!pdfs.length) return;
-
-      const total = pdfs.length;
-      setUploading(true);
-      setProgress(0);
-      setProgressText(`Starting… 0 / ${total}`);
-
-      let sent = 0;
-      const invalid = [];
-      for (let i = 0; i < total; i++) {
-        const pdf = pdfs[i];
-        const cardNo = cardFromName(pdf.name);
-        const title = (pdf.name || "Lab Report").replace(/\.pdf$/i, "");
-        try {
-          let pdfData = "";
-          try { pdfData = await FileSystem.readAsStringAsync(pdf.uri, { encoding: "base64" }); } catch (e) { /* attach name only */ }
-          // Card number → patient. No queue needed; the report lands in their
-          // My Reports and they're notified. Invalid card → counted as invalid.
-          await laboratoryService.uploadReport({ cardNo, title, pdfName: pdf.name || `${title}.pdf`, pdfData });
-          sent += 1;
-        } catch (e) {
-          invalid.push(pdf.name || cardNo || "report");
-        }
-        // Progress reflects PDFs processed (each confirmed by the backend).
-        setProgress((i + 1) / total);
-        setProgressText(`${i + 1} / ${total} processed  ·  ${sent} sent`);
-      }
-
-      try { await refreshCompleted?.(); } catch (e) {}
-
-      setProgress(1);
-      setProgressText(`Completed — ${sent} / ${total} sent`);
-      setTimeout(() => {
-        setUploading(false);
-        setProgress(0);
-        setProgressText("");
-        const msg = invalid.length
-          ? `${sent} report${sent === 1 ? "" : "s"} sent to patients.\n\n${invalid.length} invalid (card number not found): ${invalid.slice(0, 5).join(", ")}${invalid.length > 5 ? "…" : ""}`
-          : `${sent} report${sent === 1 ? "" : "s"} sent to ${sent === 1 ? "the patient" : "patients"}. They can now view it in My Reports.`;
-        labAlert(invalid.length ? "Upload Finished" : "Upload Complete", msg);
-      }, 600);
-    } catch (e) {
-      setUploading(false);
-      labAlert("Upload Failed", e?.message || "Could not upload the reports.");
-    }
-  };
 
   const openPDF = async (patient) => {
     try {
@@ -314,34 +241,8 @@ export default function CompletedReportsScreen({ navigation }) {
 
 <GradientHeader title="Reports" subtitle="Laboratory reports and results" />
 
-{/* Upload reports → pick one or more PDFs; each is sent to a waiting patient
-    and appears in their My Reports. Progress advances as the backend confirms
-    each one. */}
-{uploading ? (
-  <View style={{ marginHorizontal: 18, marginTop: 16, marginBottom: 4, backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, borderRadius: 14, padding: 16 }}>
-    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-      <Text style={{ color: colors.text, fontSize: 14, fontWeight: "800" }}>Uploading reports…</Text>
-      <Text style={{ color: colors.primary, fontSize: 14, fontWeight: "900" }}>{Math.round(progress * 100)}%</Text>
-    </View>
-    <View style={{ height: 10, borderRadius: 5, backgroundColor: colors.mint, overflow: "hidden" }}>
-      <View style={{ width: `${Math.round(progress * 100)}%`, height: "100%", backgroundColor: colors.primary, borderRadius: 5 }} />
-    </View>
-    <Text style={{ color: colors.textSecondary, fontSize: 12, marginTop: 8 }}>{progressText}</Text>
-  </View>
-) : (
-  <TouchableOpacity
-    activeOpacity={0.85}
-    onPress={handleUpload}
-    style={{
-      flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10,
-      marginHorizontal: 18, marginTop: 16, marginBottom: 4, paddingVertical: 15,
-      borderRadius: 14, backgroundColor: colors.primary,
-    }}
-  >
-    <Ionicons name="cloud-upload-outline" size={20} color={colors.white} />
-    <Text style={{ color: colors.white, fontSize: 15, fontWeight: "800" }}>Upload a Report</Text>
-  </TouchableOpacity>
-)}
+{/* Bulk PDF upload removed — reports are uploaded per patient from the
+    Queue → Upload Report screen. */}
 
 <FlatList
   data={completedReports}

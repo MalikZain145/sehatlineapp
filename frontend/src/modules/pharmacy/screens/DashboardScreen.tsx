@@ -107,8 +107,13 @@ export default function DashboardScreen() {
           </View>
         </TouchableOpacity>
 
-        {/* Completed Orders — how many patients got their medicines today. */}
-        <View style={[styles.completedCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+        {/* Completed Orders — how many patients got their medicines today.
+            Tap → full list of completed patients. */}
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate("CompletedOrders", { range: "today" })}
+          style={[styles.completedCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
+        >
           <View style={styles.completedIcon}>
             <Ionicons name="checkmark-done-outline" size={24} color="#22C55E" />
           </View>
@@ -117,7 +122,8 @@ export default function DashboardScreen() {
             <Text style={[styles.completedSub, { color: theme.colors.textSecondary }]}>Patients whose medicines were dispensed today</Text>
           </View>
           <Text style={styles.completedNum}>{stats.dispensedToday ?? 0}</Text>
-        </View>
+          <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} style={{ marginLeft: 6 }} />
+        </TouchableOpacity>
 
         <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Today's Overview</Text>
         <View style={styles.statsGrid}>

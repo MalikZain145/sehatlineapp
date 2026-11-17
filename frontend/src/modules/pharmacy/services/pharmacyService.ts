@@ -7,7 +7,7 @@ const pharmacyService = {
   // Dashboard + queue
   getDashboard: () => api.get('/pharmacy/dashboard'),
   getQueue: () => api.get('/pharmacy/queue'),
-  getCompleted: () => api.get('/pharmacy/completed'),
+  getCompleted: (range: 'today' | 'all' = 'all') => api.get(`/pharmacy/completed?range=${range}`),
   getAnalytics: () => api.get('/pharmacy/analytics'),
   getPrescription: (id: string) => api.get(`/pharmacy/prescriptions/${id}`),
   prepare: (id: string) => api.post(`/pharmacy/prescriptions/${id}/prepare`, {}),

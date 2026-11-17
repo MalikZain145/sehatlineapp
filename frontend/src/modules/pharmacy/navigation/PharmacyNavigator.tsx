@@ -28,6 +28,7 @@ import TermsConditionsScreen from "../screens/Terms & ConditionsScreen";
 import PrivacyPolicyScreen from "../screens/PrivacyPolicyScreen";
 import RequisitionScreen from "../screens/RequisitionScreen";
 import ReportAdminScreen from "../screens/ReportAdminScreen";
+import CompletedOrdersScreen from "../screens/CompletedOrdersScreen";
 
 
 
@@ -126,6 +127,11 @@ export default function PharmacyNavigator() {
 <Stack.Screen
   name="Requisition"
   component={RequisitionScreen}
+/>
+
+<Stack.Screen
+  name="CompletedOrders"
+  component={CompletedOrdersScreen}
 />
 
 <Stack.Screen

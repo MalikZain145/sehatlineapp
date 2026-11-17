@@ -277,18 +277,43 @@ async function getDashboard(req, res, next) {
 }
 
 // GET /api/pharmacy/completed — recently dispensed orders
+// GET /api/pharmacy/completed?range=today|all
+// Full list of patients whose medicines were dispensed (newest first), with
+// date/time, doctor and the medicines given — shown when the pharmacist taps
+// "Completed Orders" on the dashboard.
 async function getCompleted(req, res, next) {
   try {
-    const rows = await Prescription.find({ pharmacyStatus: 'dispensed' })
-      .sort({ dispensedAt: -1 }).limit(100).lean();
-    const orders = rows.map((p) => ({
-      id: String(p._id),
-      patientName: p.patient?.name || 'Patient',
-      cardNo: p.patient?.cdaCard || p.patient?.cnic || p.tokenNumber || '',
-      collectedTime: p.dispensedAt ? new Date(p.dispensedAt).toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' }) : '',
-      counter: p.pharmacyCounter || '',
-    }));
-    return res.json({ success: true, count: orders.length, orders });
+    const range = req.query.range === 'today' ? 'today' : 'all';
+    const filter = { pharmacyStatus: 'dispensed' };
+    if (range === 'today') {
+      const start = new Date(); start.setHours(0, 0, 0, 0);
+      filter.dispensedAt = { $gte: start };
+    }
+    const startOfToday = new Date(); startOfToday.setHours(0, 0, 0, 0);
+    const [rows, todayCount, totalCount] = await Promise.all([
+      Prescription.find(filter).sort({ dispensedAt: -1 }).limit(500).lean(),
+      Prescription.countDocuments({ pharmacyStatus: 'dispensed', dispensedAt: { $gte: startOfToday } }),
+      Prescription.countDocuments({ pharmacyStatus: 'dispensed' }),
+    ]);
+    const orders = rows.map((p) => {
+      const at = p.dispensedAt ? new Date(p.dispensedAt) : null;
+      const meds = (p.medicines && p.medicines.length)
+        ? p.medicines
+        : (p.medicineItems || []).map((m) => m.name).filter(Boolean);
+      return {
+        id: String(p._id),
+        patientName: p.patient?.name || 'Patient',
+        cardNo: p.patient?.cdaCard || p.patient?.cnic || p.tokenNumber || '',
+        phone: p.patient?.phone || '',
+        doctorName: p.doctor?.name || '',
+        medicines: meds,
+        dispensedAt: at ? at.toISOString() : null,
+        collectedTime: at ? at.toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' }) : '',
+        collectedDate: at ? at.toLocaleDateString('en-PK', { day: '2-digit', month: 'short', year: 'numeric' }) : '',
+        counter: p.pharmacyCounter || '',
+      };
+    });
+    return res.json({ success: true, range, count: orders.length, todayCount, totalCount, orders });
   } catch (err) { next(err); }
 }
 
