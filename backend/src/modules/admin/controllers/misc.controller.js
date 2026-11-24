@@ -1,5 +1,6 @@
 // Admin → dashboard stats, doctor reports, and change-own-password.
 
+const { localDateStr } = require('../../../utils/dates');
 const User = require('../../auth/models/User');
 const Doctor = require('../../patient/models/Doctor');
 const Token = require('../../patient/models/Token');
@@ -29,7 +30,7 @@ async function getDashboard(req, res, next) {
       Doctor.countDocuments({}),
       Doctor.countDocuments({ active: true }),
       Token.countDocuments({ createdAt: { $gte: startOfToday } }),
-      Appointment.countDocuments({ date: new Date().toISOString().slice(0, 10) }),
+      Appointment.countDocuments({ date: localDateStr() }),
       Report.countDocuments({ status: 'open' }),
     ]);
     return res.json({
@@ -45,7 +46,7 @@ async function getDashboard(req, res, next) {
 // existing collections — no new data is stored.
 const DEPT_LABEL = { chronic_opd: 'Chronic OPD', cardiology: 'Cardiology', pharmacy: 'Pharmacy', done: 'Completed', general: 'General' };
 const DAY_MS = 86400000;
-const dateStr = (d) => d.toISOString().slice(0, 10);
+const dateStr = (d) => localDateStr(d);
 const pctChange = (cur, prev) => {
   if (!prev) return cur > 0 ? 100 : 0;
   return Math.round(((cur - prev) / prev) * 1000) / 10;

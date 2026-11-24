@@ -350,9 +350,9 @@ export default function ReportProblemScreen({ navigation }) {
               },
             ]}
           >
-            Your report will be reviewed by the
-            laboratory administrator. Backend
-            submission will be connected later.
+            Your report is sent to the hospital
+            administrator, who will review it and
+            follow up with you.
           </Text>
         </View>
       </ScrollView>

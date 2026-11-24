@@ -142,8 +142,19 @@ export default function BookAppointmentScreen({
         setDayAvailable(res?.dayAvailable !== false);
       } catch (e) {
         if (active) {
-          setSlots([]);
-          setDayAvailable(true);
+          // OFFLINE and this day was never loaded before: show the doctor's
+          // configured slots (from the cached doctor list) so the patient can
+          // still request a time. The server re-checks it on sync; if it was
+          // taken meanwhile the patient is told (NetworkBanner "Couldn't sync").
+          if (e && (e.code === 'NETWORK' || e.code === 'TIMEOUT') && selectedDoctor?.slots?.length) {
+            const DAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][selectedDate.getDay()];
+            const worksToday = !selectedDoctor.availableDays?.length || selectedDoctor.availableDays.includes(DAY);
+            setSlots(selectedDoctor.slots.map(t => ({ time: t, available: worksToday, reason: worksToday ? null : `Doctor not available on ${DAY}` })));
+            setDayAvailable(worksToday);
+          } else {
+            setSlots([]);
+            setDayAvailable(true);
+          }
         }
       } finally {
         if (active) setSlotsLoading(false);
@@ -185,6 +196,21 @@ export default function BookAppointmentScreen({
             doctorId: selectedDoctor.id,
             reason: visitType || 'Consultation'
           });
+      if (res?.queued) {
+        // Offline / weak connection: saved in the outbox, sent automatically.
+        const dLabel = `${DOW[selectedDate.getDay()]}, ${selectedDate.getDate()} ${MON[selectedDate.getMonth()]}`;
+        setPrompt({
+          visible: true,
+          variant: 'success',
+          icon: 'cloud-upload',
+          title: isReschedule ? 'Reschedule Saved Offline' : 'Booking Saved Offline',
+          message: `${selectedDoctor.name}\n${dLabel} at ${label12(selectedTime)}\n\nYou're offline right now. Your request is saved and will be sent automatically when the connection returns — your token number is issued then. If the slot gets taken meanwhile, you'll be notified to pick another.`,
+          primaryLabel: 'OK',
+          onPrimary: () => { closePrompt(); navigation.goBack(); }
+        });
+        setSelectedTime('');
+        return;
+      }
       if (res?.appointment) {
         const dLabel = `${DOW[selectedDate.getDay()]}, ${selectedDate.getDate()} ${MON[selectedDate.getMonth()]}`;
         setPrompt({

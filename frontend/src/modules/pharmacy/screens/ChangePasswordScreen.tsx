@@ -13,6 +13,7 @@ import { useTheme } from "../Theme/themeContext";
 import GradientHeader from "../components/common/GradientHeader";
 import Colors from "../constants/colors";
 import { pharmAlert } from "../components/common/PharmAlert";
+import { api } from "../../../services/apiClient";
 
 export default function ChangePasswordScreen() {
 
@@ -22,7 +23,11 @@ const { theme } = useTheme();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const updatePassword = () => {
+  const [saving, setSaving] = useState(false);
+
+  // BUG FIX: this screen used to show "Password changed successfully" WITHOUT
+  // calling the server — the password never changed. Now it really updates it.
+  const updatePassword = async () => {
 
     if (
       !currentPassword ||
@@ -44,12 +49,22 @@ const { theme } = useTheme();
       return;
     }
 
-    pharmAlert(
-      "Success",
-      "Password changed successfully."
-    );
-
-    navigation.goBack();
+    if (saving) return;
+    setSaving(true);
+    try {
+      await api.post("/auth/settings/password", { currentPassword, newPassword });
+      pharmAlert("Success", "Password changed successfully.");
+      navigation.goBack();
+    } catch (e: any) {
+      pharmAlert(
+        "Could Not Change Password",
+        e?.code === "NETWORK" || e?.code === "TIMEOUT"
+          ? "You need an internet connection to change your password."
+          : e?.message || "Please check your current password and try again."
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (

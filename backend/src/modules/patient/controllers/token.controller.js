@@ -9,6 +9,7 @@
 //        • Mark complete → journey ends → "Thank you" → home.
 //   4) Queue position is priority-aware (elderly / critical first).
 
+const { localDateStr } = require('../../../utils/dates');
 const Token = require('../models/Token');
 const Counter = require('../models/Counter');
 const User = require('../../auth/models/User');
@@ -101,7 +102,7 @@ async function broadcastUpdate(req) {
 // Sequential token number, A-001 style, atomic (no duplicates).
 // Resets daily so numbering starts fresh each day at A-001.
 async function nextTokenNumber() {
-  const dayKey = `token_${new Date().toISOString().slice(0, 10)}`; // token_2026-07-04
+  const dayKey = `token_${localDateStr()}`; // token_2026-07-04 (hospital local day)
   const seq = await Counter.next(dayKey);
   return `A-${String(seq).padStart(3, '0')}`;
 }
@@ -267,7 +268,7 @@ async function generateToken(req, res, next) {
     // block if there's a cardiology appointment booked for today at a time
     // within the next hour window. (Simple same-day guard.)
     const Appointment = require('../models/Appointment');
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayStr = localDateStr();
     const todaysCardio = await Appointment.findOne({
       user: req.user._id, date: todayStr, status: 'booked',
     });
@@ -507,6 +508,16 @@ async function advanceToken(req, res, next) {
     const token = await Token.findOne({ _id: req.params.id, user: req.user._id });
     if (!token) return fail(res, 404, 'Token not found', 'NOT_FOUND');
     if (token.status === 'completed') return fail(res, 400, 'Token already completed', 'DONE');
+
+    // SECURITY: this route is the PATIENT's own token. Moving a patient on to
+    // the pharmacy / marking pharmacy done is staff work (doctor/pharmacy
+    // modules do it) — a patient must not be able to skip the doctor.
+    if (['move_to_pharmacy', 'pharmacy_done'].includes(action) && req.user.role === 'patient') {
+      return fail(res, 403, 'This step is done by hospital staff.', 'STAFF_ONLY');
+    }
+    if (action === 'get_lab_token' && !['awaiting_lab_choice', 'pharmacy', 'laboratory'].includes(token.status)) {
+      return fail(res, 400, 'A lab token is available after your doctor visit.', 'BAD_STATE');
+    }
 
     switch (action) {
       case 'move_to_pharmacy':

@@ -114,4 +114,7 @@ tokenSchema.methods.log = function log(note) {
   this.history.push({ department: this.department, status: this.status, at: new Date(), note: note || '' });
 };
 
+// Speed: every queue read is "department + status", ordered by priority/time.
+tokenSchema.index({ department: 1, status: 1, priorityScore: -1, issuedAt: 1 });
+
 module.exports = mongoose.model('Token', tokenSchema);

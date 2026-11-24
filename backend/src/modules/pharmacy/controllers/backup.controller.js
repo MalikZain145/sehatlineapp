@@ -2,6 +2,7 @@
 // a formatted Excel sheet; "Export All" streams one master workbook with a sheet
 // per day. The downloading pharmacist's details are stamped into every sheet.
 
+const { localDateStr } = require('../../../utils/dates');
 const {
   generateDailyBackup, buildWorkbookForDay, buildMasterWorkbook, listDays,
 } = require('../services/backup.service');
@@ -47,7 +48,7 @@ async function downloadDay(req, res, next) {
 async function exportAll(req, res, next) {
   try {
     const { workbook } = await buildMasterWorkbook(pharmacistOf(req));
-    const stamp = new Date().toISOString().slice(0, 10);
+    const stamp = localDateStr();
     return sendWorkbook(res, workbook, `pharmacy-backup-ALL-${stamp}.xlsx`);
   } catch (err) { next(err); }
 }

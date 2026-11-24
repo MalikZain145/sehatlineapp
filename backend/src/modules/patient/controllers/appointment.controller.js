@@ -10,6 +10,7 @@
 // Chronic OPD tokens are handled in token.controller.js. The 30-day chronic
 // rule is enforced there (generateToken).
 
+const { localDateStr, localHHMM } = require('../../../utils/dates');
 const Appointment = require('../models/Appointment');
 const Token = require('../models/Token');
 const Vital = require('../models/Vital');
@@ -61,10 +62,8 @@ const BOOKING_END = '13:00';  // 1:00 PM — booking window closes (no slots at/
 const SESSION_END = '14:00';  // 2:00 PM — doctors finish seeing booked patients
 
 function nowParts() {
-  const now = new Date();
-  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-  const nowHHMM = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-  return { todayStr, nowHHMM };
+  // Hospital local time (process.env.TZ = Asia/Karachi, see utils/dates).
+  return { todayStr: localDateStr(), nowHHMM: localHHMM() };
 }
 
 // Is this date+time still a valid, bookable slot? Enforces Mon–Sat, the
@@ -247,18 +246,28 @@ async function bookAppointment(req, res, next) {
     // AI/ML triage priority — elderly + critical recent vitals rank higher.
     const priority = await computeAppointmentPriority(req.user);
 
-    const appointment = await Appointment.create({
-      user: req.user._id,
-      department: 'cardiology',
-      doctorId: doctor.id,
-      doctorName: doctor.name,
-      date, time,
-      reason: reason || '',
-      status: 'booked',
-      priorityScore: priority.score,
-      priorityLevel: priority.level,
-      prioritySource: priority.source,
-    });
+    let appointment;
+    try {
+      appointment = await Appointment.create({
+        user: req.user._id,
+        department: 'cardiology',
+        doctorId: doctor.id,
+        doctorName: doctor.name,
+        date, time,
+        tokenNumber: await Appointment.nextTokenNumber(doctor.id, date),
+        reason: reason || '',
+        status: 'booked',
+        priorityScore: priority.score,
+        priorityLevel: priority.level,
+        prioritySource: priority.source,
+      });
+    } catch (e) {
+      // Unique index (uniq_active_slot): someone booked this slot a moment ago.
+      if (e && e.code === 11000) {
+        return fail(res, 409, 'This slot was just booked by someone else. Please pick another.', 'SLOT_FULL');
+      }
+      throw e;
+    }
 
     logger.db('INSERT', 'Appointment', `${req.user.email} cardio ${date} ${time} ${doctor.name}`);
     logger.success(`Cardiology appointment booked: ${date} ${time} with ${doctor.name}`);
@@ -290,28 +299,23 @@ async function bookAppointment(req, res, next) {
 // card does.
 async function getActiveAppointment(req, res, next) {
   try {
-    const now = new Date();
-    const todayStr = now.toISOString().slice(0, 10);
-    const nowHHMM = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const todayStr = localDateStr();
 
-    // Lazily close out any booked appointment whose slot has already
-    // passed — same pattern as the health-tip delivery: computed at read
-    // time instead of needing a cron job.
+    // Lazily close out bookings from PAST days that were never seen.
+    // BUG FIX: this used to mark an appointment "completed" as soon as its
+    // slot time passed — so a 09:00 patient still waiting at 09:05 vanished
+    // from the doctor's queue and from their own Home screen, and was asked
+    // for feedback on a visit that never happened. Today's bookings now stay
+    // until the doctor completes them; past days become "no-show".
     await Appointment.updateMany(
-      {
-        user: req.user._id,
-        status: 'booked',
-        $or: [
-          { date: { $lt: todayStr } },
-          { date: todayStr, time: { $lt: nowHHMM } },
-        ],
-      },
-      { $set: { status: 'completed' } }
+      { user: req.user._id, status: 'booked', date: { $lt: todayStr } },
+      { $set: { status: 'no-show' } }
     );
 
     const appointment = await Appointment.findOne({
-      user: req.user._id, status: 'booked', date: todayStr,
+      user: req.user._id, status: { $in: ['booked', 'in-progress'] }, date: todayStr,
     }).sort({ time: 1 });
+    if (appointment && !appointment.tokenNumber) await Appointment.ensureTokenNumbers([appointment]);
 
     if (!appointment) return res.json({ success: true, appointment: null });
 
@@ -322,7 +326,7 @@ async function getActiveAppointment(req, res, next) {
     const sameDay = await Appointment.find({
       date: appointment.date,
       doctorId: appointment.doctorId,
-      status: 'booked',
+      status: { $in: ['booked', 'in-progress'] },
     }).select('priorityScore time bookedAt').lean();
 
     const cmp = (a, b) => (
@@ -349,15 +353,43 @@ async function getActiveAppointment(req, res, next) {
 async function myAppointments(req, res, next) {
   try {
     const appts = await Appointment.find({ user: req.user._id }).sort({ date: -1, time: -1 });
+    await Appointment.ensureTokenNumbers(appts.filter((a) => ['booked', 'in-progress'].includes(a.status)));
     const now = new Date();
     const upcoming = [];
     const past = [];
     for (const a of appts) {
       const dt = new Date(`${a.date}T${a.time}:00`);
-      if (a.status === 'booked' && dt >= now) upcoming.push(a);
+      // Today's booking stays "upcoming" until the doctor finishes it, even if
+      // the slot time has passed (patient may still be waiting in the queue).
+      const isToday = a.date === localDateStr();
+      if ((a.status === 'booked' || a.status === 'in-progress') && (dt >= now || isToday)) upcoming.push(a);
       else past.push(a);
     }
-    return res.json({ success: true, upcoming, past, all: appts });
+    // Real queue info for active bookings (replaces the app's random
+    // "people ahead" / "position" numbers): rank inside the same doctor's day,
+    // highest priority first, then slot time, then booking time.
+    const Doctor = require('../models/Doctor');
+    const active = appts.filter((a) => a.status === 'booked' || a.status === 'in-progress');
+    const groups = {};
+    for (const a of active) groups[`${a.doctorId}|${a.date}`] = 1;
+    const extra = {};
+    await Promise.all(Object.keys(groups).map(async (k) => {
+      const [doctorId, date] = k.split('|');
+      const rows = await Appointment.find({ doctorId, date, status: { $in: ['booked', 'in-progress'] } })
+        .select('priorityScore time bookedAt status').lean();
+      rows.sort((x, y) => (
+        (x.status === 'in-progress' ? -1 : 0) - (y.status === 'in-progress' ? -1 : 0)
+        || (y.priorityScore || 0) - (x.priorityScore || 0)
+        || String(x.time).localeCompare(String(y.time))
+        || new Date(x.bookedAt) - new Date(y.bookedAt)
+      ));
+      rows.forEach((r, i) => { extra[String(r._id)] = { ahead: i, position: i + 1, estWaitMin: i * 10 }; });
+    }));
+    const docIds = [...new Set(appts.map((a) => a.doctorId).filter(Boolean))];
+    const docs = docIds.length ? await Doctor.find({ doctorId: { $in: docIds } }).select('doctorId room').lean() : [];
+    const roomOf = Object.fromEntries(docs.map((d) => [d.doctorId, d.room || '']));
+    const decorate = (a) => ({ ...a.toObject(), ...(extra[String(a._id)] || {}), room: roomOf[a.doctorId] || '', timeLabel: label12(a.time) });
+    return res.json({ success: true, upcoming: upcoming.map(decorate), past: past.map(decorate), all: appts.map(decorate) });
   } catch (err) {
     next(err);
   }
@@ -429,8 +461,15 @@ async function reschedule(req, res, next) {
     });
     if (slotTaken) return fail(res, 409, 'That slot is taken. Pick another.', 'SLOT_FULL');
 
+    const dayOrDoctorChanged = a.date !== date || a.doctorId !== doctor.id;
     a.date = date; a.time = time; a.doctorId = doctor.id; a.doctorName = doctor.name;
-    await a.save();
+    if (dayOrDoctorChanged || !a.tokenNumber) a.tokenNumber = await Appointment.nextTokenNumber(doctor.id, date);
+    try {
+      await a.save();
+    } catch (e) {
+      if (e && e.code === 11000) return fail(res, 409, 'That slot is taken. Pick another.', 'SLOT_FULL');
+      throw e;
+    }
     logger.db('UPDATE', 'Appointment', `rescheduled ${a._id} → ${date} ${time}`);
     return res.json({ success: true, message: 'Appointment rescheduled.', appointment: a });
   } catch (err) {
@@ -482,7 +521,8 @@ async function verifyAppointmentPublic(req, res) {
       ['Doctor', a.doctorName || 'Specialist'],
       ['Department', dept.charAt(0).toUpperCase() + dept.slice(1)],
       ['Date', a.date],
-      ['Time', a.time],
+      ['Time', label12(a.time)],
+      ['Token', a.tokenNumber || '—'],
       ['Status', String(a.status).replace(/^\w/, (c) => c.toUpperCase())],
       ['Reference', String(a._id).slice(-8).toUpperCase()],
     ];

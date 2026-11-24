@@ -257,9 +257,7 @@ export default function HealthCampsScreen({
               <View style={styles.emptyIcon}><Ionicons name="people-circle" size={34} color={COLORS.primary} /></View>
               <Text style={styles.emptyTitle}>{filter === 'mine' ? 'No registrations yet' : 'No upcoming camps'}</Text>
               <Text style={styles.emptySub}>{filter === 'mine' ? 'Register for a camp and it will show here.' : 'Free screening camps will be listed here as the hospital schedules them.'}</Text>
-              {filter === 'upcoming' && <TouchableOpacity style={styles.emptyBtn} onPress={loadDemo} disabled={busy} activeOpacity={0.9}>
-                  {busy ? <ActivityIndicator color="#FFF" /> : <><Ionicons name="megaphone" size={16} color="#FFF" /><Text style={styles.emptyBtnText}>Load Sample Camps</Text></>}
-                </TouchableOpacity>}
+              {/* "Load Sample Camps" removed — camps come only from the hospital (admin). */}
             </View> : <FadeInView delay={40}>{listData.map(renderCamp)}</FadeInView>}
         </ScrollView>}
 

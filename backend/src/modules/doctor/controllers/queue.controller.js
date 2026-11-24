@@ -10,6 +10,7 @@
 // queueing-theory way to minimise waiting). Cardiology doctors instead serve
 // their own booked appointments.
 
+const { localDateStr, label12 } = require('../../../utils/dates');
 const Token = require('../../patient/models/Token');
 const User = require('../../auth/models/User');
 const Appointment = require('../../patient/models/Appointment');
@@ -96,8 +97,16 @@ async function getQueue(req, res, next) {
 // ── START CONSULT (call this patient now) ─────────────────────────────────
 async function startConsult(req, res, next) {
   try {
-    const token = await Token.findOne({ _id: req.params.tokenId, department: 'chronic_opd' });
-    if (!token) return fail(res, 404, 'Token not found in the OPD queue', 'NOT_FOUND');
+    const token = await Token.findOne({ _id: req.params.tokenId, department: 'chronic_opd' }).catch(() => null);
+    if (!token) {
+      // Cardiology booking: mark the appointment in-progress so it shows as
+      // "now serving" and isn't auto-closed while the patient is with the doctor.
+      const appt = await Appointment.findById(req.params.tokenId).catch(() => null);
+      if (!appt) return fail(res, 404, 'Token not found in the OPD queue', 'NOT_FOUND');
+      if (appt.status === 'completed') return fail(res, 400, 'This visit is already complete', 'DONE');
+      if (appt.status === 'booked') { appt.status = 'in-progress'; await appt.save(); }
+      return res.json({ success: true, message: 'Consultation started', tokenNumber: appt.tokenNumber });
+    }
     if (token.status === 'completed') return fail(res, 400, 'This visit is already complete', 'DONE');
 
     token.status = 'in-progress';
@@ -121,18 +130,22 @@ async function getMyQueue(req, res, next) {
     const servers = 1; // this single doctor serves their own line
 
     if (doctorId.startsWith('cardio')) {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = localDateStr();
       // Today's Queue = TODAY's appointments only. A doctor's daily session runs
       // for the current day; future days (e.g. Wednesday's bookings) are NOT
       // shown today — they appear in the queue on their own day. Once today's
       // appointments are all seen, the queue is simply empty.
       const appts = await Appointment.find({ doctorId, date: today, status: { $in: ['booked', 'in-progress'] } })
         .sort({ time: 1 }).lean();
+      await Appointment.ensureTokenNumbers(appts);
       const users = await User.find({ _id: { $in: appts.map((a) => a.user) } }).select('name dob').lean();
       const byId = Object.fromEntries(users.map((u) => [String(u._id), u]));
       const queue = appts.map((a, idx) => ({
         id: String(a._id), tokenId: String(a._id),
-        token: a.time,                 // slot time is the "token" for a booking
+        // BUG FIX: the slot TIME used to be sent as the "token". Now the real
+        // system-assigned token number, with the slot time sent separately.
+        token: a.tokenNumber, tokenNumber: a.tokenNumber,
+        slotTime: a.time, timeLabel: label12(a.time),
         date: a.date,
         isToday: a.date === today,
         patientName: byId[String(a.user)]?.name || 'Patient',

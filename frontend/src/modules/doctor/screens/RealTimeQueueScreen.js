@@ -12,6 +12,7 @@ import { APP_VERSION } from '../../../constants/version';
 import { showConfirm } from '../../../components/confirm';
 import doctorService from '../services/doctorService';
 import { onQueueUpdate } from '../../../services/socket';
+import { visitTimeLabel } from '../utils/visitTime';
 
 // Map a backend my-queue row to this screen's patient card shape.
 import { useTheme } from "../../../context/ThemeContext";
@@ -24,7 +25,8 @@ const mapBackendQueue = rows => (rows || []).map(p => ({
   gender: p.gender || '',
   type: p.reason || p.chronicIllness || 'Chronic OPD',
   priority: p.priorityLevel === 'critical' ? 'Emergency' : p.priorityLevel === 'elderly' || p.priorityLevel === 'high' ? 'Urgent' : 'Normal',
-  time: p.estWaitMin != null ? `~${p.estWaitMin} min` : '',
+  time: visitTimeLabel(p),
+  slotTime: p.slotTime,
   status: p.status === 'in-progress' ? 'Called' : 'Waiting'
 }));
 const {

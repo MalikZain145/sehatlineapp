@@ -13,6 +13,7 @@ import { showConfirm, showInfo } from '../../../components/confirm';
 import { onQueueUpdate } from '../../../services/socket';
 import { useTheme } from "../../../context/ThemeContext";
 import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
+import { visitTimeLabel } from '../utils/visitTime';
 import { COLORS } from "../../../theme"; // static brand palette for module-scope defaults; components shadow it via useTheme()
 const {
   width,
@@ -191,7 +192,9 @@ const DoctorPortalScreen = ({
           gender: p.gender || '',
           status: p.status,
           priorityLevel: p.priorityLevel,
-          estWaitMin: p.estWaitMin
+          estWaitMin: p.estWaitMin,
+          slotTime: p.slotTime,
+          time: visitTimeLabel(p)
         })));
         setPatientsWaiting(q.waiting ?? q.queue.length);
       }
@@ -788,7 +791,7 @@ const DoctorPortalScreen = ({
                       {patient.name}
                     </Text>
                     <Text style={styles.queueDetails}>
-                      {patient.age} yrs | {patient.gender || 'Male'} | {patient.time || '10:00 AM'}
+                      {patient.age ? `${patient.age} yrs` : 'Age N/A'}{patient.gender ? ` | ${patient.gender}` : ''}{patient.time ? ` | ${patient.time}` : ''}
                     </Text>
                   </View>
                 </View>)}

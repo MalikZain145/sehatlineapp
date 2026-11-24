@@ -90,4 +90,9 @@ const prescriptionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Speed: the pharmacy queue/completed lists and lab queue filter + sort on these.
+prescriptionSchema.index({ pharmacyStatus: 1, createdAt: 1 });
+prescriptionSchema.index({ pharmacyStatus: 1, dispensedAt: -1 });
+prescriptionSchema.index({ labStatus: 1, createdAt: 1 });
+
 module.exports = mongoose.model('Prescription', prescriptionSchema);

@@ -24,10 +24,14 @@ const appointmentSchema = new mongoose.Schema(
     date: { type: String, required: true, index: true }, // 'YYYY-MM-DD'
     time: { type: String, required: true },              // 'HH:mm' (24h)
 
+    // System-assigned token number for this doctor + day, e.g. "C-007".
+    // (The doctor's queue used to show the slot TIME as the "token".)
+    tokenNumber: { type: String, default: '' },
+
     // Booking lifecycle.
     status: {
       type: String,
-      enum: ['booked', 'completed', 'cancelled', 'no-show'],
+      enum: ['booked', 'in-progress', 'completed', 'cancelled', 'no-show'],
       default: 'booked',
       index: true,
     },
@@ -50,5 +54,30 @@ const appointmentSchema = new mongoose.Schema(
 // Fast lookups for slot-clash checks.
 appointmentSchema.index({ date: 1, time: 1, doctorId: 1, status: 1 });
 appointmentSchema.index({ user: 1, date: 1, time: 1, status: 1 });
+// RACE FIX: the controller checks "slot free?" and then creates — two
+// patients tapping at the same moment could both pass the check. This makes
+// the database itself refuse a second ACTIVE booking of the same slot.
+appointmentSchema.index(
+  { doctorId: 1, date: 1, time: 1 },
+  { unique: true, partialFilterExpression: { status: 'booked' }, name: 'uniq_active_slot' }
+);
+
+// Next sequential token for a doctor's day: "C-001", "C-002", …
+appointmentSchema.statics.nextTokenNumber = async function nextTokenNumber(doctorId, date) {
+  const Counter = require('./Counter');
+  const seq = await Counter.next(`appt_${doctorId || 'any'}_${date}`);
+  return `C-${String(seq).padStart(3, '0')}`;
+};
+
+// Older bookings (made before token numbers existed) get one lazily.
+appointmentSchema.statics.ensureTokenNumbers = async function ensureTokenNumbers(appts) {
+  for (const a of appts) {
+    if (a.tokenNumber) continue;
+    const tn = await this.nextTokenNumber(a.doctorId, a.date);
+    await this.updateOne({ _id: a._id, tokenNumber: { $in: ['', null] } }, { $set: { tokenNumber: tn } });
+    a.tokenNumber = tn;
+  }
+  return appts;
+};
 
 module.exports = mongoose.model('Appointment', appointmentSchema);

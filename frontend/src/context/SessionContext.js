@@ -118,8 +118,19 @@ export function SessionProvider({ children, navigationRef }) {
         await bootstrapApiBaseUrl();
         const raw = await AsyncStorage.getItem(authService.USER_KEY);
         if (raw) {
-          // Validate with server
-          const res = await authService.me();
+          // Validate with server. OFFLINE: if the server can't be reached,
+          // keep the saved session so the app still opens and works from the
+          // offline cache (a real 401 still logs out via the global handler).
+          let res = null;
+          try {
+            res = await authService.me();
+          } catch (e) {
+            if (e && (e.code === 'NETWORK' || e.code === 'TIMEOUT')) {
+              try { setUser(JSON.parse(raw)); } catch (_) { setUser(null); }
+              return;
+            }
+            throw e;
+          }
           setUser(res.user);
           // Returning user — (re)register this device's push token.
           getExpoPushToken()

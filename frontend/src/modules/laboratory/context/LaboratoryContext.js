@@ -10,6 +10,7 @@ import React, {
   useCallback,
 } from 'react';
 import laboratoryService from '../services/laboratoryService';
+import { onQueueUpdate } from '../../../services/socket';
 
 const LaboratoryContext = createContext(null);
 
@@ -43,6 +44,13 @@ export function LaboratoryProvider({ children }) {
   }, [refreshQueue, refreshCompleted, refreshInventory, refreshStats]);
 
   useEffect(() => { refresh(); }, [refresh]);
+  // Live lab queue: the backend emits 'queue:update' when the doctor/pharmacy
+  // moves a patient on. On the hosted backend (no WebSocket) the subscription
+  // polls instead, so new lab patients appear without a manual refresh.
+  useEffect(() => {
+    const off = onQueueUpdate(() => { refreshQueue(); refreshStats(); });
+    return () => off && off();
+  }, [refreshQueue, refreshStats]);
 
   /* ================= PATIENTS ================= */
 
@@ -55,9 +63,9 @@ export function LaboratoryProvider({ children }) {
   };
 
   // Complete with an optional report payload ({ title, category, results, remarks }).
-  const completePatient = async (id, payload = {}) => {
+  const completePatient = async (id, payload = {}, opts = {}) => {
     try {
-      const res = await laboratoryService.complete(id, payload);
+      const res = await laboratoryService.complete(id, payload, opts);
       await Promise.all([refreshQueue(), refreshCompleted(), refreshStats()]);
       return res;
     } catch (e) { await refreshQueue(); throw e; }

@@ -13,13 +13,15 @@ import GradientHeader from "../components/common/GradientHeader";
 import Colors from "../constants/colors";
 import { useTheme } from "../Theme/themeContext";
 import { pharmAlert } from "../components/common/PharmAlert";
+import pharmacyService from "../services/pharmacyService";
 export default function ReportProblemScreen() {
 
   const [title, setTitle] = useState("");
   const { theme } = useTheme();
   const [description, setDescription] = useState("");
 
-  const submitReport = () => {
+  // BUG FIX: used to show "submitted successfully" without sending anything.
+  const submitReport = async () => {
 
     if (!title || !description) {
       pharmAlert(
@@ -29,13 +31,19 @@ export default function ReportProblemScreen() {
       return;
     }
 
-    pharmAlert(
-      "Report Submitted",
-      "Thank you! Your issue has been submitted successfully."
-    );
-
-    setTitle("");
-    setDescription("");
+    try {
+      const res: any = await pharmacyService.reportToAdmin(`${title}\n\n${description}`);
+      pharmAlert(
+        res?.queued ? "Saved Offline" : "Report Submitted",
+        res?.queued
+          ? "You're offline. Your report is saved and will be sent to the administrator automatically."
+          : "Thank you! Your issue has been sent to the administrator."
+      );
+      setTitle("");
+      setDescription("");
+    } catch (e: any) {
+      pharmAlert("Could Not Submit", e?.message || "Please try again.");
+    }
   };
 
   return (

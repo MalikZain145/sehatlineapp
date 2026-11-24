@@ -1,5 +1,6 @@
 // Health Camps controller — browse & register for free screening camps.
 
+const { localDateStr } = require('../../../utils/dates');
 const HealthCamp = require('../models/HealthCamp');
 const logger = require('../../../utils/logger');
 
@@ -8,7 +9,7 @@ function fail(res, status, message, code) {
 }
 function io(req) { return req.app.get('io'); }
 
-function todayStr() { return new Date().toISOString().slice(0, 10); }
+function todayStr() { return localDateStr(); }
 
 function shape(camp, userId) {
   const regs = camp.registrants || [];

@@ -11,7 +11,7 @@ const Vital = require('../../patient/models/Vital');
 const LabReport = require('../../patient/models/LabReport');
 const Appointment = require('../../patient/models/Appointment');
 const Medicine = require('../../pharmacy/models/Medicine');
-const { defaultMedsFor } = require('../../patient/services/chronic.config');
+const { defaultMedsFor, doctorForCondition } = require('../../patient/services/chronic.config');
 
 // Turn the doctor's medicine input into (a) display strings for the app and
 // (b) structured lines the pharmacy dispenses from (qty = perDay × days). Accepts
@@ -124,6 +124,11 @@ async function proceed(req, res, next) {
       return fail(res, 404, 'Token not found in OPD', 'NOT_FOUND');
     }
     if (token.status === 'completed') return fail(res, 400, 'Already completed', 'DONE');
+    // RETRY-SAFE: on a weak connection the app may resend "proceed" after the
+    // first one already went through. Don't create a second prescription.
+    if (['pharmacy', 'awaiting_lab_choice', 'laboratory'].includes(token.status)) {
+      return res.json({ success: true, alreadyDone: true, message: 'Patient already sent to Pharmacy.', nextPatient: null });
+    }
 
     const cleanTests = Array.isArray(tests) ? tests.filter(Boolean) : [];
     const { medicines: builtMeds, medicineItems } = await buildMeds(medicines, req.body.medicineItems);
@@ -146,7 +151,15 @@ async function proceed(req, res, next) {
       // the least-busy pharmacist who is on duty right now (null if none online).
       const patient = await User.findById(token.user);
       const assigned = await pickPharmacist();
-      try {
+      // BUG FIX: a failed prescription insert used to be only logged, while the
+      // token was still moved to "pharmacy" — so the patient was told to go to
+      // the pharmacy but the pharmacy never saw them. Now a failure aborts
+      // (the app retries via its offline outbox) and an existing prescription
+      // for this token is reused instead of duplicated.
+      const existingPresc = await Prescription.findOne({ token: token._id });
+      if (existingPresc) {
+        token.prescription = existingPresc._id;
+      } else {
         const presc = await Prescription.create({
           token: token._id, tokenNumber: token.tokenNumber, user: token.user,
           patient: {
@@ -172,7 +185,7 @@ async function proceed(req, res, next) {
           body: `${req.user.name} has issued your prescription (Token ${token.tokenNumber}). Tap to view it and track it at the pharmacy.`,
           icon: 'document-text', screen: 'PrescriptionDetailScreen', refId: String(presc._id),
         });
-      } catch (e) { logger.warn(`Prescription create failed: ${e.message}`); }
+      }
 
       if (cleanTests.length) { token.labRequired = true; token.prescribedTests = cleanTests; }
       token.department = 'pharmacy';
@@ -186,9 +199,17 @@ async function proceed(req, res, next) {
 
     logger.db('UPDATE', 'Token', `${token.tokenNumber} consulted by ${req.user.email}`);
 
-    // Load the NEXT waiting patient (highest priority) into consultation.
-    const waiting = await Token.find({ department: 'chronic_opd', status: 'in-queue' });
-    const nextToken = orderByPriority(waiting)[0] || null;
+    // Load the NEXT waiting patient (highest priority) into consultation —
+    // from THIS doctor's own line. (It used to pick from the whole OPD pool, so
+    // finishing a patient could pull another doctor's patient "in-progress".)
+    const myDoctorId = req.user.doctorId || '';
+    const waitingAll = await Token.find({ department: 'chronic_opd', status: 'in-queue' });
+    const waiting = myDoctorId
+      ? waitingAll.filter((t) => (t.assignedDoctor?.doctorId || doctorForCondition(t.chronicIllness)?.doctorId || 'chronic_gp') === myDoctorId)
+      : waitingAll;
+    const alreadyServing = await Token.findOne({ department: 'chronic_opd', status: 'in-progress', _id: { $ne: token._id } });
+    const servingIsMine = alreadyServing && (!myDoctorId || (alreadyServing.assignedDoctor?.doctorId || doctorForCondition(alreadyServing.chronicIllness)?.doctorId || 'chronic_gp') === myDoctorId);
+    const nextToken = servingIsMine ? null : (orderByPriority(waiting)[0] || null);
     if (nextToken) {
       nextToken.status = 'in-progress';
       nextToken.log('Now serving (auto-loaded after previous patient)');
@@ -226,7 +247,7 @@ async function getAppointmentConsultation(appt, res) {
   return res.json({
     success: true,
     token: {
-      tokenId: String(appt._id), tokenNumber: appt.time, status: appt.status,
+      tokenId: String(appt._id), tokenNumber: appt.tokenNumber || '', slotTime: appt.time, status: appt.status,
       chronicIllness: appt.reason || 'Cardiology', isFollowUp: false,
       priorityLevel: appt.priorityLevel || 'normal', priorityReason: '',
       suggestedMedicines: [],
@@ -234,7 +255,7 @@ async function getAppointmentConsultation(appt, res) {
     patient: patient ? { ...patient, age: computeAge(patient.dob) } : null,
     history: {
       pastVisits: pastVisits.map((v) => ({
-        tokenNumber: v.time, chronicIllness: v.reason, diagnosis: v.reason,
+        tokenNumber: v.tokenNumber || '', slotTime: v.time, chronicIllness: v.reason, diagnosis: v.reason,
         clinicalNotes: v.notes, completedAt: v.date, consultedByName: v.doctorName,
       })),
       vitals, reports,
@@ -243,25 +264,29 @@ async function getAppointmentConsultation(appt, res) {
 }
 
 async function completeAppointment(appt, req, res) {
-  if (appt.status === 'completed') return fail(res, 400, 'Already completed', 'DONE');
+  if (appt.status === 'completed') {
+    // Retry of a request that already went through → same success answer.
+    return res.json({ success: true, alreadyDone: true, message: 'Patient sent to Pharmacy.', nextPatient: null });
+  }
   const { diagnosis = '', clinicalNotes = '', medicines = [], tests = [] } = req.body || {};
   const cleanTests = Array.isArray(tests) ? tests.filter(Boolean) : [];
   const { medicines: cleanMeds, medicineItems } = await buildMeds(medicines, req.body.medicineItems);
 
-  appt.status = 'completed';
-  appt.notes = [clinicalNotes, diagnosis ? `Diagnosis: ${diagnosis}` : ''].filter(Boolean).join(' | ').trim();
-  await appt.save();
-
-  // Real prescription the patient can see (mirrors the OPD flow → Pharmacy),
-  // load-balanced onto the least-busy on-duty pharmacist.
+  // BUG FIX (doctor completes on a weak connection → pharmacy never sees it):
+  // the appointment used to be marked "completed" FIRST and a failed
+  // prescription insert was only logged. Now the prescription is created first
+  // (or reused on a retry) and only then is the appointment completed — if
+  // anything fails, nothing is half-done and the app's outbox retries.
   const patient = await User.findById(appt.user);
   const assigned = await pickPharmacist();
-  let apptPresc = null;
-  try {
+  let apptPresc = await Prescription.findOne({ token: appt._id });
+  if (!apptPresc) {
     apptPresc = await Prescription.create({
       // Appointments have no OPD Token; use the appointment id so the record is
       // still traceable and the required `token` field is satisfied.
-      token: appt._id, tokenNumber: appt.time, user: appt.user,
+      // BUG FIX: was `tokenNumber: appt.time` — the pharmacy showed the slot
+      // TIME as the patient's token. Use the system-assigned token number.
+      token: appt._id, tokenNumber: appt.tokenNumber || (await Appointment.nextTokenNumber(appt.doctorId, appt.date)), user: appt.user,
       patient: {
         name: patient?.name || '', email: patient?.email || '', cnic: patient?.cnic || '',
         phone: patient?.phone || '', cdaCard: patient?.cdaCard || '', age: computeAge(patient?.dob) || 0,
@@ -280,7 +305,11 @@ async function completeAppointment(appt, req, res) {
       body: `${patient?.name || 'A patient'} (Cardiology) is waiting at the pharmacy.`,
       icon: 'medkit', screen: 'Queue',
     });
-  } catch (e) { logger.warn(`Appointment prescription create failed: ${e.message}`); }
+  }
+
+  appt.status = 'completed';
+  appt.notes = [clinicalNotes, diagnosis ? `Diagnosis: ${diagnosis}` : ''].filter(Boolean).join(' | ').trim();
+  await appt.save();
 
   notifyUser(appt.user, {
     type: 'order', title: 'Your prescription is ready to view',

@@ -107,6 +107,21 @@ export default function ChronicOPDScreen({
         chronicIllness: selected?.condition || '',
         followUp
       });
+      if (res?.queued) {
+        // Offline: the request is saved and sent automatically when back
+        // online. The token NUMBER is assigned by the hospital server (so two
+        // patients can never get the same number) — it appears on Home then.
+        setPrompt({
+          visible: true,
+          variant: 'success',
+          icon: 'cloud-upload',
+          title: 'Token Request Saved',
+          message: "You're offline right now. Your token request is saved and will be sent automatically when the connection returns. Your token number will then appear on the Home screen.",
+          primaryLabel: 'OK',
+          onPrimary: () => { closePrompt(); navigation.goBack(); }
+        });
+        return;
+      }
       if (res?.alreadyActive) {
         setPrompt({
           visible: true,

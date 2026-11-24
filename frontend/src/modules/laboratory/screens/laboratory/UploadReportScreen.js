@@ -11,6 +11,7 @@ import {
 } from "react-native";
 
 import * as DocumentPicker from "expo-document-picker";
+import * as FileSystem from "expo-file-system/legacy";
 import { Ionicons } from "@expo/vector-icons";
 
 import { useTheme } from "../../Theme/themeContext";
@@ -174,29 +175,49 @@ const uploadReport = async () => {
   try {
     setUploading(true);
 
-    // Backend upload will be connected later.
-    await new Promise((resolve) =>
-      setTimeout(resolve, 1000)
-    );
-labAlert(
-  "Report Ready",
-  "The laboratory report is ready to be uploaded to the backend.",
-  [
-    {
-      text: "OK",
-      onPress: () => {
-        completePatient(patient.id, { title: patient.testName });
-        navigation.navigate("Queue");
+    // BUG FIX: this used to WAIT 1 s and show "ready to be uploaded to the
+    // backend" — the PDF was never sent; the patient only got an empty
+    // report record. Now the real PDF (base64) is attached to the patient's
+    // lab report and appears in their "My Reports".
+    let pdfData = "";
+    try {
+      pdfData = await FileSystem.readAsStringAsync(selectedFile.uri, { encoding: "base64" });
+    } catch (e) {
+      labAlert("Upload Failed", "Could not read the selected PDF. Please pick it again.");
+      return;
+    }
+    // Phone storage can't safely hold very large files for offline sync, so
+    // big PDFs need a live connection.
+    const big = pdfData.length > 1500000;
+    const res = await completePatient(
+      patient.id,
+      {
+        title: patient.testName || (selectedFile.name || "Lab Report").replace(/\.pdf$/i, ""),
+        pdfName: selectedFile.name || "report.pdf",
+        pdfData,
       },
-    },
-  ]
-);
+      { noQueue: big, label: `lab report for ${patient.name || "patient"}` }
+    );
+    labAlert(
+      res?.queued ? "Saved Offline" : "Report Uploaded",
+      res?.queued
+        ? "You're offline. The report is saved and will be sent to the patient automatically when the connection returns."
+        : "The report has been sent to the patient. They can now view it in My Reports.",
+      [
+        {
+          text: "OK",
+          onPress: () => navigation.navigate("Queue"),
+        },
+      ]
+    );
   } catch (error) {
     console.log("Upload error:", error);
 
     labAlert(
       "Upload Failed",
-      "Unable to prepare the report."
+      error?.code === "NETWORK" || error?.code === "TIMEOUT"
+        ? "No connection, and this PDF is too large to save offline. Please try again when you're online."
+        : error?.message || "Unable to upload the report."
     );
   } finally {
     setUploading(false);

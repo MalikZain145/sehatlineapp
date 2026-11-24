@@ -10,6 +10,8 @@ const path = require('path');
 const requestLogger = require('./middleware/requestLogger');
 const { noSqlGuard } = require('./middleware/security.middleware');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
+const idempotency = require('./middleware/idempotency');
+const compression = (() => { try { return require('compression'); } catch (e) { return null; } })();
 
 const authRoutes = require('./modules/auth/routes/auth.routes');
 const patientRoutes = require('./modules/patient/routes/patient.routes');
@@ -40,6 +42,9 @@ app.use(cors(allowedOrigins.length ? { origin: allowedOrigins, credentials: true
 // Body parsers with hard size caps (anti-DoS). 10mb accommodates base64
 // profile-photo data-URIs; tighten via env if your app doesn't need it.
 const bodyLimit = process.env.BODY_LIMIT || '10mb';
+// gzip JSON responses — big lists (queues, history) download 4–8× faster on
+// slow mobile data.
+if (compression) app.use(compression());
 app.use(express.json({ limit: bodyLimit }));
 app.use(express.urlencoded({ extended: true, limit: bodyLimit }));
 
@@ -61,6 +66,9 @@ app.use('/api', apiLimiter);
 
 // Security: block NoSQL injection in request bodies, queries and params.
 app.use(noSqlGuard);
+
+// Safe retries for the app's offline outbox (see middleware/idempotency.js).
+app.use('/api', idempotency);
 
 // Uploaded CNIC images are identity documents — they must NOT be publicly
 // downloadable by anyone who guesses a filename (names are timestamp-based).

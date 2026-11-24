@@ -75,7 +75,12 @@ async function connectDBCached() {
   if (mongoose.connection.readyState === 1) return mongoose.connection;
   if (!_cached) {
     mongoose.set('strictQuery', true);
-    _cached = mongoose.connect(env.mongoUri, { serverSelectionTimeoutMS: 8000 });
+    _cached = mongoose.connect(env.mongoUri, {
+      serverSelectionTimeoutMS: 8000,
+      // Serverless: keep a small warm pool and drop dead sockets quickly so a
+      // cold/slow connection doesn't stall every request.
+      maxPoolSize: 10, minPoolSize: 1, socketTimeoutMS: 20000, maxIdleTimeMS: 60000,
+    });
     global.__sehatline_db = _cached;
   }
   await _cached;

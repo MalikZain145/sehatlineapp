@@ -2,6 +2,9 @@
 // 1) connect DB  2) register models  3) print schema  4) start HTTP + Socket.IO
 // It also prints the LAN IP so you can point the Expo app at this machine.
 
+// Hospital time (PKT). Must be set before any Date is created — see
+// src/utils/dates.js. Override with APP_TZ if ever deployed elsewhere.
+process.env.TZ = process.env.APP_TZ || 'Asia/Karachi';
 const os = require('os');
 const http = require('http');
 const env = require('./src/config/env');

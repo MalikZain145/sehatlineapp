@@ -16,6 +16,11 @@ import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import ActivityWrapper from './src/components/common/ActivityWrapper';
 import { ConfirmHost } from './src/components/confirm';
 import UpdatePrompt from './src/components/common/UpdatePrompt';
+import NetworkBanner from './src/components/common/NetworkBanner';
+import { startOfflineSync } from './src/services/apiClient';
+
+// Offline-first: cache + outbox sync + connection monitoring (see apiClient).
+startOfflineSync();
 
 // Inner shell — runs INSIDE ThemeProvider so the navigation container and the
 // root view use the app's own background. Without this the container defaults to
@@ -46,6 +51,8 @@ function AppShell({ navigationRef }) {
             <ConfirmHost />
             {/* OTA: "New update available" → tap → app restarts on new version */}
             <UpdatePrompt />
+            {/* Offline / weak-connection notice, sync status */}
+            <NetworkBanner />
           </ActivityWrapper>
         </SessionProvider>
       </NavigationContainer>

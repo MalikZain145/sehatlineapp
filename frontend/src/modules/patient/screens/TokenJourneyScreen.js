@@ -354,23 +354,16 @@ export default function TokenJourneyScreen({
             </Text>
           </View>}
 
-        {/* ---- PHARMACY / LAB SIMULATION (temporary until those modules exist) ---- */}
+        {/* Pharmacy / Lab: the REAL pharmacy and lab modules serve the patient.
+            (The old "Staff Simulation" buttons let a patient dispense their
+            own medicines — removed.) */}
         {(token.status === 'pharmacy' || token.status === 'laboratory') && <View style={styles.simCard}>
-            <Text style={styles.simTitle}>⚙️ Staff Simulation (for testing)</Text>
-            <Text style={styles.simSub}>These stand in for the pharmacist / lab.</Text>
-
-            {token.status === 'pharmacy' && <TouchableOpacity style={[styles.simBtn, {
-          backgroundColor: '#8B5CF6'
-        }]} onPress={() => staffCallNext('pharmacy')} disabled={busy}>
-                <Ionicons name="medkit-outline" size={16} color="#FFF" />
-                <Text style={styles.simBtnText}>Pharmacist: Call Next Patient</Text>
-              </TouchableOpacity>}
-            {token.status === 'laboratory' && <TouchableOpacity style={[styles.simBtn, {
-          backgroundColor: '#EF4444'
-        }]} onPress={() => staffCallNext('laboratory')} disabled={busy}>
-                <Ionicons name="flask-outline" size={16} color="#FFF" />
-                <Text style={styles.simBtnText}>Lab: Call Next Patient</Text>
-              </TouchableOpacity>}
+            <Text style={styles.simTitle}>
+              {token.status === 'pharmacy' ? '💊 At the Pharmacy' : '🧪 At the Laboratory'}
+            </Text>
+            <Text style={styles.simSub}>
+              {token.status === 'pharmacy' ? 'Your prescription has been sent to the pharmacy. You will be called when your medicines are ready — this screen updates automatically.' : 'Please wait for the lab to call your token. Your report will appear in My Reports once it is ready.'}
+            </Text>
           </View>}
 
         {busy && <ActivityIndicator color={COLORS.primary} style={{

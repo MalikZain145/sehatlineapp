@@ -20,7 +20,7 @@ const laboratoryService = {
   // status: 'Sample Collected' | 'Processing'
   updateStatus: (id, status) => api.post(`/laboratory/queue/${id}/status`, { status }),
   // payload: { title?, category?, results?, remarks? }
-  complete: (id, payload = {}) => api.post(`/laboratory/queue/${id}/complete`, payload),
+  complete: (id, payload = {}, opts = {}) => api.post(`/laboratory/queue/${id}/complete`, payload, opts),
   // Upload a report by card number — { cardNo, title?, pdfName?, pdfData? }
   uploadReport: (payload) => api.post('/laboratory/reports/upload', payload),
 

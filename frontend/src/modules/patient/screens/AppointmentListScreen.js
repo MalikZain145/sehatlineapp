@@ -86,9 +86,16 @@ const STATUS_CFG = {
   }
 };
 
+// 'HH:mm' → '2:30 PM'
+const to12h = t => {
+  const [h, m] = String(t || '').split(':').map(Number);
+  if (!Number.isFinite(h)) return t || '';
+  return `${h % 12 || 12}:${String(m || 0).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`;
+};
 // Backend status → display label.
 const STATUS_LABEL = {
   booked: 'Confirmed',
+  'in-progress': 'Confirmed',
   cancelled: 'Cancelled',
   completed: 'Completed',
   'no-show': 'No Show'
@@ -115,8 +122,6 @@ const getDoctorForDept = d => ({
   'Pharmacy': 'Pharmacy Staff',
   'Laboratory': 'Lab Technician'
 })[d] || 'Medical Staff';
-const rndQueue = () => Math.floor(Math.random() * 5) + 1;
-const rndAhead = () => Math.floor(Math.random() * 5);
 
 // ─── Date/Time parser ─────────────────────────────────────────────────────────
 const parseAppointmentDateTime = item => {
@@ -219,15 +224,19 @@ const AppointmentListScreen = ({
         department: app.department === 'cardiology' ? 'Cardiology' : app.department,
         doctor: app.doctorName || getDoctorForDept(app.department),
         date: app.date,
-        time: app.time,
+        // 12-hour label from the backend ("2:30 PM"); raw 'HH:mm' kept for sorting.
+        time: app.timeLabel || to12h(app.time),
+        rawTime: app.time,
         dateTimeISO: `${app.date}T${app.time}:00`,
-        tokenNo: `CARD-${String(app._id).slice(-4).toUpperCase()}`,
+        // System-assigned token (was a fake "CARD-xxxx" built from the id).
+        tokenNo: app.tokenNumber || '—',
         status: STATUS_LABEL[app.status] || app.status,
         visitPurpose: app.reason || 'Consultation',
-        room: getRoomForDept(app.department),
-        waitingTime: getWaitTime(app.department),
-        queuePosition: rndQueue(),
-        peopleAhead: rndAhead(),
+        room: app.room || 'Cardiology OPD',
+        // Real queue numbers from the backend (were Math.random()).
+        waitingTime: app.estWaitMin != null ? (app.estWaitMin === 0 ? 'You are next' : `~${app.estWaitMin} mins`) : '—',
+        queuePosition: app.position ?? '—',
+        peopleAhead: app.ahead ?? 0,
         bookedAt: app.bookedAt
       }));
       setAppointments(formatted);
@@ -247,7 +256,12 @@ const AppointmentListScreen = ({
     const s = String(item.status || '').toLowerCase();
     const active = s === 'confirmed' || s === 'booked';
     if (!active) return false;
-    return parseAppointmentDateTime(item) > new Date();
+    // Today's booking stays Upcoming until the doctor completes it (the patient
+    // may still be waiting after the slot time).
+    const now = new Date();
+    const d = parseAppointmentDateTime(item);
+    const sameDay = d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+    return sameDay || d > now;
   }, []);
   const isPast = useCallback(item => !isUpcoming(item), [isUpcoming]);
 

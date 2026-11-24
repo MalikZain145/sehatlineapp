@@ -26,6 +26,8 @@ import doctorService from '../services/doctorService';
 import { showConfirm, showInfo } from '../../../components/confirm';
 import { useTheme } from "../../../context/ThemeContext";
 import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
+import { visitTimeLabel } from '../utils/visitTime';
+import { getPendingWrites } from '../../../services/apiClient';
 const {
   width,
   height
@@ -498,7 +500,15 @@ const CallNextPatientScreen = ({
   const fetchNextFromServer = async () => {
     try {
       const q = await doctorService.getMyQueue();
-      const rows = Array.isArray(q?.queue) ? q.queue : [];
+      // OFFLINE: the queue may come from the phone's cache, which still lists
+      // patients the doctor already finished (their "proceed" is waiting in the
+      // outbox). Skip those, and the patient just completed.
+      const pending = await getPendingWrites().catch(() => []);
+      const doneIds = new Set(pending
+        .map(w => (String(w.path).match(/\/doctor\/consult\/([^/]+)\/proceed/) || [])[1])
+        .filter(Boolean));
+      if (tokenId) doneIds.add(String(tokenId));
+      const rows = (Array.isArray(q?.queue) ? q.queue : []).filter(p => !doneIds.has(String(p.tokenId)));
       const serving = rows.find(p => p.status === 'in-progress') || rows.find(p => p.status === 'in-queue');
       if (serving) {
         const next = {
@@ -510,7 +520,9 @@ const CallNextPatientScreen = ({
           gender: serving.gender || '',
           reason: serving.reason || serving.chronicIllness || 'Chronic OPD',
           priorityLevel: serving.priorityLevel,
-          status: serving.status
+          status: serving.status,
+          slotTime: serving.slotTime,
+          time: visitTimeLabel(serving)
         };
         setNextPatient(next);
         return next;
@@ -631,7 +643,10 @@ const CallNextPatientScreen = ({
         medicineCount: selectedMedicines.length,
         labCount: selectedLabTests.length,
         queueCount: queueCount,
-        sentToPharmacy: serverResult ? !String(serverResult.message || '').includes('Follow-up') : true
+        sentToPharmacy: serverResult ? !String(serverResult.message || '').includes('Follow-up') : true,
+        // Weak/no connection: saved in the outbox, sent to the pharmacy
+        // automatically (exactly once) when the connection returns.
+        queuedOffline: !!serverResult?.queued
       });
       setShowSuccessModal(true);
       animateModalIn();
@@ -650,7 +665,7 @@ const CallNextPatientScreen = ({
         duration: 400,
         useNativeDriver: false
       }).start();
-      setTimeout(resolve, 500);
+      setTimeout(resolve, 150); // was 500 ms × 5 steps = 2.5 s of pure animation wait
     });
   };
   const buildPrescriptionData = () => {
@@ -803,7 +818,8 @@ const CallNextPatientScreen = ({
       nextPatient,
       medicineCount,
       labCount,
-      queueCount
+      queueCount,
+      queuedOffline
     } = successData;
     return <Modal visible={showSuccessModal} transparent animationType="fade" statusBarTranslucent>
         <View style={styles.successModalOverlay}>
@@ -827,7 +843,7 @@ const CallNextPatientScreen = ({
                   <Ionicons name="medkit" size={wp(4)} color={COLORS.success} />
                 </View>
                 <View style={styles.successModalRowContent}>
-                  <Text style={styles.successModalRowLabel}>Sent to Pharmacy</Text>
+                  <Text style={styles.successModalRowLabel}>{queuedOffline ? 'Saved — will reach Pharmacy when online' : 'Sent to Pharmacy'}</Text>
                   <Text style={styles.successModalRowValue}>
                     {medicineCount > 0 ? `${medicineCount} medicine${medicineCount > 1 ? 's' : ''} prescribed` : 'No medicines'}
                   </Text>
@@ -953,10 +969,10 @@ const CallNextPatientScreen = ({
           <Text style={styles.patientMeta}>
             {patient?.age || 'N/A'} yrs • {patient?.gender || 'N/A'} • {patient?.type || 'General'}
           </Text>
-          <Text style={styles.patientReason}>
+          {!!patient?.time && <Text style={styles.patientReason}>
             <Ionicons name="time-outline" size={wp(2.8)} color={COLORS.textLight} /> 
-            {patient?.time || 'Appointment at 10:00 AM'}
-          </Text>
+            {patient.time}
+          </Text>}
         </View>
       </View>
 

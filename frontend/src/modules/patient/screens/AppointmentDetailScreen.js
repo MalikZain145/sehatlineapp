@@ -27,20 +27,15 @@ const AppointmentDetailScreen = ({
   const { user } = useSession();
   const [pdfBusy, setPdfBusy] = React.useState(false);
   const styles = makeStyles(COLORS);
+  // No fake fallback appointment (it used to show "Dr. Sarah Ahmed, A-12").
   const appointment = route?.params?.appointment || {
-    id: 'SHL-99281',
-    doctorName: 'Dr. Sarah Ahmed',
-    specialty: 'Cardiologist',
-    date: 'Jun 27, 2026',
-    time: '10:30 AM',
-    status: 'Confirmed',
-    hospital: 'CDA Hospital Islamabad',
-    tokenNo: 'A-12',
-    department: 'Chronic OPD',
-    queuePosition: 3,
-    estimatedWaitTime: '15 mins',
-    type: 'Follow-up'
+    id: '', doctorName: '', specialty: '', date: '', time: '', status: '',
+    hospital: 'CDA Hospital Islamabad', tokenNo: '—', department: '', queuePosition: '—',
+    estimatedWaitTime: '—', type: ''
   };
+  React.useEffect(() => {
+    if (!route?.params?.appointment) navigation.goBack();
+  }, []);
 
   // ── Helpers ──────────────────────────────────────────────────────────────
   const STATUS_MAP = {

@@ -11,6 +11,7 @@ import doctorService from '../services/doctorService';
 import { onQueueUpdate } from '../../../services/socket';
 import { useTheme } from "../../../context/ThemeContext";
 import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
+import { visitTimeLabel } from '../utils/visitTime';
 const {
   width,
   height
@@ -88,7 +89,9 @@ const TodayQueueScreen = ({
           disease: p.reason || p.chronicIllness || 'Chronic OPD',
           status: p.status,
           priorityLevel: p.priorityLevel,
-          estWaitMin: p.estWaitMin
+          estWaitMin: p.estWaitMin,
+          slotTime: p.slotTime,
+          time: visitTimeLabel(p)
         })));
         setUsingMockData(false);
         setLoading(false);

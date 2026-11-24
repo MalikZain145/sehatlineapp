@@ -104,7 +104,7 @@ const { updateInventoryStock } = useLaboratory();
 
   const newStock = currentStock + addedStock;
 
-  const handleUpdateStock = () => {
+  const handleUpdateStock = async () => {
     if (!quantity || Number(quantity) <= 0) {
       labAlert(
         "Invalid Quantity",
@@ -112,7 +112,14 @@ const { updateInventoryStock } = useLaboratory();
       );
       return;
     }
-updateInventoryStock(item.id, Number(quantity));
+    // BUG FIX: "Stock Updated" was shown even when the server call failed
+    // (the update wasn't awaited).
+    try {
+      await updateInventoryStock(item.id, Number(quantity));
+    } catch (e) {
+      labAlert("Update Failed", e?.message || "Could not update the stock. Please try again.");
+      return;
+    }
     labAlert(
       "Stock Updated",
       `${item.name} stock has been updated from ${currentStock} ${item.unit} to ${newStock} ${item.unit}.`,

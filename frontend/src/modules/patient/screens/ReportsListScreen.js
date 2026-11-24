@@ -116,10 +116,8 @@ export default function ReportsListScreen({
           {reports.length === 0 ? <View style={styles.empty}>
               <View style={styles.emptyIcon}><Ionicons name="document-text" size={34} color={COLORS.primary} /></View>
               <Text style={styles.emptyTitle}>No reports yet</Text>
-              <Text style={styles.emptySub}>Your lab reports from Capital Hospital will appear here once your tests are done. Tap a report to see its analysis and download it.</Text>
-              <TouchableOpacity style={styles.emptyBtn} onPress={loadDemo} disabled={busy} activeOpacity={0.9}>
-                {busy ? <ActivityIndicator color="#FFF" /> : <><Ionicons name="flask" size={16} color="#FFF" /><Text style={styles.emptyBtnText}>Load Sample Reports</Text></>}
-              </TouchableOpacity>
+              <Text style={styles.emptySub}>Your lab reports from CDA Hospital will appear here once your tests are done. Tap a report to see its analysis and download it.</Text>
+              {/* "Load Sample Reports" removed — it wrote FAKE reports into the patient's real record. */}
             </View> : <>
               {/* Summary */}
               <FadeInView delay={40}>

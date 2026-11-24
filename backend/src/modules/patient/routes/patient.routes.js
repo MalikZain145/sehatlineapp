@@ -1,6 +1,7 @@
 // Patient token routes. Mounted at /api/patient in app.js
 // All require a valid session (authGuard).
 
+const allowRoles = require('../../../middleware/role.middleware');
 const express = require('express');
 const tokenController = require('../controllers/token.controller');
 const appointmentController = require('../controllers/appointment.controller');
@@ -25,7 +26,9 @@ router.get('/tokens/active', authGuard, tokenController.getActiveToken);
 router.get('/tokens/queue/:department', authGuard, tokenController.getQueue);
 router.get('/queues/summary', authGuard, tokenController.getQueuesSummary);
 router.post('/tokens/:id/advance', authGuard, oid, tokenController.advanceToken);
-router.post('/tokens/call-next', authGuard, tokenController.callNext);
+// Staff only — patients used to be able to "call next" and move the whole
+// hospital queue (a testing shortcut from before the staff modules existed).
+router.post('/tokens/call-next', authGuard, allowRoles('doctor', 'pharmacy', 'laboratory', 'admin'), tokenController.callNext);
 router.get('/stats', authGuard, tokenController.getStats);
 
 // Cardiology appointments
@@ -44,7 +47,8 @@ router.post('/feedback', authGuard, feedbackController.submit);
 
 // Lab reports — view + local analysis + demo seed
 router.get('/reports', authGuard, reportsController.listReports);
-router.post('/reports/demo', authGuard, reportsController.seedDemoReports);
+// Demo seeding wrote FAKE medical reports into a real patient's record — admin only now.
+router.post('/reports/demo', authGuard, allowRoles('admin'), reportsController.seedDemoReports);
 router.post('/reports', authGuard, reportsController.createReport);
 router.get('/reports/:id', authGuard, oid, reportsController.getReport);
 router.delete('/reports/:id', authGuard, oid, reportsController.deleteReport);
@@ -59,7 +63,7 @@ router.delete('/vitals/:id', authGuard, oid, vitalsController.deleteVital);
 router.get('/health-camps/stats', authGuard, healthCampController.getStats);
 router.get('/health-camps/mine', authGuard, healthCampController.myCamps);
 router.get('/health-camps', authGuard, healthCampController.listCamps);
-router.post('/health-camps/demo', authGuard, healthCampController.seedDemoCamps);
+router.post('/health-camps/demo', authGuard, allowRoles('admin'), healthCampController.seedDemoCamps);
 router.post('/health-camps/:id/register', authGuard, oid, healthCampController.registerCamp);
 router.post('/health-camps/:id/unregister', authGuard, oid, healthCampController.unregisterCamp);
 

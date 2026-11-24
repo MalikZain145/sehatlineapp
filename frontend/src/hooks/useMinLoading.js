@@ -1,7 +1,11 @@
 // useMinLoading — a drop-in replacement for `useState(bool)` used as a loading
 // flag, that guarantees the loading (skeleton) state stays visible for at least
 // `minMs` milliseconds. This stops the shimmer from flashing for a split second
-// when data loads almost instantly — the skeleton is clearly visible for ~2.5s.
+// when data loads almost instantly.
+//
+// SPEED FIX: the minimum used to be 2.5 s — so EVERY screen (55 of them) made
+// the user wait at least 2.5 s even when the data (now often from the offline
+// cache) was ready instantly. 350 ms is enough to avoid a flicker.
 //
 // Usage (change one line):
 //   const [loading, setLoading] = useState(true);
@@ -13,7 +17,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 
-export default function useMinLoading(initial = true, minMs = 2500) {
+export default function useMinLoading(initial = true, minMs = 350) {
   const [loading, setRaw] = useState(initial);
   const startAt = useRef(Date.now());   // when loading last became true
   const timer = useRef(null);

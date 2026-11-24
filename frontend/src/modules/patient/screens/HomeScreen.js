@@ -190,7 +190,8 @@ export default function HomeScreen({
           key: 'cardio',
           type: 'appointment',
           label: 'Cardiology Appointment',
-          code: res.appointment.time,
+          // System token number (the slot time used to be shown as the token).
+          code: res.appointment.tokenNumber || res.appointment.time,
           department: res.appointment.doctorName || 'Cardiology',
           stage: res.isNext ? 'You are next' : 'Scheduled',
           ahead: res.ahead ?? 0,
