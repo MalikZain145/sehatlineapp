@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import CustomHeader from '../../../components/CustomHeader';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 const SOSScreen = ({ navigation }) => {
   const [sosActivated, setSosActivated] = useState(false);
@@ -47,7 +48,7 @@ const SOSScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC' },
+  container: { flex: 1, backgroundColor: '#F8FAFC', paddingBottom: BOTTOM_SPACE },
   content: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 25 },
   icon: { marginBottom: 30 },
   title: { fontSize: 32, fontWeight: 'bold', color: '#EF4444', marginBottom: 15 },

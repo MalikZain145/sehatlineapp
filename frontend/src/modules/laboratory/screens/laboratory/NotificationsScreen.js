@@ -15,6 +15,7 @@ import { useTheme } from "../../Theme/themeContext";
 import laboratoryService from "../../services/laboratoryService";
 import GradientHeader from "../../components/common/GradientHeader";
 import { topPad } from '../../../../utils/safeArea';
+import { BOTTOM_SPACE } from '../../../../utils/bottomInset';
 
 // Relative "x min ago" label from an ISO date.
 function relTime(iso) {
@@ -374,6 +375,7 @@ export default function NotificationScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingBottom: BOTTOM_SPACE
   },
 header: {
   height: topPad(100),

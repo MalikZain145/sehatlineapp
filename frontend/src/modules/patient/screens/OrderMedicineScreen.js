@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import CustomHeader from '../../../components/CustomHeader';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 const OrderMedicineScreen = ({ navigation, route }) => {
   const medicine = route.params?.medicine || {};
@@ -64,7 +65,7 @@ const OrderMedicineScreen = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC' },
+  container: { flex: 1, backgroundColor: '#F8FAFC', paddingBottom: BOTTOM_SPACE },
   content: { flex: 1, padding: 25, alignItems: 'center' },
   medicineInfo: { alignItems: 'center', marginBottom: 40 },
   medName: { fontSize: 24, fontWeight: 'bold', color: '#1E3A8A', marginTop: 15, textAlign: 'center' },

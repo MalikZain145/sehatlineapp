@@ -8,6 +8,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SIZES, SHADOWS } from '../../../theme';
 import pharmacyService from '../services/pharmacyService';
 import { useTheme } from "../../../context/ThemeContext";
+import { BOTTOM_INSET } from '../../../utils/bottomInset';
 const {
   width,
   height
@@ -685,7 +686,7 @@ const makeStyles = COLORS => StyleSheet.create({
   },
   floatingCart: {
     position: 'absolute',
-    bottom: hp(2),
+    bottom: hp(2) + BOTTOM_INSET,
     left: wp(5),
     right: wp(5),
     borderRadius: wp(6),

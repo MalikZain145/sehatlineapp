@@ -18,6 +18,7 @@ import laboratoryService from "../../services/laboratoryService";
 import GradientHeader from "../../components/common/GradientHeader";
 import { labAlert } from "../../components/common/LabAlert";
 import { topPad } from '../../../../utils/safeArea';
+import { BOTTOM_SPACE } from '../../../../utils/bottomInset';
 
 export default function ReportProblemScreen({ navigation }) {
   const { theme } = useTheme();
@@ -364,6 +365,7 @@ export default function ReportProblemScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingBottom: BOTTOM_SPACE
   },
 
   content: {

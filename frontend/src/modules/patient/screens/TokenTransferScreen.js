@@ -6,6 +6,7 @@ import {
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { showConfirm } from '../../../components/confirm';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 const TokenTransferScreen = ({ navigation }) => {
   const [transferType, setTransferType] = useState('Department'); // 'Department' or 'User'
@@ -94,7 +95,7 @@ const TokenTransferScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000033' },
+  container: { flex: 1, backgroundColor: '#000033', paddingBottom: BOTTOM_SPACE },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20 },
   headerTitle: { color: '#FFF', fontSize: 18, fontWeight: '900', letterSpacing: 2 },
   content: { flex: 1, padding: 25 },

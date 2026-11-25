@@ -12,6 +12,7 @@ import { SkeletonScreen } from '../../../components/ui/Skeleton';
 import useMinLoading from '../../../hooks/useMinLoading';
 import adminService from '../services/adminService';
 import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 const SCREEN_W = Dimensions.get('window').width;
 const SLICE = ['#0BAA9D', '#8B5CF6', '#0EA5E9', '#F59E0B', '#94A3B8'];
@@ -137,7 +138,7 @@ export default function AdminAnalyticsScreen({ navigation }) {
 }
 
 const makeStyles = (COLORS) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.background, paddingBottom: BOTTOM_SPACE },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12,
     paddingTop: STATUS_BAR_HEIGHT + 12, paddingBottom: 12,

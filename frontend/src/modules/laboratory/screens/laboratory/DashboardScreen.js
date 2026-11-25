@@ -15,6 +15,7 @@ import { useLaboratory } from "../../context/LaboratoryContext";
 import SideMenu from "../../components/common/SideMenu";
 import laboratoryService from "../../services/laboratoryService";
 import { topPad } from '../../../../utils/safeArea';
+import { BOTTOM_SPACE } from '../../../../utils/bottomInset';
 
 
 export default function DashboardScreen() {
@@ -1121,6 +1122,7 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
+    paddingBottom: BOTTOM_SPACE
   },
 
   content: {

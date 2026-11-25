@@ -18,6 +18,7 @@ import laboratoryService from "../../services/laboratoryService";
 import GradientHeader from "../../components/common/GradientHeader";
 import { labAlert } from "../../components/common/LabAlert";
 import { topPad } from '../../../../utils/safeArea';
+import { BOTTOM_SPACE } from '../../../../utils/bottomInset';
 
 function toRow(r) {
   const first = (r.items && r.items[0]) || {};
@@ -580,6 +581,7 @@ export default function RequisitionsScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingBottom: BOTTOM_SPACE
   },
 
   header: {

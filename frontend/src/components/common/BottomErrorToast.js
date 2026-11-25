@@ -15,6 +15,7 @@ import { Animated, StyleSheet, Text, View, Platform } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { SIZES } from '../../theme';
 import { useTheme } from "../../context/ThemeContext";
+import { BOTTOM_INSET } from '../../utils/bottomInset';
 export default function BottomErrorToast({
   message,
   type = 'error',
@@ -74,7 +75,7 @@ export default function BottomErrorToast({
 const makeStyles = COLORS => StyleSheet.create({
   container: {
     position: 'absolute',
-    bottom: Platform.OS === 'ios' ? 44 : 30,
+    bottom: (Platform.OS === 'ios' ? 44 : 30) + BOTTOM_INSET,
     left: 0,
     right: 0,
     alignItems: 'center',

@@ -4,6 +4,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SIZES, SHADOWS } from '../../../theme';
 import { useTheme } from "../../../context/ThemeContext";
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 const {
   width,
   height
@@ -405,7 +406,8 @@ const makeStyles = COLORS => StyleSheet.create({
     height: '100%'
   },
   safeArea: {
-    flex: 1
+    flex: 1,
+    paddingBottom: BOTTOM_SPACE
   },
   cardShadow: {
     ...SHADOWS.medium

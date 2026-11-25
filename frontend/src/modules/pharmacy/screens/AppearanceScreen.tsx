@@ -10,6 +10,7 @@ import {
 
 import GradientHeader from "../components/common/GradientHeader";
 import { useTheme } from "../Theme/themeContext";
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 export default function AppearanceScreen() {
 
@@ -88,6 +89,7 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
+    paddingBottom: BOTTOM_SPACE
   },
 
   content: {

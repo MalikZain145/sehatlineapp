@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Switch } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import CustomHeader from '../../../components/CustomHeader';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 const DoctorAvailabilityScreen = ({ navigation }) => {
   const [isAvailable, setIsAvailable] = useState(true);
@@ -56,7 +57,7 @@ const DoctorAvailabilityScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC' },
+  container: { flex: 1, backgroundColor: '#F8FAFC', paddingBottom: BOTTOM_SPACE },
   content: { padding: 20 },
   statusCard: {
     backgroundColor: '#fff',

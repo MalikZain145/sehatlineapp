@@ -6,6 +6,7 @@ import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, int
 import { SIZES, SHADOWS } from '../../../theme';
 import { APP_VERSION } from '../../../constants/version';
 import { useTheme } from "../../../context/ThemeContext";
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 const {
   width,
   height
@@ -159,7 +160,8 @@ const makeStyles = COLORS => StyleSheet.create({
     height: '100%'
   },
   safeArea: {
-    flex: 1
+    flex: 1,
+    paddingBottom: BOTTOM_SPACE
   },
   scrollContent: {
     padding: wp(5),

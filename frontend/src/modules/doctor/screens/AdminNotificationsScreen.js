@@ -10,6 +10,7 @@ import BrandRow from '../../../components/BrandRow';
 import { api } from '../../../services/apiClient';
 import { showConfirm } from '../../../components/confirm';
 import { useTheme } from "../../../context/ThemeContext";
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 const {
   width,
   height
@@ -429,7 +430,8 @@ const makeStyles = COLORS => StyleSheet.create({
     backgroundColor: COLORS.background
   },
   safeArea: {
-    flex: 1
+    flex: 1,
+    paddingBottom: BOTTOM_SPACE
   },
   loadingContainer: {
     flex: 1,

@@ -19,6 +19,7 @@ import ExpiryPicker from "../components/inventory/ExpiryPicker";
 import { useNavigation } from "@react-navigation/native";
 import pharmacyService from "../services/pharmacyService";
 import { pharmAlert } from "../components/common/PharmAlert";
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 
 export default function AddMedicineScreen() {
@@ -350,6 +351,7 @@ const styles = StyleSheet.create({
 
   container:{
     flex:1,
+    paddingBottom: BOTTOM_SPACE
    
   },
 

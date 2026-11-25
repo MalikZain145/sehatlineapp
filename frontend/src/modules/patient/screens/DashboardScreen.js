@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import CustomHeader from '../../../components/CustomHeader';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 const DashboardScreen = ({ navigation }) => {
   return (
@@ -90,7 +91,7 @@ const DashboardScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC' },
+  container: { flex: 1, backgroundColor: '#F8FAFC', paddingBottom: BOTTOM_SPACE },
   content: { padding: 20 },
   overviewCard: {
     backgroundColor: '#fff',

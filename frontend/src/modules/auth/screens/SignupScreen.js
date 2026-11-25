@@ -24,6 +24,7 @@ import BottomWave from '../../../components/ui/BottomWave';
 import CnicCamera from '../../../components/ui/CnicCamera';
 import CropEditor from '../../../components/ui/CropEditor';
 import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 const { width } = Dimensions.get('window');
 
@@ -660,7 +661,7 @@ export default function SignupScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC' },
+  container: { flex: 1, backgroundColor: '#F8FAFC', paddingBottom: BOTTOM_SPACE },
   // Gradient fades into the page background (same as HomeScreen), so the form
   // card always sits on a soft white area — no hard cut-off to line up.
   headerBg: { position: 'absolute', top: 0, left: 0, right: 0, height: 340 },

@@ -15,6 +15,7 @@ import { useTheme } from "../../Theme/themeContext";
 import { useLaboratory } from "../../context/LaboratoryContext";
 import GradientHeader from "../../components/common/GradientHeader";
 import { topPad } from '../../../../utils/safeArea';
+import { BOTTOM_SPACE } from '../../../../utils/bottomInset';
 
 export default function QueueScreen({ navigation }) {
   const { theme } = useTheme();
@@ -569,6 +570,7 @@ function SummaryCard({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingBottom: BOTTOM_SPACE
   },
 
   

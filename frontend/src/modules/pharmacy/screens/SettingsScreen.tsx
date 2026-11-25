@@ -19,6 +19,7 @@ import settingsService from "../../patient/services/settingsService";
 import { loadNotificationPref, setNotificationsEnabled } from "../../../services/notifications";
 import { APP_VERSION } from "../../../constants/version";
 import { pharmAlert } from "../components/common/PharmAlert";
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 export default function SettingsScreen() {
   const navigation = useNavigation<any>();
@@ -164,7 +165,7 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, paddingBottom: BOTTOM_SPACE },
   content: { padding: 20, paddingBottom: 40 },
   heading: { fontSize: 18, fontWeight: "700", marginBottom: 12, marginTop: 20 },
   footer: { alignItems: "center", marginTop: 35 },

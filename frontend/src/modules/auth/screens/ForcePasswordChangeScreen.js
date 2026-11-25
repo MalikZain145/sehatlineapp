@@ -10,6 +10,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFocusEffect } from '@react-navigation/native';
 import authService from '../services/authService';
 import { useTheme } from '../../../context/ThemeContext';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 export default function ForcePasswordChangeScreen({ navigation, route }) {
   const { colors: COLORS } = useTheme();
@@ -100,7 +101,7 @@ export default function ForcePasswordChangeScreen({ navigation, route }) {
 const HIT = { top: 10, bottom: 10, left: 10, right: 10 };
 
 const makeStyles = (COLORS) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background, alignItems: 'center', justifyContent: 'center', padding: 24 },
+  container: { flex: 1, backgroundColor: COLORS.background, alignItems: 'center', justifyContent: 'center', padding: 24, paddingBottom: (24) + BOTTOM_SPACE },
   card: { width: '100%', maxWidth: 400, backgroundColor: COLORS.card, borderRadius: 20, padding: 22 },
   iconDisc: { width: 54, height: 54, borderRadius: 27, alignSelf: 'center', backgroundColor: COLORS.primary + '18', justifyContent: 'center', alignItems: 'center', marginBottom: 14 },
   title: { fontSize: 20, fontWeight: '800', color: COLORS.text, textAlign: 'center' },

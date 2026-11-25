@@ -20,6 +20,7 @@ import BottomSheet from "../../../../components/ui/BottomSheet";
 import GradientHeader from "../../components/common/GradientHeader";
 import { labAlert } from "../../components/common/LabAlert";
 import { topPad } from '../../../../utils/safeArea';
+import { BOTTOM_SPACE } from '../../../../utils/bottomInset';
 
 const CATEGORIES = [
   "All",
@@ -611,6 +612,7 @@ const fstyles = {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingBottom: BOTTOM_SPACE
   },
   fab: {
     position: "absolute", right: 20, bottom: 26, width: 58, height: 58, borderRadius: 29,

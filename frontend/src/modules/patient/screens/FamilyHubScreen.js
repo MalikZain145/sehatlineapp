@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, FlatList } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import CustomHeader from '../../../components/CustomHeader';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 const FamilyHubScreen = ({ navigation }) => {
   const familyMembers = [
@@ -85,7 +86,7 @@ const FamilyHubScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC' },
+  container: { flex: 1, backgroundColor: '#F8FAFC', paddingBottom: BOTTOM_SPACE },
   content: { padding: 20 },
   welcome: { fontSize: 26, fontWeight: 'bold', color: '#1E3A8A' },
   subtitle: { fontSize: 16, color: '#64748B', marginBottom: 25 },

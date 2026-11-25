@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../../Theme/themeContext";
 import { useLaboratory } from "../../context/LaboratoryContext";
 import { topPad } from '../../../../utils/safeArea';
+import { BOTTOM_SPACE } from '../../../../utils/bottomInset';
 
 export default function InventoryScreen({ navigation }) {
   const { theme } = useTheme();
@@ -449,6 +450,7 @@ export default function InventoryScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingBottom: BOTTOM_SPACE
   },
 
   header: {

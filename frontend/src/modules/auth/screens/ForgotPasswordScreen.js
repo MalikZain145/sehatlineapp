@@ -18,6 +18,7 @@ import FadeInView from '../../../components/ui/FadeInView';
 import AuthLogo from '../../../components/ui/AuthLogo';
 import BottomWave from '../../../components/ui/BottomWave';
 import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 const { width } = Dimensions.get('window');
 
@@ -347,7 +348,7 @@ export default function ForgotPasswordScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC' },
+  container: { flex: 1, backgroundColor: '#F8FAFC', paddingBottom: BOTTOM_SPACE },
   headerBg: { position: 'absolute', top: 0, left: 0, right: 0, height: 340 },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',

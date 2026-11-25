@@ -14,6 +14,7 @@ import { useLaboratory } from "../../context/LaboratoryContext";
 import laboratoryService from "../../services/laboratoryService";
 import GradientHeader from "../../components/common/GradientHeader";
 import { topPad } from '../../../../utils/safeArea';
+import { BOTTOM_SPACE } from '../../../../utils/bottomInset';
 
 export default function AnalyticsScreen({ navigation }) {
   const { theme } = useTheme();
@@ -489,6 +490,7 @@ function PerformanceRow({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingBottom: BOTTOM_SPACE
   },
 
   content: {

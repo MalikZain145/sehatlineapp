@@ -20,6 +20,7 @@ import { useRoute } from "@react-navigation/native";
 import GradientHeader from "../components/common/GradientHeader";
 import { pharmAlert } from "../components/common/PharmAlert";
 import { topPad } from '../../../utils/safeArea';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 
 export default function PrepareMedicineScreen() {
@@ -168,6 +169,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
+    paddingBottom: BOTTOM_SPACE
   },
 
   section: {

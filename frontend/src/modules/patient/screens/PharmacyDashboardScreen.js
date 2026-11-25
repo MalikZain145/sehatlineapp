@@ -8,6 +8,7 @@ import useMinLoading from '../../../hooks/useMinLoading';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SHADOWS } from '../../../theme';
 import { useTheme } from "../../../context/ThemeContext";
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 const {
   width,
   height
@@ -1363,7 +1364,8 @@ const makeStyles = COLORS => StyleSheet.create({
     height: hp(22)
   },
   safeArea: {
-    flex: 1
+    flex: 1,
+    paddingBottom: BOTTOM_SPACE
   },
   loadingContainer: {
     flex: 1,

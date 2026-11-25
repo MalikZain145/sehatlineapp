@@ -9,6 +9,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigationState } from '@react-navigation/native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { STATUS_BAR_HEIGHT } from '../../utils/safeArea';
+import { BOTTOM_INSET } from '../../utils/bottomInset';
 const {
   width,
   height
@@ -304,7 +305,7 @@ const makeStyles = (COLORS, isDark = false) => StyleSheet.create({
   footer: {
     paddingHorizontal: 20,
     paddingTop: 6,
-    paddingBottom: 18,
+    paddingBottom: 18 + BOTTOM_INSET,
     alignItems: 'center'
   },
   footerText: {

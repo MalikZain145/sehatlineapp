@@ -27,6 +27,7 @@ import ThemedPrompt from '../../../components/common/ThemedPrompt';
 import { showConfirm } from '../../../components/confirm';
 import { useTheme } from "../../../context/ThemeContext";
 import { topPad } from '../../../utils/safeArea';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 const {
   width
 } = Dimensions.get('window');
@@ -424,7 +425,8 @@ function JourneyStep({
 const makeStyles = COLORS => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background
+    backgroundColor: COLORS.background,
+    paddingBottom: BOTTOM_SPACE
   },
   center: {
     flex: 1,

@@ -20,6 +20,12 @@ import {
   Modal, Animated, PanResponder, KeyboardAvoidingView, View,
   TouchableWithoutFeedback, StyleSheet, Platform, useWindowDimensions,
 } from 'react-native';
+import { initialWindowMetrics } from 'react-native-safe-area-context';
+
+// A Modal opens in its own window, outside the app's bottom padding, and is
+// drawn edge-to-edge (under the Android nav bar / iPhone home indicator).
+// This spacer keeps the sheet's last button above the system bar.
+const SHEET_BOTTOM = ((initialWindowMetrics && initialWindowMetrics.insets.bottom) || 0) + 8;
 
 export default function BottomSheet({
   visible,
@@ -72,6 +78,7 @@ export default function BottomSheet({
         </TouchableWithoutFeedback>
         <Animated.View style={[sheetStyle, { transform: [{ translateY }] }]} {...pan.panHandlers}>
           {children}
+          <View style={{ height: SHEET_BOTTOM }} />
         </Animated.View>
       </Wrapper>
     </Modal>

@@ -14,6 +14,7 @@ import Colors from "../constants/colors";
 import PatientSummaryCard from "../components/preparation/patientSummaryCard";
 import MedicineChecklist from "../components/preparation/MedicineChecklist";
 import { pharmAlert } from "../components/common/PharmAlert";
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 export default function ReadyForPickupScreen() {
   const navigation = useNavigation<any>();
@@ -105,6 +106,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
+    paddingBottom: BOTTOM_SPACE
   },
 
   content: {

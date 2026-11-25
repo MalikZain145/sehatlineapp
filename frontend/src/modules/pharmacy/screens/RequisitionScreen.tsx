@@ -18,6 +18,7 @@ import GradientHeader from "../components/common/GradientHeader";
 import ThemedAlert from "../components/common/ThemedAlert";
 import { useTheme } from "../Theme/themeContext";
 import pharmacyService from "../services/pharmacyService";
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 export default function RequisitionScreen() {
   const navigation = useNavigation<any>();
@@ -163,7 +164,7 @@ export default function RequisitionScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, paddingBottom: BOTTOM_SPACE },
   content: { padding: 20, paddingBottom: 40 },
   label: { fontSize: 16, fontWeight: "700", marginBottom: 10 },
   row: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 10 },

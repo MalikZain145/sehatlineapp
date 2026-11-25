@@ -16,6 +16,7 @@ import BiometricSheet from "../../../../components/ui/BiometricSheet";
 import settingsService from "../../../patient/services/settingsService";
 import { APP_VERSION } from "../../../../constants/version";
 import { topPad } from '../../../../utils/safeArea';
+import { BOTTOM_SPACE } from '../../../../utils/bottomInset';
 
 export default function SettingsScreen({ navigation }) {
   const { theme, toggleTheme } = useTheme();
@@ -375,6 +376,7 @@ function SettingRow({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingBottom: BOTTOM_SPACE
   },
 
   content: {

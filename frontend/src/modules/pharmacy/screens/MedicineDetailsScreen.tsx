@@ -12,6 +12,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import { useTheme } from "../Theme/themeContext";
 import GradientHeader from "../components/common/GradientHeader";
 import Colors from "../constants/colors";
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 export default function MedicineDetailsScreen() {
   const navigation = useNavigation<any>();
@@ -265,6 +266,7 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
+    paddingBottom: BOTTOM_SPACE
   
   },
 

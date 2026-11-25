@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import CustomHeader from '../../../components/CustomHeader';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 const TokenDisplayScreen = ({ navigation, route }) => {
   const tokenData = route.params?.tokenData || {
@@ -48,7 +49,7 @@ const TokenDisplayScreen = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC' },
+  container: { flex: 1, backgroundColor: '#F8FAFC', paddingBottom: BOTTOM_SPACE },
   content: { flex: 1, padding: 25, alignItems: 'center' },
   tokenBox: {
     backgroundColor: '#1E3A8A',

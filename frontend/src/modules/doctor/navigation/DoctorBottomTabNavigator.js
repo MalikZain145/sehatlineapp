@@ -9,6 +9,7 @@ import DoctorProfileScreen from '../screens/DoctorProfileScreen';
 import DoctorNotificationsScreen from '../screens/DoctorNotificationsScreen';
 import DoctorSettingsScreen from '../screens/DoctorSettingsScreen';
 import { useTheme } from "../../../context/ThemeContext";
+import { BOTTOM_INSET } from '../../../utils/bottomInset';
 const Tab = createBottomTabNavigator();
 
 // Custom Tab Bar Background Component with Gradient
@@ -35,8 +36,10 @@ export default function DoctorBottomTabNavigator() {
     tabBarActiveTintColor: COLORS.white,
     tabBarInactiveTintColor: 'rgba(255,255,255,0.6)',
     tabBarStyle: {
-      height: Platform.OS === 'ios' ? 85 : 72,
-      paddingBottom: Platform.OS === 'ios' ? 20 : 10,
+      // Tab bar sits ABOVE the phone's nav bar / home indicator; its gradient
+      // background still extends underneath it.
+      height: 64 + Math.max(BOTTOM_INSET, 8),
+      paddingBottom: Math.max(BOTTOM_INSET, 8),
       paddingTop: 10,
       backgroundColor: 'transparent',
       borderTopWidth: 0,

@@ -14,6 +14,7 @@ import useMinLoading from '../../../hooks/useMinLoading';
 import adminService from '../services/adminService';
 import { showInfo } from '../../../components/confirm';
 import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 const CATEGORIES = [
   { key: 'all', label: 'All' },
@@ -131,7 +132,7 @@ export default function AdminRatingsScreen({ navigation }) {
 }
 
 const makeStyles = (COLORS) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.background, paddingBottom: BOTTOM_SPACE },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12,
     paddingTop: STATUS_BAR_HEIGHT + 14, paddingBottom: 12, backgroundColor: COLORS.background,

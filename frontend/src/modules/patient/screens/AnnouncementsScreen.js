@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 const AnnouncementsScreen = ({ navigation }) => {
   const news = [
@@ -61,7 +62,7 @@ const AnnouncementsScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#011027' },
+  container: { flex: 1, backgroundColor: '#011027', paddingBottom: BOTTOM_SPACE },
   header: { flexDirection: 'row', alignItems: 'center', padding: 20, gap: 15 },
   headerTitle: { color: '#FFF', fontSize: 20, fontWeight: 'bold' },
   scroll: { padding: 15 },

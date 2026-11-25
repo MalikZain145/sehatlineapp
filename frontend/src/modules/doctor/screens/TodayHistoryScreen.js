@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SHADOWS } from '../../../theme';
 import BrandRow from '../../../components/BrandRow';
 import { useTheme } from "../../../context/ThemeContext";
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 const {
   width,
   height
@@ -620,7 +621,8 @@ const makeStyles = COLORS => StyleSheet.create({
     backgroundColor: COLORS.background
   },
   safeArea: {
-    flex: 1
+    flex: 1,
+    paddingBottom: BOTTOM_SPACE
   },
   loadingContainer: {
     flex: 1,

@@ -24,6 +24,7 @@ import { useTheme } from "../Theme/themeContext";
 import pharmacyService from "../services/pharmacyService";
 import { onPharmacyUpdate } from "../../../services/socket";
 import { pharmAlert } from "../components/common/PharmAlert";
+import { BOTTOM_SPACE, BOTTOM_INSET } from '../../../utils/bottomInset';
 
 export default function InventoryScreen() {
   const navigation = useNavigation<any>();
@@ -164,14 +165,14 @@ export default function InventoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, paddingBottom: BOTTOM_SPACE },
   searchWrap: { paddingHorizontal: 20, paddingTop: 20 },
   listContent: { paddingHorizontal: 20, paddingBottom: 100, paddingTop: 2 },
   search: {
     borderRadius: 16, paddingHorizontal: 18, paddingVertical: 14, marginBottom: 18, fontSize: 16, elevation: 2,
   },
   fab: {
-    position: "absolute", bottom: 30, right: 25, width: 64, height: 64, borderRadius: 32,
+    position: "absolute", bottom: 30 + BOTTOM_INSET, right: 25, width: 64, height: 64, borderRadius: 32,
     justifyContent: "center", alignItems: "center", elevation: 8,
   },
 });

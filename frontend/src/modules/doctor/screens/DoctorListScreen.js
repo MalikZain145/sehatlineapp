@@ -5,6 +5,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { SIZES, SHADOWS } from '../../../theme';
 import { useTheme } from "../../../context/ThemeContext";
 import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 const {
   width
 } = Dimensions.get('window');
@@ -540,7 +541,8 @@ const DoctorListScreen = ({
 const makeStyles = COLORS => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background
+    backgroundColor: COLORS.background,
+    paddingBottom: BOTTOM_SPACE
   },
   headerGradient: {
     paddingTop: STATUS_BAR_HEIGHT + 10,

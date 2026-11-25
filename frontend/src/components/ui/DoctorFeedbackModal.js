@@ -13,6 +13,10 @@ import feedbackService from '../../modules/patient/services/feedbackService';
 
 // Three yes/no questions. Default "No" (the good outcome).
 import { useTheme } from "../../context/ThemeContext";
+import { initialWindowMetrics } from 'react-native-safe-area-context';
+
+// Modal draws edge-to-edge: keep the submit button above the phone's nav bar.
+const SYS_BOTTOM = (initialWindowMetrics && initialWindowMetrics.insets.bottom) || 0;
 const QUESTIONS = [{
   key: 'harassed',
   label: 'Did the doctor harass you in any way?'
@@ -151,7 +155,7 @@ const makeStyles = COLORS => StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 22,
-    paddingBottom: 30,
+    paddingBottom: 30 + SYS_BOTTOM,
     maxHeight: '92%'
   },
   iconWrap: {

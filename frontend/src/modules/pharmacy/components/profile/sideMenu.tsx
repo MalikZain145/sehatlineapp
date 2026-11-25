@@ -18,6 +18,7 @@ const { width } = Dimensions.get("window");
 import { useTheme } from "../../Theme/themeContext";
 import { useProfile } from "../../context/profileContext";
 import { topPad } from '../../../../utils/safeArea';
+import { BOTTOM_INSET } from '../../../../utils/bottomInset';
 
 interface Props {
   visible: boolean;
@@ -379,7 +380,7 @@ footer: {
 
   paddingHorizontal: 20,
   paddingTop: 6,
-  paddingBottom: 18,
+  paddingBottom: 18 + BOTTOM_INSET,
 },
 
   menuItem: {

@@ -18,6 +18,7 @@ import adminService from '../services/adminService';
 import BottomSheet from '../../../components/ui/BottomSheet';
 import { showConfirm, showInfo } from '../../../components/confirm';
 import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
+import { BOTTOM_SPACE, BOTTOM_INSET } from '../../../utils/bottomInset';
 
 const EMPTY = { name: '', email: '', phone: '' };
 
@@ -226,7 +227,7 @@ export default function ManagePharmacistsScreen({ navigation }) {
 }
 
 const makeStyles = (COLORS) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.background, paddingBottom: BOTTOM_SPACE },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12,
     paddingTop: STATUS_BAR_HEIGHT + 14, paddingBottom: 12, backgroundColor: COLORS.background,
@@ -252,7 +253,7 @@ const makeStyles = (COLORS) => StyleSheet.create({
   statusText: { fontSize: 10, fontWeight: '700' },
   rowBtn: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center' },
 
-  fab: { position: 'absolute', right: 20, bottom: 26, borderRadius: 30, overflow: 'hidden', elevation: 6 },
+  fab: { position: 'absolute', right: 20, bottom: 26 + BOTTOM_INSET, borderRadius: 30, overflow: 'hidden', elevation: 6 },
   fabInner: { width: 58, height: 58, alignItems: 'center', justifyContent: 'center' },
 
   sheetOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' },

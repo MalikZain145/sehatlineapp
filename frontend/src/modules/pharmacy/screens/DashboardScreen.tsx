@@ -19,6 +19,7 @@ import StatCard from "../components/dashboard/statCard";
 import ActionCard from "../components/dashboard/actionCard";
 import pharmacyService from "../services/pharmacyService";
 import { onPharmacyUpdate } from "../../../services/socket";
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 export default function DashboardScreen() {
   const navigation = useNavigation<any>();
@@ -148,7 +149,7 @@ export default function DashboardScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, paddingBottom: BOTTOM_SPACE },
   content: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 40 },
   sectionTitle: { fontSize: 22, fontWeight: "700" },
   statsGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", marginBottom: 18, marginTop: 10 },

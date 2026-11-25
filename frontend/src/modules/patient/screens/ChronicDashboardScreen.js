@@ -10,6 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { SHADOWS } from '../../../theme';
 import { useTheme } from "../../../context/ThemeContext";
+import { BOTTOM_SPACE, BOTTOM_INSET } from '../../../utils/bottomInset';
 const {
   width,
   height
@@ -584,7 +585,8 @@ const ChronicDashboard = ({
 const makeStyles = COLORS => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background
+    backgroundColor: COLORS.background,
+    paddingBottom: BOTTOM_SPACE
   },
   scrollView: {
     flex: 1
@@ -1100,7 +1102,7 @@ const makeStyles = COLORS => StyleSheet.create({
   // FAB
   fab: {
     position: 'absolute',
-    bottom: hp(3),
+    bottom: hp(3) + BOTTOM_INSET,
     right: wp(5),
     ...Platform.select({
       ios: {

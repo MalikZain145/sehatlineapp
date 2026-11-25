@@ -20,6 +20,7 @@ import { useTheme } from "../../Theme/themeContext";
 import { useSession } from "../../../../context/SessionContext";
 import laboratoryService from "../../services/laboratoryService";
 import { topPad } from '../../../../utils/safeArea';
+import { BOTTOM_INSET } from '../../../../utils/bottomInset';
 
 const { width } = Dimensions.get("window");
 const drawerWidth = width * 0.82;
@@ -174,7 +175,7 @@ const styles = StyleSheet.create({
   email: { marginTop: 3, fontSize: 13, color: "#F5FFFF" },
   body: { flex: 1, justifyContent: "space-between" },
   menuContainer: { paddingHorizontal: 8, paddingTop: 14 },
-  footer: { marginTop: "auto", paddingHorizontal: 20, paddingTop: 6, paddingBottom: 18 },
+  footer: { marginTop: "auto", paddingHorizontal: 20, paddingTop: 6, paddingBottom: 18 + BOTTOM_INSET },
   menuItem: { flexDirection: "row", alignItems: "center", paddingVertical: 11, paddingHorizontal: 10, borderRadius: 12, marginBottom: 4 },
   iconCircle: { width: 40, height: 40, borderRadius: 20, backgroundColor: "transparent", justifyContent: "center", alignItems: "center" },
   menuText: { flex: 1, marginLeft: 12, fontSize: 15, fontWeight: "600" },

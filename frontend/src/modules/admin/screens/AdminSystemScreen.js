@@ -23,6 +23,7 @@ import { API_BASE_URL } from '../../../config/api.config';
 import { showInfo, showConfirm } from '../../../components/confirm';
 import { reloadApp } from '../../../utils/appReload';
 import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 const REFRESH_MS = 5000; // live poll cadence
 
@@ -328,7 +329,7 @@ function DepMini({ label, value, danger, styles }) {
 }
 
 const makeStyles = (COLORS) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.background, paddingBottom: BOTTOM_SPACE },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12,
     paddingTop: STATUS_BAR_HEIGHT + 12, paddingBottom: 12,

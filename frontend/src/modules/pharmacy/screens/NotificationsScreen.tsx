@@ -17,6 +17,7 @@ import GradientHeader from "../components/common/GradientHeader";
 import { useTheme } from "../Theme/themeContext";
 import pharmacyService from "../services/pharmacyService";
 import { onPharmacyUpdate } from "../../../services/socket";
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 // The pharmacist's real notifications (admin announcements + any updates), read
 // from the role-neutral /api/notifications endpoint. Tap one to open it (marks
@@ -192,7 +193,7 @@ export default function NotificationsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, paddingBottom: BOTTOM_SPACE },
   content: { paddingHorizontal: 20, paddingTop: 14, paddingBottom: 30 },
   toolbar: {
     flexDirection: "row", alignItems: "center", justifyContent: "space-between",

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 const CheckInQRScreen = ({ navigation }) => {
   const [permission, requestPermission] = useCameraPermissions();
@@ -77,7 +78,7 @@ const CheckInQRScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000033' },
+  container: { flex: 1, backgroundColor: '#000033', paddingBottom: BOTTOM_SPACE },
   header: { flexDirection: 'row', justifyContent: 'space-between', padding: 20, alignItems: 'center' },
   headerTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
   content: { flex: 1, alignItems: 'center', padding: 20 },

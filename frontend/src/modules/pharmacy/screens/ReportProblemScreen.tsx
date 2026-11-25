@@ -14,6 +14,7 @@ import Colors from "../constants/colors";
 import { useTheme } from "../Theme/themeContext";
 import { pharmAlert } from "../components/common/PharmAlert";
 import pharmacyService from "../services/pharmacyService";
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 export default function ReportProblemScreen() {
 
   const [title, setTitle] = useState("");
@@ -152,6 +153,7 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
+    paddingBottom: BOTTOM_SPACE
     
   },
 

@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, ScrollView, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../../context/ThemeContext';
 import DoctorHeader from '../components/DoctorHeader';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 const POINTS = [
   'Use the app only for legitimate patient care.',
@@ -38,7 +39,7 @@ export default function DoctorTermsScreen({ navigation }) {
 }
 
 const makeStyles = (COLORS) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.background, paddingBottom: BOTTOM_SPACE },
   content: { padding: 20, paddingBottom: 40 },
   iconWrap: {
     width: 56, height: 56, borderRadius: 28, backgroundColor: COLORS.primary + '18',

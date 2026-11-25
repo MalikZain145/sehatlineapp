@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Alert, TextInput } from 'reac
 import * as ImagePicker from 'expo-image-picker';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import CustomHeader from '../../../components/CustomHeader';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 const UploadReportScreen = ({ navigation }) => {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -82,7 +83,7 @@ const UploadReportScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC' },
+  container: { flex: 1, backgroundColor: '#F8FAFC', paddingBottom: BOTTOM_SPACE },
   content: { flex: 1, padding: 25, alignItems: 'center' },
   icon: { marginBottom: 20 },
   title: { fontSize: 24, fontWeight: 'bold', color: '#1E3A8A', marginBottom: 8 },

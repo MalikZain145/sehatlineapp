@@ -22,6 +22,7 @@ import GradientHeader from "../components/common/GradientHeader";
 import { LineChart, PieChart } from "react-native-chart-kit";
 import pharmacyService from "../services/pharmacyService";
 import { onPharmacyUpdate } from "../../../services/socket";
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 const screenWidth = Dimensions.get("window").width;
 const PIE_COLORS = ["#0BAA9D", "#6DD5C4", "#AEEFE5", "#4B9B6E", "#B8E9DE", "#F59E0B"];
@@ -176,7 +177,7 @@ export default function AnalyticsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, paddingBottom: BOTTOM_SPACE },
   sectionTitle: { fontSize: 20, fontWeight: "700", marginBottom: 16, marginTop: 8, marginHorizontal: 20 },
   lowStockBox: { marginBottom: 20 },
   grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", marginBottom: 24, paddingHorizontal: 20, marginTop: 12 },

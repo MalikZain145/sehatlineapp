@@ -9,6 +9,7 @@ import { useTheme } from "../Theme/themeContext";
 import GradientHeader from "../components/common/GradientHeader";
 import ThemedAlert from "../components/common/ThemedAlert";
 import pharmacyService from "../services/pharmacyService";
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 export default function ReportAdminScreen() {
   const navigation = useNavigation<any>();
@@ -83,7 +84,7 @@ export default function ReportAdminScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, paddingBottom: BOTTOM_SPACE },
   content: { padding: 20, paddingBottom: 40 },
   iconWrap: { width: 56, height: 56, borderRadius: 28, justifyContent: "center", alignItems: "center", marginBottom: 16 },
   sub: { fontSize: 14, lineHeight: 21, marginBottom: 16 },

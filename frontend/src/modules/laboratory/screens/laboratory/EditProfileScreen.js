@@ -20,6 +20,7 @@ import { useTheme } from "../../Theme/themeContext";
 import laboratoryService from "../../services/laboratoryService";
 import GradientHeader from "../../components/common/GradientHeader";
 import { labAlert } from "../../components/common/LabAlert";
+import { BOTTOM_SPACE } from '../../../../utils/bottomInset';
 
 // Module-level so the TextInputs are NOT remounted on every parent render
 // (an inline component would drop keyboard focus after each keystroke).
@@ -170,7 +171,7 @@ export default function EditProfileScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, paddingBottom: BOTTOM_SPACE },
   content: { paddingBottom: 160 },
 
   profileSection: { alignItems: "center", marginTop: 18, marginBottom: 6 },

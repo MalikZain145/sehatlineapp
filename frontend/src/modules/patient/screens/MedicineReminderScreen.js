@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import CustomHeader from '../../../components/CustomHeader';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 const MedicineReminderScreen = ({ navigation }) => {
   const [reminders, setReminders] = useState([
@@ -61,7 +62,7 @@ const MedicineReminderScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC' },
+  container: { flex: 1, backgroundColor: '#F8FAFC', paddingBottom: BOTTOM_SPACE },
   content: { padding: 25 },
   title: { fontSize: 24, fontWeight: 'bold', color: '#1E3A8A', marginBottom: 8 },
   subtitle: { fontSize: 16, color: '#64748B', marginBottom: 30 },

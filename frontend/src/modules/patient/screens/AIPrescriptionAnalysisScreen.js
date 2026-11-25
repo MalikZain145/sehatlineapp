@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import CustomHeader from '../../../components/CustomHeader';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 const AIPrescriptionAnalysisScreen = ({ navigation, route }) => {
   const { image } = route.params || {};
@@ -62,7 +63,7 @@ const AIPrescriptionAnalysisScreen = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC' },
+  container: { flex: 1, backgroundColor: '#F8FAFC', paddingBottom: BOTTOM_SPACE },
   content: { padding: 25, alignItems: 'center' },
   successIcon: { marginBottom: 15 },
   title: { fontSize: 26, fontWeight: 'bold', color: '#1E3A8A', marginBottom: 8 },

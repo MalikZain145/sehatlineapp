@@ -4,6 +4,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { APP_VERSION } from '../../../constants/version';
 import { topPad } from '../../../utils/safeArea';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 const PortalSelectionScreen = ({ navigation }) => {
   const portals = [
@@ -64,7 +65,7 @@ const PortalSelectionScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#020914', padding: 20 },
+  container: { flex: 1, backgroundColor: '#020914', padding: 20, paddingBottom: (20) + BOTTOM_SPACE },
   header: { marginTop: topPad(60), marginBottom: 40 },
   headerTitle: { color: '#FFF', fontSize: 32, fontWeight: 'bold' },
   headerSub: { color: '#888', fontSize: 16, marginTop: 5 },

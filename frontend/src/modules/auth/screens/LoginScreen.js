@@ -18,6 +18,7 @@ import { ROLE_HOME_ROUTE } from '../../../constants';
 import { api } from '../../../services/apiClient';
 import { useSession } from '../../../context/SessionContext';
 import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 const { width, height } = Dimensions.get('window');
 
@@ -539,6 +540,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8FAFC',
+    paddingBottom: BOTTOM_SPACE
   },
   // Transparent so the gradient behind stays visible.
   flexFill: {

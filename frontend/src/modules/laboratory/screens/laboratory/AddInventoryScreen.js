@@ -16,6 +16,7 @@ import { useTheme } from "../../Theme/themeContext";
 import { useLaboratory } from "../../context/LaboratoryContext";
 import { labAlert } from "../../components/common/LabAlert";
 import { topPad } from '../../../../utils/safeArea';
+import { BOTTOM_SPACE } from '../../../../utils/bottomInset';
 
 export default function AddInventoryScreen({ navigation }) {
   const { theme } = useTheme();
@@ -352,6 +353,7 @@ function InputField({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingBottom: BOTTOM_SPACE
   },
 
   header: {

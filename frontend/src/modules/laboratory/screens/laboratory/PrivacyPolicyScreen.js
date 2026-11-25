@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../../Theme/themeContext";
 import GradientHeader from "../../components/common/GradientHeader";
 import { topPad } from '../../../../utils/safeArea';
+import { BOTTOM_SPACE } from '../../../../utils/bottomInset';
 
 const SECTIONS = [
   { h: "Information We Handle", b: "The laboratory module processes patient identity (name, CDA card / CNIC), the tests referred by the doctor, sample and processing status, and the results entered by lab staff. This data belongs to CDA Hospital and is used solely for the patient's care." },
@@ -36,7 +37,7 @@ export default function PrivacyPolicyScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, paddingBottom: BOTTOM_SPACE },
   header: { height: topPad(105), paddingTop: topPad(45), paddingHorizontal: 18, flexDirection: "row", alignItems: "center" },
   headerBtn: { width: 42, height: 42, alignItems: "center", justifyContent: "center" },
   headerTitle: { flex: 1, textAlign: "center", color: "#FFFFFF", fontSize: 21, fontWeight: "800" },

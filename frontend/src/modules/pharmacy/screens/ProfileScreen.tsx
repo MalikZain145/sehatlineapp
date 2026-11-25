@@ -18,6 +18,7 @@ import Colors from "../constants/colors";
 import { useTheme } from "../Theme/themeContext";
 import pharmacyService from "../services/pharmacyService";
 import { pharmAlert } from "../components/common/PharmAlert";
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 export default function ProfileScreen() {
   const navigation = useNavigation<any>();
@@ -145,7 +146,7 @@ function InfoRow({ icon, label, value, theme }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, paddingBottom: BOTTOM_SPACE },
   content: { padding: 20, paddingBottom: 40 },
   profileHeader: { alignItems: "center", marginBottom: 25 },
   avatar: {

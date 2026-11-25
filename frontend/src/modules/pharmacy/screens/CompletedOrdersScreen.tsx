@@ -21,6 +21,7 @@ import { useTheme } from "../Theme/themeContext";
 import pharmacyService from "../services/pharmacyService";
 import { onPharmacyUpdate } from "../../../services/socket";
 import { pharmAlert } from "../components/common/PharmAlert";
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 type Range = "today" | "all";
 
@@ -186,7 +187,7 @@ export default function CompletedOrdersScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, paddingBottom: BOTTOM_SPACE },
   content: { padding: 20, paddingBottom: 30 },
   tabs: { flexDirection: "row", borderRadius: 14, borderWidth: 1, padding: 4, marginBottom: 14 },
   tab: { flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: "center" },

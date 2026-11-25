@@ -10,6 +10,7 @@ import { APP_VERSION } from '../../../constants/version';
 import doctorService from '../services/doctorService';
 import { showInfo } from '../../../components/confirm';
 import { useTheme } from "../../../context/ThemeContext";
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 const {
   width,
   height
@@ -270,7 +271,8 @@ const makeStyles = COLORS => StyleSheet.create({
     backgroundColor: COLORS.background
   },
   safeArea: {
-    flex: 1
+    flex: 1,
+    paddingBottom: BOTTOM_SPACE
   },
   // ── Header ────────────────────────────────────────────────────────
   header: {

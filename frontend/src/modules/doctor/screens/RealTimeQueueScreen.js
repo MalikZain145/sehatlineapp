@@ -16,6 +16,7 @@ import { visitTimeLabel } from '../utils/visitTime';
 
 // Map a backend my-queue row to this screen's patient card shape.
 import { useTheme } from "../../../context/ThemeContext";
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 const mapBackendQueue = rows => (rows || []).map(p => ({
   id: p.tokenId,
   tokenId: p.tokenId,
@@ -644,7 +645,8 @@ const makeStyles = COLORS => StyleSheet.create({
     backgroundColor: COLORS.background
   },
   safeArea: {
-    flex: 1
+    flex: 1,
+    paddingBottom: BOTTOM_SPACE
   },
   loadingContainer: {
     flex: 1,

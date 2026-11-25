@@ -12,6 +12,7 @@ import GradientHeader from "../components/common/GradientHeader";
 import Colors from "../constants/colors";
 import { useTheme } from "../Theme/themeContext";
 import { APP_VERSION } from "../../../constants/version";
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 export default function AboutAppScreen() {
   const { theme } = useTheme();
@@ -241,6 +242,7 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
+    paddingBottom: BOTTOM_SPACE
    
   },
 

@@ -13,6 +13,7 @@ import adminService from '../services/adminService';
 import { showConfirm, showInfo } from '../../../components/confirm';
 import { onAdminUpdate } from '../../../services/socket';
 import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 function when(iso) {
   try {
@@ -213,7 +214,7 @@ export default function AdminReportsScreen({ navigation }) {
 }
 
 const makeStyles = (COLORS) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.background, paddingBottom: BOTTOM_SPACE },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12,
     paddingTop: STATUS_BAR_HEIGHT + 14, paddingBottom: 12, backgroundColor: COLORS.background,

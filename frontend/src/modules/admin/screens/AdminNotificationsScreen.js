@@ -15,6 +15,7 @@ import useMinLoading from '../../../hooks/useMinLoading';
 import adminService from '../services/adminService';
 import { onAdminUpdate } from '../../../services/socket';
 import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 // Filter notifications by which module they came from (funnel dropdown).
 const FILTERS = [
@@ -170,7 +171,7 @@ export default function AdminNotificationsScreen({ navigation }) {
 }
 
 const makeStyles = (COLORS) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.background, paddingBottom: BOTTOM_SPACE },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12,
     paddingTop: STATUS_BAR_HEIGHT + 14, paddingBottom: 12, backgroundColor: COLORS.background,

@@ -15,6 +15,7 @@ import { Linking } from "react-native";
 import FAQItem from "../components/support/FAQItem";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "../Theme/themeContext";
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 export default function HelpSupportScreen() {
 const navigation = useNavigation<any>();
@@ -142,6 +143,7 @@ const styles = StyleSheet.create({
 },
   container: {
     flex: 1,
+    paddingBottom: BOTTOM_SPACE
     
   },
 

@@ -12,6 +12,7 @@ import { onQueueUpdate } from '../../../services/socket';
 import { useTheme } from "../../../context/ThemeContext";
 import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
 import { visitTimeLabel } from '../utils/visitTime';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 const {
   width,
   height
@@ -204,7 +205,8 @@ const TodayQueueScreen = ({
 const makeStyles = COLORS => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background
+    backgroundColor: COLORS.background,
+    paddingBottom: BOTTOM_SPACE
   },
   scrollContent: {
     paddingBottom: 20

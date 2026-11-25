@@ -14,6 +14,7 @@ import GradientHeader from "../components/common/GradientHeader";
 import Colors from "../constants/colors";
 import { pharmAlert } from "../components/common/PharmAlert";
 import { api } from "../../../services/apiClient";
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 export default function ChangePasswordScreen() {
 
@@ -190,6 +191,7 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
+    paddingBottom: BOTTOM_SPACE
    
   },
 

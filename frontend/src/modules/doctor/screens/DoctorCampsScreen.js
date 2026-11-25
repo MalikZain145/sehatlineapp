@@ -17,6 +17,7 @@ import useMinLoading from '../../../hooks/useMinLoading';
 import doctorService from '../services/doctorService';
 import { showConfirm, showInfo } from '../../../components/confirm';
 import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
+import { BOTTOM_SPACE, BOTTOM_INSET } from '../../../utils/bottomInset';
 
 const CATEGORIES = ['General', 'Diabetes', 'Blood Pressure', 'Heart', 'Eye', 'Hepatitis', 'Dental', 'Women Health'];
 const pad = (n) => String(n).padStart(2, '0');
@@ -179,7 +180,7 @@ export default function DoctorCampsScreen({ navigation }) {
 }
 
 const makeStyles = (COLORS) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.background, paddingBottom: BOTTOM_SPACE },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12,
     paddingTop: STATUS_BAR_HEIGHT + 12, paddingBottom: 12, backgroundColor: COLORS.background,
@@ -199,7 +200,7 @@ const makeStyles = (COLORS) => StyleSheet.create({
   cardMeta: { fontSize: 12.5, color: COLORS.textSecondary, marginTop: 2 },
   cardRegs: { fontSize: 12, color: COLORS.primary, fontWeight: '700', marginTop: 4 },
 
-  fab: { position: 'absolute', right: 20, bottom: 26, borderRadius: 30, overflow: 'hidden', elevation: 6 },
+  fab: { position: 'absolute', right: 20, bottom: 26 + BOTTOM_INSET, borderRadius: 30, overflow: 'hidden', elevation: 6 },
   fabInner: { width: 58, height: 58, alignItems: 'center', justifyContent: 'center' },
 
   sheetOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' },

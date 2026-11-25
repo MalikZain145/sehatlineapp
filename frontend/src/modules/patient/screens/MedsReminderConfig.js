@@ -26,6 +26,7 @@ import { showConfirm, showInfo } from '../../../components/confirm';
 import {
   setupNotifications, scheduleDailyReminder, cancelReminder,
 } from '../../../services/notifications';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 const STORAGE_KEY = 'med_reminders_v1';
 
@@ -263,7 +264,7 @@ const MedsReminderConfig = ({ navigation }) => {
 };
 
 const makeStyles = (COLORS) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.background, paddingBottom: BOTTOM_SPACE },
   content: { padding: 20, paddingBottom: 40 },
   title: { fontSize: 20, fontWeight: '800', color: COLORS.text },
   subtitle: { fontSize: 13, color: COLORS.textSecondary, marginTop: 6, marginBottom: 20, lineHeight: 19 },

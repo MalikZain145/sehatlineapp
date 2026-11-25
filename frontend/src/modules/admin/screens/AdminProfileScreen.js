@@ -15,6 +15,7 @@ import authService from '../../auth/services/authService';
 import settingsService from '../../patient/services/settingsService';
 import { showConfirm, showInfo } from '../../../components/confirm';
 import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 export default function AdminProfileScreen({ navigation }) {
   const { colors: COLORS } = useTheme();
@@ -124,7 +125,7 @@ export default function AdminProfileScreen({ navigation }) {
 }
 
 const makeStyles = (COLORS) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.background, paddingBottom: BOTTOM_SPACE },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12,
     paddingTop: STATUS_BAR_HEIGHT + 10, paddingBottom: 10, backgroundColor: COLORS.primary,

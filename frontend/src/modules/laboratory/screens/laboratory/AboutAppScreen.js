@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../../Theme/themeContext";
 import GradientHeader from "../../components/common/GradientHeader";
 import { topPad } from '../../../../utils/safeArea';
+import { BOTTOM_SPACE } from '../../../../utils/bottomInset';
 
 export default function AboutAppScreen({ navigation }) {
   const { theme } = useTheme();
@@ -42,7 +43,7 @@ export default function AboutAppScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, paddingBottom: BOTTOM_SPACE },
   header: { height: topPad(105), paddingTop: topPad(45), paddingHorizontal: 18, flexDirection: "row", alignItems: "center" },
   headerBtn: { width: 42, height: 42, alignItems: "center", justifyContent: "center" },
   headerTitle: { flex: 1, textAlign: "center", color: "#FFFFFF", fontSize: 21, fontWeight: "800" },

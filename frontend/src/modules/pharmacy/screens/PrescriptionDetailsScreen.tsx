@@ -18,6 +18,7 @@ import { useTheme } from "../Theme/themeContext";
 import Colors from "../constants/colors";
 import pharmacyService from "../services/pharmacyService";
 import { pharmAlert } from "../components/common/PharmAlert";
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 export default function PrescriptionDetailsScreen() {
   const navigation = useNavigation<any>();
@@ -220,7 +221,7 @@ function Row({ label, value, theme }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  container: { flex: 1, backgroundColor: Colors.background, paddingBottom: BOTTOM_SPACE },
   buttonContainer: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 28 },
   prescriptionCard: {
     marginHorizontal: 20, marginTop: 24, marginBottom: 24, borderRadius: 24, padding: 22,

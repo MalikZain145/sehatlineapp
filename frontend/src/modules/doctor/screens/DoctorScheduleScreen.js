@@ -11,6 +11,7 @@ import doctorService from '../services/doctorService';
 import { APP_VERSION } from '../../../constants/version';
 import { useTheme } from "../../../context/ThemeContext";
 import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 const {
   width,
   height
@@ -361,7 +362,8 @@ const DoctorScheduleScreen = ({
 const makeStyles = COLORS => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background
+    backgroundColor: COLORS.background,
+    paddingBottom: BOTTOM_SPACE
   },
   loadingContainer: {
     flex: 1,

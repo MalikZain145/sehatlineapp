@@ -5,13 +5,15 @@
 //   back    → green:  "Back online — N change(s) synced" (auto-hides)
 //   failed  → red:    "Couldn't sync: <server reason>" (e.g. slot taken meanwhile)
 //
-// Sits above every screen; touches pass through except on the banner itself.
+// Sits above every screen and is purely informational (touches pass through).
+// No manual Retry: the outbox re-syncs on its own when the connection
+// changes, when the app returns to the foreground and on a periodic timer.
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, StyleSheet, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import network from '../../services/network';
-import { onOutboxChange, flushOutbox, getPendingWrites } from '../../services/apiClient';
+import { onOutboxChange, getPendingWrites } from '../../services/apiClient';
 import { STATUS_BAR_HEIGHT } from '../../utils/safeArea';
 
 const COLORS = {
@@ -73,7 +75,7 @@ export default function NetworkBanner() {
   if (!visible) return null;
 
   return (
-    <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
+    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
       <Animated.View
         style={[
           styles.bar,
@@ -81,13 +83,10 @@ export default function NetworkBanner() {
           { transform: [{ translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [-80, 0] }) }] },
         ]}
       >
-        <TouchableOpacity activeOpacity={0.85} style={styles.row} onPress={() => flushOutbox()}>
+        <View style={styles.row}>
           <Ionicons name={icon} size={16} color="#FFF" />
           <Text style={styles.text} numberOfLines={2}>{text}</Text>
-          {(status !== 'online' || pending > 0) && kind !== 'synced' && (
-            <Text style={styles.retry}>Retry</Text>
-          )}
-        </TouchableOpacity>
+        </View>
       </Animated.View>
     </View>
   );
@@ -100,5 +99,4 @@ const styles = StyleSheet.create({
   },
   row: { flexDirection: 'row', alignItems: 'center' },
   text: { color: '#FFF', fontSize: 12.5, fontWeight: '700', marginLeft: 8, flex: 1 },
-  retry: { color: '#FFF', fontSize: 12, fontWeight: '900', textDecorationLine: 'underline', marginLeft: 8 },
 });

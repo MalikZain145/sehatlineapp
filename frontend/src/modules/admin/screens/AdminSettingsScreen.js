@@ -15,6 +15,7 @@ import { APP_VERSION } from '../../../constants/version';
 import adminService from '../services/adminService';
 import { showConfirm, showInfo } from '../../../components/confirm';
 import { STATUS_BAR_HEIGHT } from '../../../utils/safeArea';
+import { BOTTOM_SPACE } from '../../../utils/bottomInset';
 
 export default function AdminSettingsScreen({ navigation }) {
   const { colors: COLORS, isDark, toggleTheme } = useTheme();
@@ -151,7 +152,7 @@ export default function AdminSettingsScreen({ navigation }) {
 }
 
 const makeStyles = (COLORS) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COLORS.background, paddingBottom: BOTTOM_SPACE },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12,
     paddingTop: STATUS_BAR_HEIGHT + 14, paddingBottom: 12, backgroundColor: COLORS.background,
